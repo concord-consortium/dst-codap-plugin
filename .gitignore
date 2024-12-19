@@ -3,7 +3,7 @@
 
 # testing
 /coverage
-cypress/screenshots/
+/cypress/screenshots
 
 # production
 /build
