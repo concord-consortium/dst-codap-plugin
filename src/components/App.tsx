@@ -1,3 +1,4 @@
+import { ChakraProvider, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import {
   createDataContext,
@@ -12,7 +13,7 @@ import {
 } from "@concord-consortium/codap-plugin-api";
 import "./App.css";
 
-const kPluginName = "Sample Plugin";
+const kPluginName = "Space-Time Cube";
 const kVersion = "0.0.1";
 const kInitialDimensions = {
   width: 380,
@@ -79,31 +80,49 @@ export const App = () => {
   };
 
   return (
-    <div className="App">
-      CODAP Starter Plugin
-      <div className="buttons">
-        <button onClick={handleCreateData}>
-          Create some data
-        </button>
-        <button onClick={handleOpenTable} disabled={!dataContext}>
-          Open Table
-        </button>
-        <button onClick={handleGetResponse}>
-          See getAllItems response
-        </button>
-        <div className="response-area">
-          <span>Response:</span>
-          <div className="response">
-            {codapResponse && `${JSON.stringify(codapResponse, null, "  ")}`}
-          </div>
-        </div>
+    <ChakraProvider>
+      <div className="App">
+        <Tabs variant="enclosed">
+          <TabList>
+            <Tab>
+              3D Graph
+            </Tab>
+            <Tab>
+              About
+            </Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel>
+              <div className="buttons">
+                <button onClick={handleCreateData}>
+                  Create some data
+                </button>
+                <button onClick={handleOpenTable} disabled={!dataContext}>
+                  Open Table
+                </button>
+                <button onClick={handleGetResponse}>
+                  See getAllItems response
+                </button>
+                <div className="response-area">
+                  <span>Response:</span>
+                  <div className="response">
+                    {codapResponse && `${JSON.stringify(codapResponse, null, "  ")}`}
+                  </div>
+                </div>
+              </div>
+              <div className="response-area">
+                  <span>Listener Notification:</span>
+                  <div className="response">
+                    {listenerNotification && listenerNotification}
+                  </div>
+              </div>
+            </TabPanel>
+            <TabPanel>
+              About the Space-Time Cube...
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
       </div>
-      <div className="response-area">
-          <span>Listener Notification:</span>
-          <div className="response">
-            {listenerNotification && listenerNotification}
-          </div>
-      </div>
-    </div>
+    </ChakraProvider>
   );
 };
