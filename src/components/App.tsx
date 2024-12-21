@@ -26,7 +26,11 @@ export const App = () => {
   const [dataContext, setDataContext] = useState<any>(null);
 
   useEffect(() => {
-    initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
+    initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions})
+      .catch(reason => {
+        // This will happen if not embedded in CODAP
+        console.warn("Not embedded in CODAP");
+      });
 
     // this is an example of how to add a notification listener to a CODAP component
     // for more information on listeners and notifications, see
