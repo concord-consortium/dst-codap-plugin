@@ -1,7 +1,9 @@
 .App {
   text-align: center;
   background-color: white;
+  box-sizing: border-box;
   color: rgb(110,109,95);
+  font-family: "Montserrat", serif;
   font-size: 20px;
 
   div {
@@ -12,9 +14,43 @@
     flex-direction: column;
   }
 
-  button {
-    margin: 10px;
+  .chakra-tabs {
+    margin: 0px;
+
+    .chakra-tabs__tablist {
+      border-color: #777;
+      margin-left: 0px;
+      margin-right: 0px;
+      margin-top: 2px;
+      padding-left: 3px;
+
+      .chakra-tabs__tab {
+        border: solid 1px #777;
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+        font-size: 12px;
+        margin-left: -1px;
+        padding: 5px 10px;
+
+        &[aria-selected=true] {
+          border-bottom-color: white;
+          color: #222222;
+          font-weight: 600;
+          height: 27px;
+          padding-bottom: 7px;
+        }
+
+        &[aria-selected=false] {
+          background-color: #fafafa;
+          color: #696969;
+          font-weight: 500;
+          height: 25px;
+          margin-top: 2px;
+        }
+      }
+    }
   }
+
   .response-area {
     display: flex;
     flex-direction: column;
