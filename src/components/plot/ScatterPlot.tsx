@@ -2,10 +2,11 @@
 import React, { useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { Points, Point } from "./Points";
 import { AxisLabels } from "./AxisLabels";
 import { GridPlane } from "./GridPlane";
 import { PlaneControls } from "./PlaneControls";
+import { Points, Point } from "./Points";
+import "./scatter-plot.scss";
 
 export function ScatterPlot() {
   const points = useRef(generatePoints(100));
@@ -14,7 +15,7 @@ export function ScatterPlot() {
   const [zPosition, setZPosition] = useState(-5);
 
   return (
-    <div className="w-full h-full relative" style={{backgroundColor: "rgb(31 41 55)"}}>
+    <div className="w-full h-full relative scatter-plot" style={{backgroundColor: "rgb(31 41 55)"}}>
       <Canvas>
         <PerspectiveCamera makeDefault position={[5, 5, 5]} />
         <OrbitControls enableDamping />
