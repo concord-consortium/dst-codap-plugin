@@ -3,6 +3,7 @@ import {
 } from "@concord-consortium/codap-plugin-api";
 import React, { useState } from "react";
 import { kDataContextName } from "../utilities/constants";
+import { ScatterPlot } from "./plot/ScatterPlot";
 
 interface IGraphTabProps {
   listenerNotification?: string
@@ -52,6 +53,7 @@ export function GraphTab({ listenerNotification }: IGraphTabProps) {
 
   return (
     <>
+      <ScatterPlot />
       <div className="buttons">
         <button onClick={handleCreateData}>
           Create some data
