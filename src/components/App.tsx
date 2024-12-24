@@ -1,10 +1,9 @@
 import { ChakraProvider, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import {
-  initializePlugin,
-  addDataContextChangeListener,
-  ClientNotification,
+  initializePlugin, addDataContextChangeListener, ClientNotification
 } from "@concord-consortium/codap-plugin-api";
 import React, { useEffect, useState } from "react";
+import { getData } from "../utilities/codap-utils";
 import {
   kAboutTabLabel, kDataContextName, kGraphTabLabel, kInitialDimensions, kPluginName, kVersion
 } from "../utilities/constants";
@@ -31,6 +30,8 @@ export const App = () => {
       }
     };
     addDataContextChangeListener(kDataContextName, casesUpdatedListener);
+
+    getData();
   }, []);
 
   return (

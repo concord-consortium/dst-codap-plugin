@@ -1,15 +1,14 @@
 /* eslint-disable react/no-unknown-property */
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { AxisLabels } from "./AxisLabels";
 import { GridPlane } from "./GridPlane";
 import { PlaneControls } from "./PlaneControls";
-import { Points, Point } from "./Points";
+import { Points } from "./Points";
 import "./scatter-plot.scss";
 
 export function ScatterPlot() {
-  const points = useRef(generatePoints(100));
   const gridSize = 10;
   const tickCount = 10;
   const [zPosition, setZPosition] = useState(-5);
@@ -17,11 +16,11 @@ export function ScatterPlot() {
   return (
     <div className="w-full h-full relative scatter-plot" style={{backgroundColor: "rgb(31 41 55)"}}>
       <Canvas>
-        <PerspectiveCamera makeDefault position={[5, 5, 5]} />
+        <PerspectiveCamera makeDefault position={[-5, 6, 0]} />
         <OrbitControls enableDamping />
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
-        <Points points={points.current} />
+        <Points />
         <gridHelper args={[gridSize, tickCount]} />
         <axesHelper args={[gridSize / 2]} />
         <AxisLabels axis="x" length={gridSize} ticks={tickCount} />
@@ -32,16 +31,5 @@ export function ScatterPlot() {
       <PlaneControls zPosition={zPosition} onZPositionChange={setZPosition} />
     </div>
   );
-}
-
-function generatePoints(count: number): Point[] {
-  return Array.from({ length: count }, () => ({
-    position: [
-      (Math.random() - 0.5) * 8,
-      (Math.random() - 0.5) * 8,
-      (Math.random() - 0.5) * 8,
-    ],
-    color: `hsl(${Math.random() * 360}, 50%, 50%)`,
-  }));
 }
 /* eslint-enable react/no-unknown-property */
