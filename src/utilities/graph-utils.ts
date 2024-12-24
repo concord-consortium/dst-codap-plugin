@@ -1,30 +1,36 @@
 import { getDate, IItem } from "../models/item";
 
-export const kDateMin = 1578124800000;
-export const kDateMax = 1672358400000;
-const dateRange = kDateMax - kDateMin;
-const defaultDate = kDateMin + dateRange / 2;
-export const kLatMin = 18.4589;
-export const kLatMax = 48.98;
-const latRange = kLatMax - kLatMin;
-export const kLongMin = -124.0062;
-export const kLongMax = -66.746;
-const longRange = kLongMax - kLongMin;
+export const dataRanges = {
+  dateMin: 1578124800000,
+  dateMax: 1672358400000,
+  latMin: 18.4589,
+  latMax: 48.98,
+  longMin: -124.0062,
+  longMax: -66.746
+};
+const dateRange = () => dataRanges.dateMax - dataRanges.dateMin;
+const defaultDate = () =>  dataRanges.dateMin + dateRange() / 2;
+const latRange = () => dataRanges.latMax - dataRanges.latMin;
+const defaultLat = () => dataRanges.latMin + latRange() / 2;
+const longRange = () => dataRanges.longMax - dataRanges.longMin;
+const defaultLong = () => dataRanges.longMin + longRange() / 2;
 
 const graphMin = -5;
 const graphMax = 5;
 const graphRange = graphMax - graphMin;
 
-export function convertLat(lat = 35) {
-  return ((lat - kLatMin) / latRange) * graphRange + graphMin;
+export function convertLat(_lat?: number) {
+  const lat = _lat ?? defaultLat();
+  return ((lat - dataRanges.latMin) / latRange()) * graphRange + graphMin;
 }
 
-export function convertLong(long = -95) {
-  return ((long - kLongMin) / longRange) * graphRange + graphMin;
+export function convertLong(_long?: number) {
+  const long = _long ?? defaultLong();
+  return ((long - dataRanges.longMin) / longRange()) * graphRange + graphMin;
 }
 
 export function convertDate(item: IItem) {
   const _date = getDate(item);
-  const date = isFinite(_date) ? _date : defaultDate;
-  return ((date - kDateMin) / dateRange) * graphRange + graphMin;
+  const date = isFinite(_date) ? _date : defaultDate();
+  return ((date - dataRanges.dateMin) / dateRange()) * graphRange + graphMin;
 }
