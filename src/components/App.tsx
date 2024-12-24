@@ -1,19 +1,17 @@
 import { ChakraProvider, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import {
-  initializePlugin, addDataContextChangeListener, ClientNotification
+  addDataContextsListListener, initializePlugin, ClientNotification,
 } from "@concord-consortium/codap-plugin-api";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { getData } from "../utilities/codap-utils";
 import {
-  kAboutTabLabel, kDataContextName, kGraphTabLabel, kInitialDimensions, kPluginName, kVersion
+  kAboutTabLabel, kGraphTabLabel, kInitialDimensions, kPluginName, kVersion
 } from "../utilities/constants";
 import { AboutTab } from "./about-tab";
 import "./App.css";
 import { GraphTab } from "./graph-tab";
 
 export const App = () => {
-  const [listenerNotification, setListenerNotification] = useState<string>();
-
   useEffect(() => {
     initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions})
       .catch(reason => {
@@ -21,15 +19,15 @@ export const App = () => {
         console.warn("Not embedded in CODAP");
       });
 
-    // this is an example of how to add a notification listener to a CODAP component
-    // for more information on listeners and notifications, see
-    // https://github.com/concord-consortium/codap/wiki/CODAP-Data-Interactive-Plugin-API#documentchangenotice
-    const casesUpdatedListener = (listenerRes: ClientNotification) => {
-      if (listenerRes.values.operation === "updateCases") {
-        setListenerNotification(JSON.stringify(listenerRes.values.result));
+    // Update data when there are new datasets in the document
+    const documentChangeListener = (notification: ClientNotification) => {
+      console.log(`!!! notification`, notification);
+      if (notification.values.operation === "dataContextCountChanged") {
+        console.log(` !! getting data`);
+        getData();
       }
     };
-    addDataContextChangeListener(kDataContextName, casesUpdatedListener);
+    addDataContextsListListener(documentChangeListener);
 
     getData();
   }, []);
@@ -48,7 +46,7 @@ export const App = () => {
           </TabList>
           <TabPanels>
             <TabPanel>
-              <GraphTab listenerNotification={listenerNotification} />
+              <GraphTab />
             </TabPanel>
             <TabPanel>
               <AboutTab />
