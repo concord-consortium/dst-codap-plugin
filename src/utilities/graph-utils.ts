@@ -1,3 +1,9 @@
+import { getDate, IItem } from "../models/item";
+
+export const kDateMin = 1578124800000;
+export const kDateMax = 1672358400000;
+const dateRange = kDateMax - kDateMin;
+const defaultDate = kDateMin + dateRange / 2;
 export const kLatMin = 18.4589;
 export const kLatMax = 48.98;
 const latRange = kLatMax - kLatMin;
@@ -17,6 +23,8 @@ export function convertLong(long = -95) {
   return ((long - kLongMin) / longRange) * graphRange + graphMin;
 }
 
-export function convertDate(date?: string) {
-  return 0;
+export function convertDate(item: IItem) {
+  const _date = getDate(item);
+  const date = isFinite(_date) ? _date : defaultDate;
+  return ((date - kDateMin) / dateRange) * graphRange + graphMin;
 }

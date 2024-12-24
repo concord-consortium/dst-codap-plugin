@@ -11,8 +11,12 @@ export async function getData() {
     if (itemsResult.success) {
       const is = itemsResult.values.map((item: any) => item.values);
       items.replace(is);
-      // This code outputs the min and max lat and long.
+      // This code outputs the min and max date, lat, and long.
       // It still might be useful but should eventually be removed.
+      // const dates = is.map((item: any) => getDate(item)).filter((time: number) => isFinite(time));
+      // console.log(`--- dates`, dates);
+      // console.log(`--- min date`, Math.min(...dates));
+      // console.log(` -- max date`, Math.max(...dates));
       // const lats = is.map((item: any) => item.Latitude);
       // console.log(`--- min lat`, Math.min(...lats));
       // console.log(` -- max lat`, Math.max(...lats));

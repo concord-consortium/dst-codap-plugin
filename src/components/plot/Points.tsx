@@ -11,7 +11,7 @@ export const Points = observer(function Points() {
   return (
     <group>
       {items.map((item, i) => {
-        const position = [convertLat(item.Latitude), convertDate(item.date), convertLong(item.Longitude)];
+        const position = [convertLat(item.Latitude), convertDate(item), convertLong(item.Longitude)];
         return (
           <mesh key={i} position={new THREE.Vector3(...position)}>
             <sphereGeometry args={[0.1, 16, 16]} />

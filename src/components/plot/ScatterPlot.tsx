@@ -16,7 +16,7 @@ export function ScatterPlot() {
   return (
     <div className="w-full h-full relative scatter-plot" style={{backgroundColor: "rgb(31 41 55)"}}>
       <Canvas>
-        <PerspectiveCamera makeDefault position={[-5, 6, 0]} />
+        <PerspectiveCamera makeDefault position={[-10, 14, 0]} />
         <OrbitControls enableDamping />
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
