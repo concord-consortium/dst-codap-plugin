@@ -14,7 +14,7 @@ export function ScatterPlot() {
   const [zPosition, setZPosition] = useState(-5);
 
   return (
-    <div className="w-full h-full relative scatter-plot" style={{backgroundColor: "rgb(31 41 55)"}}>
+    <div className="w-full h-full relative scatter-plot" style={{backgroundColor: "#f9f9f9"}}>
       <Canvas>
         <PerspectiveCamera makeDefault position={[-10, 14, 0]} />
         <OrbitControls enableDamping />

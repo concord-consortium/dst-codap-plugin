@@ -5,8 +5,6 @@ import React from "react";
 import { items } from "../../models/item";
 import { convertDate, convertLat, convertLong } from "../../utilities/graph-utils";
 
-const hue = Math.random() * 360;
-
 export const Points = observer(function Points() {
   return (
     <group>
@@ -15,7 +13,7 @@ export const Points = observer(function Points() {
         return (
           <mesh key={i} position={new THREE.Vector3(...position)}>
             <sphereGeometry args={[0.1, 16, 16]} />
-            <meshStandardMaterial color={`hsl(${hue}, 60%, 80%)`} />
+            <meshStandardMaterial color="#925987" />
           </mesh>
         );
       })}
