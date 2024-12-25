@@ -1,22 +1,20 @@
 /* eslint-disable react/no-unknown-property */
 import React from "react";
 import { useTexture } from "@react-three/drei";
+import map from "../../assets/USA_location_map.svg.png";
+import { kBackgroundHeight, kBackgroundWidth } from "../../utilities/constants";
 
 interface GridPlaneProps {
   zPosition: number;
 }
 
 export function GridPlane({ zPosition }: GridPlaneProps) {
-  const texture = useTexture("https://images.unsplash.com/photo-1502134249126-9f3755a50d78?auto=format&fit=crop&w=1024");
+  const texture = useTexture(map);
 
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, zPosition, 0]}>
-      <planeGeometry args={[10, 10]} />
-      <meshStandardMaterial 
-        map={texture}
-        transparent
-        opacity={0.3}
-      />
+    <mesh rotation={[-Math.PI / 2, 0, -Math.PI / 2]} position={[0, zPosition, 0]}>
+      <planeGeometry args={[10, 10 * kBackgroundHeight / kBackgroundWidth]} />
+      <meshStandardMaterial map={texture} />
     </mesh>
   );
 }

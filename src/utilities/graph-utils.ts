@@ -1,12 +1,13 @@
 import { getDate, IItem } from "../models/item";
+import { kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin } from "./constants";
 
 export const dataRanges = {
   dateMin: 1578124800000,
   dateMax: 1672358400000,
-  latMin: 18.4589,
-  latMax: 48.98,
-  longMin: -124.0062,
-  longMax: -66.746
+  latMin: kBackgroundLatMin,
+  latMax: kBackgroundLatMax,
+  longMin: kBackgroundLongMin,
+  longMax: kBackgroundLongMax
 };
 const dateRange = () => dataRanges.dateMax - dataRanges.dateMin;
 const defaultDate = () =>  dataRanges.dateMin + dateRange() / 2;
