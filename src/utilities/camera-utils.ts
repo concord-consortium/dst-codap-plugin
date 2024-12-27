@@ -28,11 +28,10 @@ export function getCameraFormatFromPosition(x: number, y: number, z: number): IC
 }
 
 export function getPositionFromCameraFormat(radius: number, latitude: number, longitude: number): IPosition {
-  const tanLong = Math.tan(longitude);
-  const y = Math.sqrt((radius * Math.cos(latitude)) ** 2 / (1 + tanLong ** 2)) * (latitude > halfPi ? -1 : 1);
-  const _z = y * tanLong;
-  const x = Math.sqrt(radius ** 2 - _z ** 2 - y ** 2) * (longitude < halfPi || longitude > 3 * halfPi ? -1 : 1);
-  const z = Math.abs(_z) * (longitude > Math.PI ? 1 : -1);
+  const xSign = (longitude < halfPi || longitude > 3 * halfPi ? -1 : 1);
+  const x = Math.sqrt(radius ** 2 * (1 - Math.cos(latitude) ** 2)) * xSign;
+  const z = Math.abs(x * Math.tan(longitude)) * (longitude > Math.PI ? 1 : -1);
+  const y = Math.sqrt(radius ** 2 - x ** 2 - z ** 2) * (latitude > halfPi ? -1 : 1);
   console.log(`... x`, x);
   console.log(` .. y`, y);
   console.log(` .. z`, z);

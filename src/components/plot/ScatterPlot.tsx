@@ -3,7 +3,6 @@ import { observer } from "mobx-react-lite";
 import React, { useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { Vector3 } from "three";
 import { dstCamera } from "../../models/camera";
 import { AxisLabels } from "./AxisLabels";
 import { GridPlane } from "./GridPlane";
@@ -16,24 +15,14 @@ export const ScatterPlot = observer(function ScatterPlot() {
   const gridSize = 10;
   const tickCount = 10;
   const [zPosition, setZPosition] = useState(-5);
-  const [controlling, setControlling] = useState(false);
   const { position } = dstCamera;
-  const cameraPosition = controlling ? undefined : new Vector3(position.x, position.y, position.z);
 
   return (
-    <div
-      className="w-full h-full relative scatter-plot"
-      onPointerDown={() => setControlling(true)}
-      onPointerMove={(event) => {
-        if (event.buttons === 0) setControlling(false);
-      }}
-      onPointerUp={() => setControlling(false)}
-      style={{backgroundColor: "#f9f9f9"}}
-    >
+    <div className="w-full h-full relative scatter-plot" style={{backgroundColor: "#f9f9f9"}}>
       <Canvas>
         <PerspectiveCamera
           makeDefault
-          position={cameraPosition}
+          position={[position.x, position.y, position.z]}
           ref={cameraRef}
         />
         <OrbitControls enableDamping
