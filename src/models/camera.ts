@@ -39,8 +39,21 @@ class DSTCamera {
     return this.radius < radiusMax;
   }
 
+  get isHome() {
+    const { x, y, z } = this.position;
+    return x <= defaultCameraX + .2 && x >= defaultCameraX - .2 &&
+      y <= defaultCameraY + .2 && y >= defaultCameraY - .2 &&
+      z <= defaultCameraZ + .2 && z >= defaultCameraZ - .2;
+  }
+
   get position() {
     return getPositionFromCameraFormat(this.radius, this.latitude, this.longitude);
+  }
+
+  resetHome() {
+    this.setRadius(defaultRadius);
+    this.setLatitude(defaultLatitude);
+    this.setLongitude(defaultLongitude);
   }
 
   setLatitude(lat: number) {

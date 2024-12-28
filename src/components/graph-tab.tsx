@@ -17,7 +17,7 @@ export const GraphTab = observer(function GraphTab() {
       <ScatterPlot />
       <NavigationCube />
       <UIButtonContainer className="zoom-container">
-        <UIButton className="top" disabled={true} Icon={HomeIcon} />
+        <UIButton className="top" disabled={dstCamera.isHome} Icon={HomeIcon} onClick={() => dstCamera.resetHome()} />
         <UIButton disabled={true} Icon={FitAllIcon} />
         <UIButton
           disabled={!dstCamera.canZoomIn}
