@@ -33,4 +33,10 @@
     left: 41px;
     top: 0;
   }
+
+  &:disabled {
+    svg {
+      opacity: .5;
+    }
+  }
 }
