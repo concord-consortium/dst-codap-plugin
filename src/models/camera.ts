@@ -1,4 +1,4 @@
-import { action, computed, makeObservable, observable } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { getCameraFormatFromPosition, getPositionFromCameraFormat } from "../utilities/camera-utils";
 import { normalizeRadian } from "../utilities/trig-utils";
 
@@ -8,22 +8,24 @@ export const defaultCameraZ = 0;
 const { radius: defaultRadius, latitude: defaultLatitude, longitude: defaultLongitude} =
   getCameraFormatFromPosition(defaultCameraX, defaultCameraY, defaultCameraZ);
 
+export const radiusMax = 30;
+export const radiusMin = 1;
+
 class DSTCamera {
   radius = defaultRadius;
   latitude = defaultLatitude;
   longitude = defaultLongitude;
 
   constructor() {
-    makeObservable(this, {
-      radius: observable,
-      longitude: observable,
-      latitude: observable,
-      position: computed,
-      setLatitude: action,
-      setLongitude: action,
-      setPosition: action,
-      setRadius: action
-    });
+    makeAutoObservable(this);
+  }
+  
+  get canZoomIn() {
+    return this.radius > radiusMin;
+  }
+
+  get canZoomOut() {
+    return this.radius < radiusMax;
   }
 
   get position() {
@@ -46,7 +48,7 @@ class DSTCamera {
   }
 
   setRadius(r: number) {
-    this.radius = r;
+    this.radius = Math.max(radiusMin, Math.min(radiusMax, r));
   }
 }
 

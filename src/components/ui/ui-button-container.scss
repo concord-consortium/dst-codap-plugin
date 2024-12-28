@@ -1,0 +1,10 @@
+.ui-button-container {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+
+  &.zoom-container {
+    left: 15px;
+    top: 131px;
+  }
+}

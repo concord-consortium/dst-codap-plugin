@@ -1,0 +1,36 @@
+.arrow-button {
+  border: none;
+  position: absolute;
+
+  &.down {
+    left: 41px;
+    top: 88px;
+
+    svg {
+      rotate: 180deg;
+    }
+  }
+
+  &.left {
+    left: 0;
+    top: 43px;
+
+    svg {
+      rotate: 270deg;
+    }
+  }
+
+  &.right {
+    left: 82px;
+    top: 43px;
+
+    svg {
+      rotate: 90deg;
+    }
+  }
+
+  &.up {
+    left: 41px;
+    top: 0;
+  }
+}
