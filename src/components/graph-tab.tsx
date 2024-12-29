@@ -10,7 +10,7 @@ import PlusIcon from "../assets/icons/plus.svg";
 import PointIcon from "../assets/icons/point-selection.svg";
 import { dstCamera } from "../models/camera";
 import { modeType } from "../types/ui-types";
-import { ScatterPlot } from "./plot/ScatterPlot";
+import { ScatterPlot } from "./plot/scatter-plot";
 import { NavigationCube } from "./ui/navigation-cube";
 import { UIButton } from "./ui/ui-button";
 import { UIButtonContainer } from "./ui/ui-button-container";

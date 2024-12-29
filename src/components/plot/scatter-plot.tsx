@@ -5,10 +5,10 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { dstCamera } from "../../models/camera";
 import { modeType } from "../../types/ui-types";
-import { AxisLabels } from "./AxisLabels";
-import { GridPlane } from "./GridPlane";
-import { PlaneControls } from "./PlaneControls";
-import { Points } from "./Points";
+import { AxisLabels } from "./axis-labels";
+import { GridPlane } from "./grid-plane";
+import { PlaneControls } from "./plane-controls";
+import { Points } from "./points";
 import "./scatter-plot.scss";
 
 interface IScatterPlotProps {
