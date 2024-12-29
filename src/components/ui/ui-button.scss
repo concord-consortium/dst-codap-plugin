@@ -8,6 +8,10 @@
   justify-content: center;
   width: 32px;
 
+  &.active {
+    background-color: #b9dfe5;
+  }
+
   &.bottom {
     border-bottom: 1px solid #177991;
     border-bottom-left-radius: 3px;
@@ -22,6 +26,10 @@
 
   &:hover {
     background-color: #dceff2;
+
+    &.nohover {
+      background-color: #b9dfe5;
+    }
   }
 
   &:disabled {
