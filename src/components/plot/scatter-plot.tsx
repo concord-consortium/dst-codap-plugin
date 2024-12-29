@@ -3,9 +3,11 @@ import { observer } from "mobx-react-lite";
 import React, { useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import { Vector3 } from "three";
 import { dstCamera } from "../../models/camera";
 import { modeType } from "../../types/ui-types";
 import { AxisLabels } from "./axis-labels";
+import { CubeOutline } from "./cube-outline";
 import { GridPlane } from "./grid-plane";
 import { PlaneControls } from "./plane-controls";
 import { Points } from "./points";
@@ -20,13 +22,15 @@ export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotP
   const tickCount = 10;
   const [zPosition, setZPosition] = useState(-5);
   const { position } = dstCamera;
+  const cameraPosition = new Vector3(position.x, position.y, position.z);
 
   return (
     <div className="w-full h-full relative scatter-plot" style={{backgroundColor: "#f9f9f9"}}>
       <Canvas>
+        <CubeOutline />
         <PerspectiveCamera
           makeDefault
-          position={[position.x, position.y, position.z]}
+          position={cameraPosition}
           ref={cameraRef}
         />
         {mode === "pointer" && (
@@ -40,7 +44,7 @@ export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotP
           />
         )}
         <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 5]} intensity={1} />
+        <directionalLight position={cameraPosition} intensity={1} />
         <Points />
         <gridHelper args={[gridSize, tickCount]} />
         <axesHelper args={[gridSize / 2]} />
