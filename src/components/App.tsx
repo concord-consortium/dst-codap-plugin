@@ -21,9 +21,7 @@ export const App = () => {
 
     // Update data when there are new datasets in the document
     const documentChangeListener = (notification: ClientNotification) => {
-      console.log(`!!! notification`, notification);
       if (notification.values.operation === "dataContextCountChanged") {
-        console.log(` !! getting data`);
         getData();
       }
     };
