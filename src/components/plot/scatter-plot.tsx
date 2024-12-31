@@ -10,7 +10,7 @@ import { AxisLabels } from "./axis-labels";
 import { CubeOutline } from "./cube-outline";
 import { GridPlane } from "./grid-plane";
 import { PlaneControls } from "./plane-controls";
-import { Points } from "./pppoints";
+import { Points } from "./points";
 import "./scatter-plot.scss";
 
 interface IScatterPlotProps {
