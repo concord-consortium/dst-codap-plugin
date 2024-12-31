@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unknown-property */
 import { observer } from "mobx-react-lite";
 import * as THREE from "three";
 import React from "react";
@@ -6,6 +5,7 @@ import { items } from "../../models/item";
 import { convertDate, convertLat, convertLong } from "../../utilities/graph-utils";
 
 export const Points = observer(function Points() {
+  /* eslint-disable react/no-unknown-property */
   return (
     <group>
       {items.map((item, i) => {
@@ -19,5 +19,5 @@ export const Points = observer(function Points() {
       })}
     </group>
   );
+  /* eslint-enable react/no-unknown-property */
 });
-/* eslint-enable react/no-unknown-property */
