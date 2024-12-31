@@ -15,12 +15,14 @@ export interface IPosition {
 
 export function getCameraFormatFromPosition(x: number, y: number, z: number): ICameraFormat {
   const radius = Math.sqrt(x**2 + y**2 + z**2);
-  const longitude = normalizeRadian2Pi(Math.atan(z/x) - (x > 0 ? Math.PI : 0));
+  const longitude = x === 0 && z === 0 ? 0 : normalizeRadian2Pi(Math.atan(z/x) - (x >= 0 ? Math.PI : 0));
   const latitude = normalizeRadianMinusPi(Math.asin(y / radius));
   return { radius, latitude, longitude };
 }
 
-export function getPositionFromCameraFormat(radius: number, latitude: number, longitude: number): IPosition {
+export function getPositionFromCameraFormat(radius: number, _latitude: number, _longitude: number): IPosition {
+  const latitude = normalizeRadianMinusPi(_latitude);
+  const longitude = normalizeRadian2Pi(_longitude);
   const y = radius * Math.sin(latitude);
   const flatRadius = radius * Math.cos(latitude);
   const xSign = (longitude < halfPi || longitude > 3 * halfPi ? -1 : 1);
