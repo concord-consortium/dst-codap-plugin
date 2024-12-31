@@ -12,7 +12,7 @@ export const Points = observer(function Points() {
         const position = [convertLat(item.Latitude), convertDate(item), convertLong(item.Longitude)];
         return (
           <mesh key={i} position={new THREE.Vector3(...position)}>
-            <sphereGeometry args={[0.1, 16, 16]} />
+            <sphereGeometry args={[0.1, 8, 8]} />
             <meshStandardMaterial color="#925987" />
           </mesh>
         );
