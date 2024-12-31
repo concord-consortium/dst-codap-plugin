@@ -4,5 +4,8 @@ export const AppElements = {
   },
   getTabButton(label: string) {
     return this.getApp().get("button").contains(label);
+  },
+  getUIButton(testId: string) {
+    return this.getApp().get(`[data-testid="${testId}"`);
   }
 };

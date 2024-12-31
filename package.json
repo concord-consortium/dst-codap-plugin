@@ -84,8 +84,9 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^16.1.0",
     "@types/jest": "^29.5.1",
-    "@types/react": "^19.0.2",
-    "@types/react-dom": "^19.0.2",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@types/three": "^0.162.0",
     "@typescript-eslint/eslint-plugin": "^5.59.7",
     "@typescript-eslint/parser": "^5.59.7",
     "autoprefixer": "^10.4.14",
@@ -132,8 +133,14 @@
   },
   "dependencies": {
     "@chakra-ui/react": "~2.9.5",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "@react-three/drei": "^9.120.4",
+    "@react-three/fiber": "^8.15.19",
+    "clsx": "^2.1.1",
+    "mobx": "^6.13.5",
+    "mobx-react-lite": "^4.1.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "three": "^0.162.0",
     "tslib": "^2.8.1"
   }
 }
