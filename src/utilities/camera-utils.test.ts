@@ -6,7 +6,7 @@ describe("camera utilities", () => {
   it("converts position to position round trip", () => {
     function testPositionToPosition(x: number, y: number, z: number) {
       const cameraFormat = getCameraFormatFromPosition(x, y, z);
-      const position = getPositionFromCameraFormat(cameraFormat.radius, cameraFormat.latitude, cameraFormat.longitude);
+      const position = getPositionFromCameraFormat(cameraFormat.distance, cameraFormat.pivot, cameraFormat.rotation);
       expect(position.x).toBeCloseTo(x);
       expect(position.y).toBeCloseTo(y);
       expect(position.z).toBeCloseTo(z);
@@ -25,12 +25,12 @@ describe("camera utilities", () => {
   });
 
   it("converts camera format to camera format round trip", () => {
-    function testCameraToCamera(r: number, lat: number, long: number) {
-      const position = getPositionFromCameraFormat(r, lat, long);
+    function testCameraToCamera(distance: number, pivot: number, rotation: number) {
+      const position = getPositionFromCameraFormat(distance, pivot, rotation);
       const cameraFormat = getCameraFormatFromPosition(position.x, position.y, position.z);
-      expect(cameraFormat.radius).toBeCloseTo(r);
-      expect(cameraFormat.latitude).toBeCloseTo(normalizeRadianMinusPi(lat));
-      expect(cameraFormat.longitude).toBeCloseTo(normalizeRadian2Pi(long));
+      expect(cameraFormat.distance).toBeCloseTo(distance);
+      expect(cameraFormat.pivot).toBeCloseTo(normalizeRadianMinusPi(pivot));
+      expect(cameraFormat.rotation).toBeCloseTo(normalizeRadian2Pi(rotation));
     }
     testCameraToCamera(1, 0, 0);
     testCameraToCamera(100, 0, 0);

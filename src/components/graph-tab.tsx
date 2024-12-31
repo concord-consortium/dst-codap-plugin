@@ -10,6 +10,7 @@ import PlusIcon from "../assets/icons/plus.svg";
 import PointIcon from "../assets/icons/point-selection.svg";
 import { dstCamera } from "../models/camera";
 import { modeType } from "../types/ui-types";
+import { kUIDistanceChange } from "../utilities/constants";
 import { ScatterPlot } from "./plot/scatter-plot";
 import { NavigationCube } from "./ui/navigation-cube";
 import { UIButton } from "./ui/ui-button";
@@ -37,14 +38,14 @@ export const GraphTab = observer(function GraphTab() {
         <UIButton
           disabled={!dstCamera.canZoomIn}
           Icon={PlusIcon}
-          onClick={() => dstCamera.setRadius(dstCamera.radius - 1)}
+          onClick={() => dstCamera.setDistance(dstCamera.distance - kUIDistanceChange)}
           testId="button-zoom-in"
         />
         <UIButton
           className="bottom"
           disabled={!dstCamera.canZoomOut}
           Icon={MinusIcon}
-          onClick={() => dstCamera.setRadius(dstCamera.radius + 1)}
+          onClick={() => dstCamera.setDistance(dstCamera.distance + kUIDistanceChange)}
           testId="button-zoom-out"
         />
       </UIButtonContainer>

@@ -20,3 +20,7 @@ const baseBackgroundLatRange = baseBackgroundLatMax - baseBackgroundLatMin;
 const baseBackgroundLatMid = baseBackgroundLatMin + baseBackgroundLatRange / 2;
 export const kBackgroundLatMax = baseBackgroundLatMid + backgroundLongRange / 2;
 export const kBackgroundLatMin = baseBackgroundLatMid - backgroundLongRange / 2;
+
+export const kUIDistanceChange = 1;
+export const kUIPivotChange = Math.PI / 12;
+export const kUIRotationChange = Math.PI / 12;

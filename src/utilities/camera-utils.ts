@@ -1,11 +1,11 @@
 import { halfPi, normalizeRadian2Pi, normalizeRadianMinusPi } from "./trig-utils";
 
 export interface ICameraFormat {
-  radius: number; // Distance from center
-  longitude: number; // Angle on the xz plane
-  // Angle on the plane that cuts through the longitude.
-  // Ranges from -half pi (look straight up) to half pi (looking straight down).
-  latitude: number;
+  distance: number; // Distance from center
+  rotation: number; // Angle around the y axis. Ranges from 0 to two pi.
+  // Angle on the plane that cuts through the rotation angle.
+  // Ranges from -half pi (looking straight up) to half pi (looking straight down).
+  pivot: number;
 }
 export interface IPosition {
   x: number;
@@ -14,19 +14,19 @@ export interface IPosition {
 }
 
 export function getCameraFormatFromPosition(x: number, y: number, z: number): ICameraFormat {
-  const radius = Math.sqrt(x**2 + y**2 + z**2);
-  const longitude = x === 0 && z === 0 ? 0 : normalizeRadian2Pi(Math.atan(z/x) - (x >= 0 ? Math.PI : 0));
-  const latitude = normalizeRadianMinusPi(Math.asin(y / radius));
-  return { radius, latitude, longitude };
+  const distance = Math.sqrt(x**2 + y**2 + z**2);
+  const rotation = x === 0 && z === 0 ? 0 : normalizeRadian2Pi(Math.atan(z/x) - (x >= 0 ? Math.PI : 0));
+  const pivot = normalizeRadianMinusPi(Math.asin(y / distance));
+  return { distance, pivot, rotation };
 }
 
-export function getPositionFromCameraFormat(radius: number, _latitude: number, _longitude: number): IPosition {
-  const latitude = normalizeRadianMinusPi(_latitude);
-  const longitude = normalizeRadian2Pi(_longitude);
-  const y = radius * Math.sin(latitude);
-  const flatRadius = radius * Math.cos(latitude);
-  const xSign = (longitude < halfPi || longitude > 3 * halfPi ? -1 : 1);
-  const x = Math.abs(flatRadius * Math.cos(longitude)) * xSign;
-  const z = Math.abs(flatRadius * Math.sin(longitude)) * (longitude > Math.PI ? 1 : -1);
+export function getPositionFromCameraFormat(distance: number, _pivot: number, _rotation: number): IPosition {
+  const pivot = normalizeRadianMinusPi(_pivot);
+  const rotation = normalizeRadian2Pi(_rotation);
+  const y = distance * Math.sin(pivot);
+  const flatDistance = distance * Math.cos(pivot);
+  const xSign = (rotation < halfPi || rotation > 3 * halfPi ? -1 : 1);
+  const x = Math.abs(flatDistance * Math.cos(rotation)) * xSign;
+  const z = Math.abs(flatDistance * Math.sin(rotation)) * (rotation > Math.PI ? 1 : -1);
   return { x, y, z };
 }

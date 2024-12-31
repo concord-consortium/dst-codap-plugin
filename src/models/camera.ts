@@ -5,38 +5,38 @@ import { halfPi, normalizeRadian2Pi, normalizeRadianMinusPi } from "../utilities
 export const defaultCameraX = -10;
 export const defaultCameraY = 14;
 export const defaultCameraZ = 0;
-const { radius: defaultRadius, latitude: defaultLatitude, longitude: defaultLongitude} =
+const { distance: defaultDistance, pivot: defaultPivot, rotation: defaultRotation} =
   getCameraFormatFromPosition(defaultCameraX, defaultCameraY, defaultCameraZ);
 
-const radiusMax = 30;
-const radiusMin = 1;
-const latitudeMax = halfPi;
-const latitudeMin = -halfPi;
-const latitudeOffset = .05;
+const distanceMax = 30;
+const distanceMin = 1;
+const pivotMax = halfPi;
+const pivotMin = -halfPi;
+const pivotOffset = .05;
 
 class DSTCamera {
-  radius = defaultRadius;
-  latitude = defaultLatitude;
-  longitude = defaultLongitude;
+  distance = defaultDistance;
+  pivot = defaultPivot;
+  rotation = defaultRotation;
 
   constructor() {
     makeAutoObservable(this);
   }
 
   get canPivotUp() {
-    return this.latitude < latitudeMax - latitudeOffset;
+    return this.pivot < pivotMax - pivotOffset;
   }
 
   get canPivotDown() {
-    return this.latitude > latitudeMin + latitudeOffset;
+    return this.pivot > pivotMin + pivotOffset;
   }
   
   get canZoomIn() {
-    return this.radius > radiusMin;
+    return this.distance > distanceMin;
   }
 
   get canZoomOut() {
-    return this.radius < radiusMax;
+    return this.distance < distanceMax;
   }
 
   get isHome() {
@@ -47,32 +47,32 @@ class DSTCamera {
   }
 
   get position() {
-    return getPositionFromCameraFormat(this.radius, this.latitude, this.longitude);
+    return getPositionFromCameraFormat(this.distance, this.pivot, this.rotation);
   }
 
   resetHome() {
-    this.setRadius(defaultRadius);
-    this.setLatitude(defaultLatitude);
-    this.setLongitude(defaultLongitude);
+    this.setDistance(defaultDistance);
+    this.setPivot(defaultPivot);
+    this.setRotation(defaultRotation);
   }
 
-  setLatitude(lat: number) {
-    this.latitude = Math.max(latitudeMin, Math.min(latitudeMax, normalizeRadianMinusPi(lat)));
+  setPivot(pivot: number) {
+    this.pivot = Math.max(pivotMin, Math.min(pivotMax, normalizeRadianMinusPi(pivot)));
   }
 
-  setLongitude(long: number) {
-    this.longitude = normalizeRadian2Pi(long);
+  setRotation(rotation: number) {
+    this.rotation = normalizeRadian2Pi(rotation);
   }
 
   setPosition(x: number, y: number, z: number) {
-    const { radius, latitude, longitude } = getCameraFormatFromPosition(x, y, z);
-    this.setRadius(radius);
-    this.setLatitude(latitude);
-    this.setLongitude(longitude);
+    const { distance, pivot, rotation } = getCameraFormatFromPosition(x, y, z);
+    this.setDistance(distance);
+    this.setPivot(pivot);
+    this.setRotation(rotation);
   }
 
-  setRadius(r: number) {
-    this.radius = Math.max(radiusMin, Math.min(radiusMax, r));
+  setDistance(distance: number) {
+    this.distance = Math.max(distanceMin, Math.min(distanceMax, distance));
   }
 }
 
