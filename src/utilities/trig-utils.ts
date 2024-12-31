@@ -5,7 +5,7 @@ export const halfPi = Math.PI / 2;
 function normalizeRadian(_radian: number, min: number, max: number) {
   let radian = _radian;
   while (radian < min) radian += twoPi;
-  while (radian > max) radian -= twoPi;
+  while (radian >= max) radian -= twoPi;
   return radian;
 }
 
