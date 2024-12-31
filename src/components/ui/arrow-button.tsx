@@ -10,7 +10,12 @@ interface IArrowButtonProps {
 }
 export function ArrowButton({ direction, disabled, onClick }: IArrowButtonProps) {
   return (
-    <button className={clsx("arrow-button", direction)} disabled={disabled} onClick={onClick}>
+    <button
+      className={clsx("arrow-button", direction)}
+      data-testid={`button-${direction}`}
+      disabled={disabled}
+      onClick={onClick}
+    >
       <ArrowIcon />
     </button>
   );

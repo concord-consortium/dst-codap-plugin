@@ -26,18 +26,26 @@ export const GraphTab = observer(function GraphTab() {
       <ScatterPlot mode={mode} />
       <NavigationCube />
       <UIButtonContainer className="zoom-container">
-        <UIButton className="top" disabled={dstCamera.isHome} Icon={HomeIcon} onClick={() => dstCamera.resetHome()} />
-        <UIButton disabled={true} Icon={FitAllIcon} />
+        <UIButton
+          className="top"
+          disabled={dstCamera.isHome}
+          Icon={HomeIcon}
+          onClick={() => dstCamera.resetHome()}
+          testId="button-home"
+        />
+        <UIButton disabled={true} Icon={FitAllIcon} testId="button-fit-all" />
         <UIButton
           disabled={!dstCamera.canZoomIn}
           Icon={PlusIcon}
           onClick={() => dstCamera.setRadius(dstCamera.radius - 1)}
+          testId="button-zoom-in"
         />
         <UIButton
           className="bottom"
           disabled={!dstCamera.canZoomOut}
           Icon={MinusIcon}
           onClick={() => dstCamera.setRadius(dstCamera.radius + 1)}
+          testId="button-zoom-out"
         />
       </UIButtonContainer>
       <UIButtonContainer className="mode-container">
@@ -47,6 +55,7 @@ export const GraphTab = observer(function GraphTab() {
           Icon={PointIcon}
           onClick={() => setMode("pointer")}
           noActiveHover={true}
+          testId="button-pointer-mode"
         />
         <UIButton
           active={mode === "marquee"}
@@ -54,6 +63,7 @@ export const GraphTab = observer(function GraphTab() {
           Icon={MarqueeIcon}
           onClick={() => setMode("marquee")}
           noActiveHover={true}
+          testId="button-marquee-mode"
         />
       </UIButtonContainer>
       <UIButtonContainer className="legend-container">
@@ -62,6 +72,7 @@ export const GraphTab = observer(function GraphTab() {
           className="top bottom"
           Icon={LegendIcon}
           onClick={() => setDisplayLegend(!displayLegend)}
+          testId="button-legend"
         />
       </UIButtonContainer>
       <UIButtonContainer className="xy-container">
@@ -70,6 +81,7 @@ export const GraphTab = observer(function GraphTab() {
           className="top bottom"
           Icon={XYIcon}
           onClick={() => setDisplayXYControls(!displayXYControls)}
+          testId="button-xy-controls"
         />
       </UIButtonContainer>
     </div>

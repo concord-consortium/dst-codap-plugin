@@ -9,11 +9,12 @@ interface IUIButtonProps {
   Icon?: any;
   onClick?: () => void;
   noActiveHover?: boolean;
+  testId?: string;
 }
-export function UIButton({ active, className, disabled, Icon, onClick, noActiveHover }: IUIButtonProps) {
+export function UIButton({ active, className, disabled, Icon, onClick, noActiveHover, testId }: IUIButtonProps) {
   const classes = clsx("ui-button", className, { active, nohover: noActiveHover && active });
   return (
-    <button className={classes} disabled={disabled} onClick={() => onClick?.()}>
+    <button className={classes} data-testid={testId} disabled={disabled} onClick={() => onClick?.()}>
       {Icon && <Icon />}
     </button>
   );
