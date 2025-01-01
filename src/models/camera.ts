@@ -56,25 +56,21 @@ class DSTCamera {
     const animate = () => {
       // Update the distance, pivot, and rotation based on how far along we are in the animation.
       this.animationPercentage = this.animationPercentage != null ? Math.min(this.animationPercentage + .1, 1) : 1;
-      const percentage = Math.sin((this.animationPercentage * 2 - 1) * halfPi) / 2 + .5;
+      const smoothPercentage = Math.sin((this.animationPercentage * 2 - 1) * halfPi) / 2 + .5;
       if (this.targetDistance != null && this.startDistance != null) {
-        this.setDistance(this.startDistance + (this.targetDistance - this.startDistance) * percentage);
+        this.setDistance(this.startDistance + (this.targetDistance - this.startDistance) * smoothPercentage);
       }
       if (this.targetPivot != null && this.startPivot != null) {
-        this.setPivot(this.startPivot + (this.targetPivot - this.startPivot) * percentage);
+        this.setPivot(this.startPivot + (this.targetPivot - this.startPivot) * smoothPercentage);
       }
       if (this.targetRotation != null && this.startRotation != null) {
-        const normalChange = this.targetRotation - this.startRotation;
-        const wrapOffset = normalChange > Math.PI ? -twoPi : normalChange < -Math.PI ? twoPi : 0;
-        this.setRotation(this.startRotation + (this.targetRotation - this.startRotation + wrapOffset) * percentage);
+        const baseDifference = this.targetRotation - this.startRotation;
+        const wrapOffset = baseDifference > Math.PI ? -twoPi : baseDifference < -Math.PI ? twoPi : 0;
+        this.setRotation(this.startRotation + (baseDifference + wrapOffset) * smoothPercentage);
       }
 
       // Either continue the animation or end it if we're done.
-      if (
-        (this.targetDistance != null && this.distance !== this.targetDistance) ||
-        (this.targetPivot != null && this.pivot !== this.targetPivot) ||
-        (this.targetRotation != null && this.rotation !== this.targetRotation)
-      ) {
+      if (this.animationPercentage < 1) {
         setTimeout(animate, 20);
       } else {
         this.animationPercentage = undefined;
