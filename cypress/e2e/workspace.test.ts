@@ -56,7 +56,6 @@ context("Test the overall app", () => {
       ae.getUIButton("button-zoom-in").should("not.be.enabled");
 
       // Zoom out button
-      cy.wait(100); // Wait for previous animation to finish
       ae.getUIButton("button-home").click();
       ae.getUIButton("button-zoom-out").should("be.enabled");
       ae.getUIButton("button-zoom-out").click();
