@@ -40,11 +40,13 @@ class DSTCamera {
   }
 
   animateBy(dDistance: number, dPivot: number, dRotation: number) {
+    // Capture the state when the animation starts.
     this.animationPercentage = 0;
     this.startDistance = this.distance;
     this.startPivot = this.pivot;
     this.startRotation = this.rotation;
 
+    // Either set or extend the target distance, pivot, and rotation.
     this.targetDistance =
       legalDistance((this.targetDistance != null ? this.targetDistance : this.distance) + dDistance);
     this.targetPivot = legalPivot((this.targetPivot != null ? this.targetPivot : this.pivot) + dPivot);
@@ -52,6 +54,7 @@ class DSTCamera {
       normalizeRadian2Pi((this.targetRotation != null ? this.targetRotation : this.rotation) + dRotation);
 
     const animate = () => {
+      // Update the distance, pivot, and rotation based on how far along we are in the animation.
       this.animationPercentage = this.animationPercentage != null ? Math.min(this.animationPercentage + .1, 1) : 1;
       const percentage = Math.sin((this.animationPercentage * 2 - 1) * halfPi) / 2 + .5;
       if (this.targetDistance != null && this.startDistance != null) {
@@ -66,6 +69,7 @@ class DSTCamera {
         this.setRotation(this.startRotation + (this.targetRotation - this.startRotation + wrapOffset) * percentage);
       }
 
+      // Either continue the animation or end it if we're done.
       if (
         (this.targetDistance != null && this.distance !== this.targetDistance) ||
         (this.targetPivot != null && this.pivot !== this.targetPivot) ||
@@ -82,6 +86,8 @@ class DSTCamera {
         this.targetRotation = undefined;
       }
     };
+
+    // Start the animation.
     animate();
   }
 
