@@ -123,9 +123,10 @@ class DSTCamera {
   }
 
   resetHome() {
-    this.setDistance(defaultDistance);
-    this.setPivot(defaultPivot);
-    this.setRotation(defaultRotation);
+    const dDistance = defaultDistance - (this.targetDistance ?? this.distance);
+    const dPivot = defaultPivot - (this.targetPivot ?? this.pivot);
+    const dRotation = defaultRotation - (this.targetRotation ?? this.rotation);
+    this.animateBy(dDistance, dPivot, dRotation);
   }
 
   setDistance(distance: number) {
