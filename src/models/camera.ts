@@ -2,10 +2,10 @@ import { makeAutoObservable } from "mobx";
 import { getCameraFormatFromPosition, getPositionFromCameraFormat } from "../utilities/camera-utils";
 import { halfPi, normalizeRadian2Pi, normalizeRadianMinusPi, twoPi } from "../utilities/trig-utils";
 
-const defaultCameraX = -10;
-const defaultCameraY = 14;
-const defaultCameraZ = 0;
-const { distance: defaultDistance, pivot: defaultPivot, rotation: defaultRotation} =
+export const defaultCameraX = -10;
+export const defaultCameraY = 14;
+export const defaultCameraZ = 0;
+export const { distance: defaultDistance, pivot: defaultPivot, rotation: defaultRotation} =
   getCameraFormatFromPosition(defaultCameraX, defaultCameraY, defaultCameraZ);
 // const defaultDistance = 20;
 // const defaultRotation = halfPi;
@@ -13,11 +13,11 @@ const { distance: defaultDistance, pivot: defaultPivot, rotation: defaultRotatio
 // const { x: defaultCameraX, y: defaultCameraY, z: defaultCameraZ } =
 //   getPositionFromCameraFormat(defaultDistance, defaultPivot, defaultRotation);
 
-const distanceMax = 30;
-const distanceMin = 1;
+export const distanceMax = 30;
+export const distanceMin = 1;
 const legalDistance = (distance: number) => Math.max(distanceMin, Math.min(distanceMax, distance));
-const pivotMax = halfPi;
-const pivotMin = -halfPi;
+export const pivotMax = halfPi;
+export const pivotMin = -halfPi;
 const pivotOffset = .05;
 const legalPivot = (pivot: number) => Math.max(pivotMin, Math.min(pivotMax, normalizeRadianMinusPi(pivot)));
 
