@@ -1,7 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { getCameraFormatFromPosition, getPositionFromCameraFormat } from "../utilities/camera-utils";
 import { halfPi, normalizeRadian2Pi, normalizeRadianMinusPi, twoPi } from "../utilities/trig-utils";
-import { kUIDistanceChange, kUIPivotChange, kUIRotationChange } from "../utilities/constants";
 
 const defaultCameraX = -10;
 const defaultCameraY = 14;
@@ -27,6 +26,7 @@ class DSTCamera {
   pivot = defaultPivot;
   rotation = defaultRotation;
 
+  animationPercentage: Maybe<number>;
   startDistance: Maybe<number>;
   startPivot: Maybe<number>;
   startRotation: Maybe<number>;
@@ -40,6 +40,7 @@ class DSTCamera {
   }
 
   animateBy(dDistance: number, dPivot: number, dRotation: number) {
+    this.animationPercentage = 0;
     this.startDistance = this.distance;
     this.startPivot = this.pivot;
     this.startRotation = this.rotation;
@@ -51,31 +52,18 @@ class DSTCamera {
       normalizeRadian2Pi((this.targetRotation != null ? this.targetRotation : this.rotation) + dRotation);
 
     const animate = () => {
+      this.animationPercentage = this.animationPercentage != null ? Math.min(this.animationPercentage + .1, 1) : 1;
+      const percentage = Math.sin((this.animationPercentage * 2 - 1) * halfPi) / 2 + .5;
       if (this.targetDistance != null && this.startDistance != null) {
-        const nextDistance = this.distance + (this.targetDistance - this.startDistance) / 10;
-        if (Math.abs(nextDistance - this.targetDistance) < kUIDistanceChange / 10) {
-          this.setDistance(this.targetDistance);
-        } else {
-          this.setDistance(nextDistance);
-        }
+        this.setDistance(this.startDistance + (this.targetDistance - this.startDistance) * percentage);
       }
       if (this.targetPivot != null && this.startPivot != null) {
-        const nextPivot = this.pivot + (this.targetPivot - this.startPivot) / 10;
-        if (Math.abs(nextPivot - this.targetPivot) < kUIPivotChange / 10) {
-          this.setPivot(this.targetPivot);
-        } else {
-          this.setPivot(nextPivot);
-        }
+        this.setPivot(this.startPivot + (this.targetPivot - this.startPivot) * percentage);
       }
       if (this.targetRotation != null && this.startRotation != null) {
         const normalChange = this.targetRotation - this.startRotation;
         const wrapOffset = normalChange > Math.PI ? -twoPi : normalChange < -Math.PI ? twoPi : 0;
-        const nextRotation = this.rotation + (this.targetRotation - this.startRotation + wrapOffset) / 10;
-        if (Math.abs(nextRotation - this.targetRotation) < kUIRotationChange / 10) {
-          this.setRotation(this.targetRotation);
-        } else {
-          this.setRotation(nextRotation);
-        }
+        this.setRotation(this.startRotation + (this.targetRotation - this.startRotation + wrapOffset) * percentage);
       }
 
       if (
@@ -85,6 +73,7 @@ class DSTCamera {
       ) {
         setTimeout(animate, 20);
       } else {
+        this.animationPercentage = undefined;
         this.startDistance = undefined;
         this.startPivot = undefined;
         this.startRotation = undefined;
