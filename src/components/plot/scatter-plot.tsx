@@ -2,7 +2,7 @@
 import { observer } from "mobx-react-lite";
 import React, { useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import { OrbitControls, OrthographicCamera } from "@react-three/drei";
 import { Vector3 } from "three";
 import { dstCamera } from "../../models/camera";
 import { modeType } from "../../types/ui-types";
@@ -28,10 +28,11 @@ export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotP
     <div className="w-full h-full relative scatter-plot" style={{backgroundColor: "#f9f9f9"}}>
       <Canvas>
         <CubeOutline />
-        <PerspectiveCamera
+        <OrthographicCamera
           makeDefault
           position={cameraPosition}
           ref={cameraRef}
+          zoom={25}
         />
         {mode === "pointer" && (
           <OrbitControls enableDamping
@@ -43,8 +44,8 @@ export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotP
             }}
           />
         )}
-        <ambientLight intensity={0.5} />
-        <directionalLight position={cameraPosition} intensity={1} />
+        <ambientLight intensity={1.5} />
+        {/* <directionalLight position={cameraPosition} intensity={1} /> */}
         <Points />
         <gridHelper args={[gridSize, tickCount]} />
         <axesHelper args={[gridSize / 2]} />
