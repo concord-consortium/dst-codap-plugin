@@ -5,7 +5,9 @@ import {
 
 describe("DSTCamera", () => {
   beforeEach(() => {
-    dstCamera.resetHome();
+    dstCamera.setDistance(defaultDistance);
+    dstCamera.setPivot(defaultPivot);
+    dstCamera.setRotation(defaultRotation);
   });
 
   test("should initialize with default values", () => {
@@ -14,16 +16,20 @@ describe("DSTCamera", () => {
     expect(dstCamera.rotation).toBeCloseTo(defaultRotation);
   });
 
-  test("should reset to home position", () => {
+  test("should reset to home position", (done) => {
     dstCamera.setDistance(10);
     dstCamera.setPivot(0.5);
     dstCamera.setRotation(1);
 
     dstCamera.resetHome();
 
-    expect(dstCamera.distance).toBeCloseTo(defaultDistance);
-    expect(dstCamera.pivot).toBeCloseTo(defaultPivot);
-    expect(dstCamera.rotation).toBeCloseTo(defaultRotation);
+
+    setTimeout(() => {
+      expect(dstCamera.distance).toBeCloseTo(defaultDistance);
+      expect(dstCamera.pivot).toBeCloseTo(defaultPivot);
+      expect(dstCamera.rotation).toBeCloseTo(defaultRotation);
+      done();
+    }, 250);
   });
 
   test("should set distance within legal range", () => {
