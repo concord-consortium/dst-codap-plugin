@@ -50,7 +50,7 @@ context("Test the overall app", () => {
       // Zoom in button
       ae.getUIButton("button-zoom-in").should("be.enabled");
       ae.getUIButton("button-zoom-in").click();
-      Array(15).fill(1).forEach(() => ae.getUIButton("button-zoom-in").click());
+      Array(7).fill(1).forEach(() => ae.getUIButton("button-zoom-in").click());
       ae.getUIButton("button-zoom-in").should("be.enabled");
       ae.getUIButton("button-zoom-in").click();
       ae.getUIButton("button-zoom-in").should("not.be.enabled");
@@ -59,7 +59,7 @@ context("Test the overall app", () => {
       ae.getUIButton("button-home").click();
       ae.getUIButton("button-zoom-out").should("be.enabled");
       ae.getUIButton("button-zoom-out").click();
-      Array(11).fill(1).forEach(() => ae.getUIButton("button-zoom-out").click());
+      Array(5).fill(1).forEach(() => ae.getUIButton("button-zoom-out").click());
       ae.getUIButton("button-zoom-out").should("be.enabled");
       ae.getUIButton("button-zoom-out").click();
       ae.getUIButton("button-zoom-out").should("not.be.enabled");

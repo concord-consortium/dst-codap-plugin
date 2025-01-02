@@ -4,3 +4,5 @@ declare module "*.png" {
 }
 declare module "*.svg";
 declare module "*.scss";
+
+type Maybe<T> = T | undefined;

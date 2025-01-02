@@ -38,14 +38,14 @@ export const GraphTab = observer(function GraphTab() {
         <UIButton
           disabled={!dstCamera.canZoomIn}
           Icon={PlusIcon}
-          onClick={() => dstCamera.setDistance(dstCamera.distance - kUIDistanceChange)}
+          onClick={() => dstCamera.animateBy(-kUIDistanceChange, 0, 0)}
           testId="button-zoom-in"
         />
         <UIButton
           className="bottom"
           disabled={!dstCamera.canZoomOut}
           Icon={MinusIcon}
-          onClick={() => dstCamera.setDistance(dstCamera.distance + kUIDistanceChange)}
+          onClick={() => dstCamera.animateBy(kUIDistanceChange, 0, 0)}
           testId="button-zoom-out"
         />
       </UIButtonContainer>
