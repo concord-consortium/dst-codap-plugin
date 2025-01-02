@@ -3,8 +3,7 @@ import * as THREE from "three";
 import React from "react";
 import { dstCamera } from "../../models/camera";
 import { items } from "../../models/item";
-import { getCameraFormatFromPosition, getPositionFromCameraFormat } from "../../utilities/camera-utils";
-import { convertDate, convertLat, convertLong } from "../../utilities/graph-utils";
+import { convertDate, convertLat, convertLong, projectPoint } from "../../utilities/graph-utils";
 import { halfPi } from "../../utilities/trig-utils";
 
 export const Points = observer(function Points() {
@@ -13,51 +12,40 @@ export const Points = observer(function Points() {
   return (
     <group>
       {items.map((item, i) => {
+        const dotColor = "#925987";
+        const dotSize = 0.1;
+        const outlineColor = "#FFFFFF";
+        const outlineWidth = 0.01;
+
+        // Determine the position of the point in graph space.
         const convertedLat = convertLat(item.Latitude);
         const convertedDate = convertDate(item);
         const convertedLong = convertLong(item.Longitude);
         const position =
           new THREE.Vector3(...[convertedLat, convertedDate, convertedLong]);
+
+        // Project the point slightly towards the camera so it will appear in front of the outline.
         const { x, y, z } = dstCamera.position;
-        const distance = Math.sqrt((x - convertedLat)**2 + (y - convertedDate)**2 + (z - convertedLong)**2);
-        const offset = .001;
-        const px = convertedLat + offset * ((x - convertedLat) / distance);
-        const py = convertedDate + offset * ((y - convertedDate) / distance);
-        const pz = convertedLong + offset * ((z - convertedLong) / distance);
-        const outlineCameraFormat = getCameraFormatFromPosition(convertedLat, convertedDate, convertedLong);
-        const borderPosition = getPositionFromCameraFormat(
-          outlineCameraFormat.distance + .00005, outlineCameraFormat.pivot, outlineCameraFormat.rotation
-        );
-        // return (
-        //   <group key={i}>
-        //     <mesh position={position}>
-        //       <sphereGeometry args={[0.1, 8, 8]} />
-        //       <meshStandardMaterial color="#925987" />
-        //     </mesh>
-        //      <mesh
-        //        position={position}
-        //        rotation={rotation}
-        //      >
-        //        <circleGeometry args={[0.11, 16]} />
-        //        <meshStandardMaterial color="#FFFFFF" />
-        //      </mesh>
-        //   </group>
-        // );
+        const offset = .00005;
+        const { x: px, y: py, z: pz } = projectPoint(convertedLat, convertedDate, convertedLong, x, y, z, offset);
+
         return (
           <group key={i}>
+            {/* The outline, which is a slightly larger circle */}
             <mesh
               position={position}
               rotation={rotation}
             >
-              <circleGeometry args={[0.1, 16]} />
-              <meshStandardMaterial color="#925987" />
+              <circleGeometry args={[dotSize + outlineWidth, 16]} />
+              <meshStandardMaterial color={outlineColor} />
             </mesh>
+            {/* The actual point */}
             <mesh
-              position={new THREE.Vector3(...[borderPosition.x, borderPosition.y, borderPosition.z])}
+              position={new THREE.Vector3(...[px, py, pz])}
               rotation={rotation}
             >
-              <ringGeometry args={[0.085, 0.1, 16]} />
-              <meshStandardMaterial color="#FFFFFF" />
+              <circleGeometry args={[dotSize, 16]} />
+              <meshStandardMaterial color={dotColor} />
             </mesh>
           </group>
         );
