@@ -87,6 +87,14 @@ class DSTCamera {
   setZoom(zoom: number) {
     this.zoom = Math.max(zoomMin, Math.min(zoomMax, zoom));
   }
+
+  zoomIn() {
+    this.setZoom(this.zoom + this.zoom / 3);
+  }
+
+  zoomOut() {
+    this.setZoom(this.zoom - this.zoom / 4);
+  }
 }
 
 export const dstCamera = new DSTCamera();
