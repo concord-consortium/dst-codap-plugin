@@ -4,11 +4,10 @@ import React from "react";
 import { dstCamera } from "../../models/camera";
 import { items } from "../../models/item";
 import { convertDate, convertLat, convertLong, projectPoint } from "../../utilities/graph-utils";
-import { halfPi } from "../../utilities/trig-utils";
 
 export const Points = observer(function Points() {
   /* eslint-disable react/no-unknown-property */
-  const rotation = new THREE.Euler(-dstCamera.pivot, -dstCamera.rotation - halfPi, 0, "YXZ");
+  const { facingRotation } = dstCamera;
   return (
     <group>
       {items.map((item, i) => {
@@ -34,7 +33,7 @@ export const Points = observer(function Points() {
             {/* The outline, which is a slightly larger circle */}
             <mesh
               position={position}
-              rotation={rotation}
+              rotation={facingRotation}
             >
               <circleGeometry args={[dotSize + outlineWidth, 16]} />
               <meshStandardMaterial color={outlineColor} />
@@ -42,7 +41,7 @@ export const Points = observer(function Points() {
             {/* The actual point */}
             <mesh
               position={new THREE.Vector3(...[px, py, pz])}
-              rotation={rotation}
+              rotation={facingRotation}
             >
               <circleGeometry args={[dotSize, 16]} />
               <meshStandardMaterial color={dotColor} />

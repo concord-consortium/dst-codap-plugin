@@ -1,4 +1,5 @@
 import { makeAutoObservable } from "mobx";
+import { Euler } from "three";
 import { getCameraFormatFromPosition, getPositionFromCameraFormat } from "../utilities/camera-utils";
 import { halfPi, normalizeRadian2Pi, normalizeRadianMinusPi, quarterPi } from "../utilities/trig-utils";
 
@@ -46,6 +47,11 @@ class DSTCamera {
 
   get canZoomOut() {
     return this.zoom > zoomMin;
+  }
+
+  // Returns the Euler to make a flat object face the camera
+  get facingRotation() {
+    return new Euler(-this.pivot, -this.rotation - halfPi, 0, "YXZ");
   }
 
   get isHome() {
