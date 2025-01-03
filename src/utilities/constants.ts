@@ -24,3 +24,4 @@ export const kBackgroundLatMin = baseBackgroundLatMid - backgroundLongRange / 2;
 export const kUIDistanceChange = 1;
 export const kUIPivotChange = Math.PI / 12;
 export const kUIRotationChange = Math.PI / 12;
+export const kUIZoomChange = 5;

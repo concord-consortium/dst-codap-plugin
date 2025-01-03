@@ -1,5 +1,6 @@
 export const twoPi = Math.PI * 2;
 export const halfPi = Math.PI / 2;
+export const quarterPi = Math.PI / 4;
 
 // max - min should equal two pi
 function normalizeRadian(_radian: number, min: number, max: number) {

@@ -4,7 +4,7 @@ import React, { useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, OrthographicCamera } from "@react-three/drei";
 import { Vector3 } from "three";
-import { dstCamera } from "../../models/camera";
+import { dstCamera, zoomMax, zoomMin } from "../../models/camera";
 import { modeType } from "../../types/ui-types";
 import { AxisLabels } from "./axis-labels";
 import { CubeOutline } from "./cube-outline";
@@ -21,7 +21,7 @@ export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotP
   const gridSize = 10;
   const tickCount = 10;
   const [zPosition, setZPosition] = useState(-5);
-  const { position } = dstCamera;
+  const { position, zoom } = dstCamera;
   const cameraPosition = new Vector3(position.x, position.y, position.z);
 
   return (
@@ -32,16 +32,20 @@ export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotP
           makeDefault
           position={cameraPosition}
           ref={cameraRef}
-          zoom={25}
+          zoom={zoom}
         />
         {mode === "pointer" && (
-          <OrbitControls enableDamping
+          <OrbitControls
+            enableDamping
             onChange={() => {
               if (cameraRef.current) {
                 const {x, y, z} = cameraRef.current.position;
                 dstCamera.setPosition(x, y, z);
+                dstCamera.setZoom(cameraRef.current.zoom);
               }
             }}
+            maxZoom={zoomMax}
+            minZoom={zoomMin}
           />
         )}
         <ambientLight intensity={1.5} />

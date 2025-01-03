@@ -1,28 +1,32 @@
 import { makeAutoObservable } from "mobx";
 import { getCameraFormatFromPosition, getPositionFromCameraFormat } from "../utilities/camera-utils";
-import { halfPi, normalizeRadian2Pi, normalizeRadianMinusPi } from "../utilities/trig-utils";
+import { halfPi, normalizeRadian2Pi, normalizeRadianMinusPi, quarterPi } from "../utilities/trig-utils";
 
-const defaultCameraX = -10;
-const defaultCameraY = 14;
-const defaultCameraZ = 0;
-const { distance: defaultDistance, pivot: defaultPivot, rotation: defaultRotation} =
-  getCameraFormatFromPosition(defaultCameraX, defaultCameraY, defaultCameraZ);
-// const defaultDistance = 20;
-// const defaultRotation = halfPi;
-// const defaultPivot = Math.PI / 4;
-// const { x: defaultCameraX, y: defaultCameraY, z: defaultCameraZ } =
-//   getPositionFromCameraFormat(defaultDistance, defaultPivot, defaultRotation);
+// const defaultCameraX = -10;
+// const defaultCameraY = 14;
+// const defaultCameraZ = 0;
+// const { distance: defaultDistance, pivot: defaultPivot, rotation: defaultRotation} =
+//   getCameraFormatFromPosition(defaultCameraX, defaultCameraY, defaultCameraZ);
+const defaultDistance = 40;
+const defaultRotation = quarterPi;
+const defaultPivot = quarterPi;
+const defaultZoom = 20;
+const { x: defaultCameraX, y: defaultCameraY, z: defaultCameraZ } =
+  getPositionFromCameraFormat(defaultDistance, defaultPivot, defaultRotation);
 
-const distanceMax = 30;
+const distanceMax = 60;
 const distanceMin = 1;
 const pivotMax = halfPi;
 const pivotMin = -halfPi;
 const pivotOffset = .05;
+export const zoomMax = 200;
+export const zoomMin = 10;
 
 class DSTCamera {
   distance = defaultDistance;
   pivot = defaultPivot;
   rotation = defaultRotation;
+  zoom = defaultZoom;
 
   constructor() {
     makeAutoObservable(this);
@@ -37,11 +41,11 @@ class DSTCamera {
   }
   
   get canZoomIn() {
-    return this.distance > distanceMin;
+    return this.zoom < zoomMax;
   }
 
   get canZoomOut() {
-    return this.distance < distanceMax;
+    return this.zoom > zoomMin;
   }
 
   get isHome() {
@@ -78,6 +82,10 @@ class DSTCamera {
 
   setDistance(distance: number) {
     this.distance = Math.max(distanceMin, Math.min(distanceMax, distance));
+  }
+
+  setZoom(zoom: number) {
+    this.zoom = Math.max(zoomMin, Math.min(zoomMax, zoom));
   }
 }
 
