@@ -37,7 +37,7 @@ export function TimeAxis({ endPoint, maxValue, minValue, startPoint }: IAxisProp
         const endPosition = new Vector3(endTickX, tickY, endTickZ);
         const textPosition = projectPoint(
           startPosition.x, startPosition.y, startPosition.z,
-          endPosition.x, endPosition.y, startPosition.z, tickLength + labelBuffer
+          endPosition.x, endPosition.y, endPosition.z, tickLength + labelBuffer
         );
         return (
           <group key={`time-axis-tick-${i}`}>
