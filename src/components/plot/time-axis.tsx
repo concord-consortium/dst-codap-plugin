@@ -23,6 +23,7 @@ export function TimeAxis({ endPoint, maxValue, minValue, startPoint }: IAxisProp
   const tickAngle = cameraAngle + halfPi;
   const endTickX = startPoint.x + tickLength * multiplier * Math.cos(tickAngle);
   const endTickZ = startPoint.z + tickLength * multiplier * Math.sin(tickAngle);
+  const endTickYOffset = Math.tan(dstCamera.pivot) / 8;
   return (
     <group>
       {Array.from({ length: tickCount + 1 }, (_, i) => {
@@ -34,7 +35,7 @@ export function TimeAxis({ endPoint, maxValue, minValue, startPoint }: IAxisProp
           tickY,
           startPoint.z + (endPoint.z - startPoint.z) / tickCount * i,
         );
-        const endPosition = new Vector3(endTickX, tickY, endTickZ);
+        const endPosition = new Vector3(endTickX, tickY + endTickYOffset, endTickZ);
         const textPosition = projectPoint(
           startPosition.x, startPosition.y, startPosition.z,
           endPosition.x, endPosition.y, endPosition.z, tickLength + labelBuffer
