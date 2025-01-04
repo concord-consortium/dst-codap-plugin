@@ -24,7 +24,8 @@ export const CubeOutline = observer(function CubeOutline() {
   const IIA = new Vector3(xMin, yMin, zMax);
   const III = new Vector3(xMin, yMin, zMin);
 
-  const { rotation } = dstCamera;
+  const { pivot, rotation } = dstCamera;
+  const displayTimeAxis = pivot > -3/8 * Math.PI && pivot < 3/8 * Math.PI;
   const yAxisX = rotation >= Math.PI ? xMin : xMax;
   const yAxisZ = rotation > halfPi && rotation < 3 * halfPi ? zMax : zMin;
 
@@ -36,12 +37,14 @@ export const CubeOutline = observer(function CubeOutline() {
       <PlotLine points={[AAI, IAI]} />
       <PlotLine points={[AII, III]} />
       <PlotLine points={[AIA, IIA]} />
-      <TimeAxis
-        startPoint={new Vector3(yAxisX, yMin, yAxisZ)}
-        endPoint={new Vector3(yAxisX, yMax, yAxisZ)}
-        minValue={dataRanges.dateMin}
-        maxValue={dataRanges.dateMax}
-      />
+      {displayTimeAxis && (
+        <TimeAxis
+          startPoint={new Vector3(yAxisX, yMin, yAxisZ)}
+          endPoint={new Vector3(yAxisX, yMax, yAxisZ)}
+          minValue={dataRanges.dateMin}
+          maxValue={dataRanges.dateMax}
+        />
+      )}
     </>
   );
 });
