@@ -60,6 +60,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           flags: cypress
+          token: ${{ secrets.CODECOV_TOKEN }}
   s3-deploy:
     name: S3 Deploy
     needs:
