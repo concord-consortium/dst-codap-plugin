@@ -9,7 +9,7 @@ interface IAxisProps {
   maxValue: number;
   minValue: number;
   startPoint: Vector3;
-  tickDirection: "up" | "down";
+  tickDirection: "down" | "left" | "right" | "up";
 }
 export function SpaceAxis({ endPoint, maxValue, minValue, startPoint, tickDirection }: IAxisProps) {
   return (

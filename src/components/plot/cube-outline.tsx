@@ -18,6 +18,7 @@ const zMin = -5;
 export const CubeOutline = observer(function CubeOutline() {
   const { pivot, rotation } = dstCamera;
 
+  // The corners of the cube
   const AAA = new Vector3(xMax, yMax, zMax);
   const AAI = new Vector3(xMax, yMax, zMin);
   const AIA = new Vector3(xMax, yMin, zMax);
@@ -27,16 +28,37 @@ export const CubeOutline = observer(function CubeOutline() {
   const IIA = new Vector3(xMin, yMin, zMax);
   const III = new Vector3(xMin, yMin, zMin);
 
+  // Information relevant to both space axes
   const topSpaceAxis = pivot < 0;
   const spaceY = topSpaceAxis ? yMax : yMin;
   const tickDirection = topSpaceAxis ? "up" : "down";
-  const xAxisZ = rotation > Math.PI ? zMax : zMin;
+  const horizontalView = Math.abs(pivot) < Math.PI / 10;
 
+  // The x (latitude) axis
+  const xAxisZ = rotation > Math.PI ? zMax : zMin;
+  const xDirection = rotation < Math.PI / 8 ? "left"
+    : rotation < Math.PI * 7 / 8 ? tickDirection
+    : rotation < Math.PI ? "right"
+    : rotation < Math.PI * 9 / 8 ? "left"
+    : rotation < Math.PI * 15 / 8 ? tickDirection
+    : "right";
+  const displayXAxis = !horizontalView || xDirection === tickDirection;
+
+  // The y (time) axis
   const displayTimeAxis = pivot > -3/8 * Math.PI && pivot < 3/8 * Math.PI;
   const yAxisX = rotation >= Math.PI ? xMin : xMax;
   const yAxisZ = rotation > halfPi && rotation < 3 * halfPi ? zMax : zMin;
 
+  // The z (longitude) axis
   const zAxisX = rotation < halfPi || rotation > 3 * halfPi ? xMin : xMax;
+  const zDirection = rotation < Math.PI * 3 / 8 ? tickDirection
+    : rotation < halfPi ? "right"
+    : rotation < Math.PI * 5 / 8 ? "left"
+    : rotation < Math.PI * 11 / 8 ? tickDirection
+    : rotation < halfPi * 3 ? "right"
+    : rotation < Math.PI * 13 / 8 ? "left"
+    : tickDirection;
+  const displayZAxis = !horizontalView || zDirection === tickDirection;
 
   return (
     <>
@@ -46,13 +68,15 @@ export const CubeOutline = observer(function CubeOutline() {
       <PlotLine points={[AAI, IAI]} />
       <PlotLine points={[AII, III]} />
       <PlotLine points={[AIA, IIA]} />
-      <SpaceAxis
-        startPoint={new Vector3(xMin, spaceY, xAxisZ)}
-        endPoint={new Vector3(xMax, spaceY, xAxisZ)}
-        minValue={dataRanges.latMin}
-        maxValue={dataRanges.latMax}
-        tickDirection={tickDirection}
-      />
+      {displayXAxis && (
+        <SpaceAxis
+          startPoint={new Vector3(xMin, spaceY, xAxisZ)}
+          endPoint={new Vector3(xMax, spaceY, xAxisZ)}
+          minValue={dataRanges.latMin}
+          maxValue={dataRanges.latMax}
+          tickDirection={xDirection}
+        />
+      )}
       {displayTimeAxis && (
         <TimeAxis
           startPoint={new Vector3(yAxisX, yMin, yAxisZ)}
@@ -61,13 +85,15 @@ export const CubeOutline = observer(function CubeOutline() {
           maxValue={dataRanges.dateMax}
         />
       )}
-      <SpaceAxis
-        startPoint={new Vector3(zAxisX, spaceY, zMin)}
-        endPoint={new Vector3(zAxisX, spaceY, zMax)}
-        minValue={dataRanges.longMin}
-        maxValue={dataRanges.longMax}
-        tickDirection={tickDirection}
-      />
+      {displayZAxis && (
+        <SpaceAxis
+          startPoint={new Vector3(zAxisX, spaceY, zMin)}
+          endPoint={new Vector3(zAxisX, spaceY, zMax)}
+          minValue={dataRanges.longMin}
+          maxValue={dataRanges.longMax}
+          tickDirection={zDirection}
+        />
+      )}
     </>
   );
 });
