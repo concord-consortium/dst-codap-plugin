@@ -21,9 +21,12 @@ module.exports = (env, argv) => {
     devServer: {
       static: 'dist',
       hot: true,
-      https: {
-        key: path.resolve(os.homedir(), '.localhost-ssl/localhost.key'),
-        cert: path.resolve(os.homedir(), '.localhost-ssl/localhost.pem'),
+      server: {
+        type: 'https',
+        options: {
+          key: path.resolve(os.homedir(), '.localhost-ssl/localhost.key'),
+          cert: path.resolve(os.homedir(), '.localhost-ssl/localhost.pem'),
+        }
       },
     },
     devtool: devMode ? 'eval-cheap-module-source-map' : 'source-map',
@@ -72,6 +75,15 @@ module.exports = (env, argv) => {
               }
             }
           ]
+        },
+        {
+          test: /data\/.*\.csv$/,
+          type: 'asset/resource',
+          // TODO: we need to modify this so it preserves the file name and doesn't
+          // // use the cache busting name.
+          generator: {
+            filename: '[name][ext]'
+          }
         },
         {
           test: /\.(png|woff|woff2|eot|ttf)$/,
@@ -136,6 +148,7 @@ module.exports = (env, argv) => {
     plugins: [
       new ESLintPlugin({
         extensions: ['ts', 'tsx', 'js', 'jsx'],
+        configType: 'flat'
       }),
       new MiniCssExtractPlugin({
         filename: devMode ? 'assets/[name].css' : 'assets/[name].[contenthash].css',
