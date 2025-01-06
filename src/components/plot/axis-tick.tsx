@@ -2,13 +2,14 @@ import React from "react";
 import { Text } from "@react-three/drei";
 import { Vector3 } from "three";
 import { dstCamera } from "../../models/camera";
+import { tickDirectionType } from "../../types/graph-types";
 import { PlotLine } from "./plot-line";
 
 const tickLength = .5;
 const labelBuffer = .25;
 
 interface IAxisTickProps {
-  direction: "down" | "left" | "right" | "up";
+  direction: tickDirectionType;
   position: Vector3;
   text: string;
 }

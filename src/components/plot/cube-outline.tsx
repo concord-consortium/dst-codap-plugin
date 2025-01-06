@@ -5,8 +5,8 @@ import { dstCamera } from "../../models/camera";
 import { PlotLine } from "./plot-line";
 import { dataRanges } from "../../utilities/graph-utils";
 import { halfPi } from "../../utilities/trig-utils";
-import { TimeAxis } from "./time-axis";
 import { SpaceAxis } from "./space-axis";
+import { TimeAxis } from "./time-axis";
 
 const xMax = 5;
 const xMin = -5;
@@ -31,18 +31,18 @@ export const CubeOutline = observer(function CubeOutline() {
   // Information relevant to both space axes
   const topSpaceAxis = pivot < 0;
   const spaceY = topSpaceAxis ? yMax : yMin;
-  const tickDirection = topSpaceAxis ? "up" : "down";
+  const spaceTickDirection = topSpaceAxis ? "up" : "down";
   const horizontalView = Math.abs(pivot) < Math.PI / 10;
 
   // The x (latitude) axis
   const xAxisZ = rotation > Math.PI ? zMax : zMin;
   const xDirection = rotation < Math.PI / 8 ? "left"
-    : rotation < Math.PI * 7 / 8 ? tickDirection
+    : rotation < Math.PI * 7 / 8 ? spaceTickDirection
     : rotation < Math.PI ? "right"
     : rotation < Math.PI * 9 / 8 ? "left"
-    : rotation < Math.PI * 15 / 8 ? tickDirection
+    : rotation < Math.PI * 15 / 8 ? spaceTickDirection
     : "right";
-  const displayXAxis = !horizontalView || xDirection === tickDirection;
+  const displayXAxis = !horizontalView || xDirection === spaceTickDirection;
 
   // The y (time) axis
   const displayTimeAxis = pivot > -3/8 * Math.PI && pivot < 3/8 * Math.PI;
@@ -51,14 +51,14 @@ export const CubeOutline = observer(function CubeOutline() {
 
   // The z (longitude) axis
   const zAxisX = rotation < halfPi || rotation > 3 * halfPi ? xMin : xMax;
-  const zDirection = rotation < Math.PI * 3 / 8 ? tickDirection
+  const zDirection = rotation < Math.PI * 3 / 8 ? spaceTickDirection
     : rotation < halfPi ? "right"
     : rotation < Math.PI * 5 / 8 ? "left"
-    : rotation < Math.PI * 11 / 8 ? tickDirection
+    : rotation < Math.PI * 11 / 8 ? spaceTickDirection
     : rotation < halfPi * 3 ? "right"
     : rotation < Math.PI * 13 / 8 ? "left"
-    : tickDirection;
-  const displayZAxis = !horizontalView || zDirection === tickDirection;
+    : spaceTickDirection;
+  const displayZAxis = !horizontalView || zDirection === spaceTickDirection;
 
   return (
     <>

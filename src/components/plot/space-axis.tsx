@@ -1,35 +1,32 @@
 import React from "react";
 import { Vector3 } from "three";
-import { AxisTick } from "./axis-tick";
+import { tickDirectionType } from "../../types/graph-types";
+import { Axis } from "./axis";
 
 const tickCount = 5;
+
+function renderDegrees(value: number) {
+  return `${value.toFixed(1)}°`;
+}
 
 interface IAxisProps {
   endPoint: Vector3;
   maxValue: number;
   minValue: number;
   startPoint: Vector3;
-  tickDirection: "down" | "left" | "right" | "up";
+  tickDirection: tickDirectionType;
 }
 export function SpaceAxis({ endPoint, maxValue, minValue, startPoint, tickDirection }: IAxisProps) {
   return (
-    <group>
-      {Array.from({ length: tickCount }, (_, _i) => {
-        const i = _i + .5;
-        const value = minValue + (maxValue - minValue) / tickCount * i;
-        const tickX = startPoint.x + (endPoint.x - startPoint.x) / tickCount * i;
-        const tickY = startPoint.y + (endPoint.y - startPoint.y) / tickCount * i;
-        const tickZ = startPoint.z + (endPoint.z - startPoint.z) / tickCount * i;
-        const pivotPosition = new Vector3(tickX, tickY, tickZ);
-        return (
-          <AxisTick
-            direction={tickDirection}
-            key={`space-axis-tick-${i}`}
-            position={pivotPosition}
-            text={`${value.toFixed(1)}°`}
-          />
-        );
-      })}
-    </group>
+    <Axis
+      displayFunction={renderDegrees}
+      endPoint={endPoint}
+      maxValue={maxValue}
+      minValue={minValue}
+      startPoint={startPoint}
+      tickBuffer={true}
+      tickCount={tickCount}
+      tickDirection={tickDirection}
+    />
   );
 }

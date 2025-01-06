@@ -1,10 +1,13 @@
 import React from "react";
 import { Vector3 } from "three";
 import { formatDateString } from "../../utilities/date-utils";
-import { AxisTick } from "./axis-tick";
+import { Axis } from "./axis";
 
 const tickCount = 9;
-const count = tickCount - 1;
+
+function renderTime(value: number) {
+  return formatDateString(new Date(value));
+}
 
 interface IAxisProps {
   endPoint: Vector3;
@@ -14,24 +17,14 @@ interface IAxisProps {
 }
 export function TimeAxis({ endPoint, maxValue, minValue, startPoint }: IAxisProps) {
   return (
-    <group>
-      {Array.from({ length: tickCount }, (_, i) => {
-        const value = minValue + (maxValue - minValue) / count * i;
-        const dateDisplay = formatDateString(new Date(value));
-        const startPosition = new Vector3(
-          startPoint.x + (endPoint.x - startPoint.x) / count * i,
-          startPoint.y + (endPoint.y - startPoint.y) / count * i,
-          startPoint.z + (endPoint.z - startPoint.z) / count * i,
-        );
-        return (
-          <AxisTick
-            direction="left"
-            key={`time-axis-tick-${i}`}
-            position={startPosition}
-            text={dateDisplay}
-          />
-        );
-      })}
-    </group>
+    <Axis
+      displayFunction={renderTime}
+      endPoint={endPoint}
+      maxValue={maxValue}
+      minValue={minValue}
+      startPoint={startPoint}
+      tickCount={tickCount}
+      tickDirection="left"
+    />
   );
 }
