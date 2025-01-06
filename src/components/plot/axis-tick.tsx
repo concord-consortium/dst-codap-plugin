@@ -9,11 +9,10 @@ const labelBuffer = .25;
 
 interface IAxisTickProps {
   direction: "down" | "left" | "right" | "up";
-  key: string;
   position: Vector3;
   text: string;
 }
-export function AxisTick({ direction, key, position, text }: IAxisTickProps) {
+export function AxisTick({ direction, position, text }: IAxisTickProps) {
   const startPosition = new Vector3(0, 0, 0);
   const endPosition = new Vector3(
     direction === "left" ? -tickLength : direction === "right" ? tickLength : 0,
@@ -29,7 +28,7 @@ export function AxisTick({ direction, key, position, text }: IAxisTickProps) {
   const anchorY = direction === "down" ? "top" : direction === "up" ? "bottom" : "middle";
   /* eslint-disable react/no-unknown-property */
   return (
-    <group key={key} rotation={dstCamera.facingRotation} position={position}>
+    <group rotation={dstCamera.facingRotation} position={position}>
       <PlotLine points={[startPosition, endPosition]} />
       <Text
         position={new Vector3(textPosition.x, textPosition.y, textPosition.z)}
