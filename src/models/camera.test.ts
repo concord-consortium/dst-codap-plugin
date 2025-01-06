@@ -3,12 +3,17 @@ import {
   distanceMin, dstCamera, pivotMax, pivotMin
 } from "./camera";
 
+// Normally this would be handled by useFrame in the DSTCamera componet.
+const interval = setInterval(() => dstCamera.animate(33), 33);
+
 describe("DSTCamera", () => {
   beforeEach(() => {
     dstCamera.setDistance(defaultDistance);
     dstCamera.setPivot(defaultPivot);
     dstCamera.setRotation(defaultRotation);
   });
+
+  afterAll(() => clearInterval(interval));
 
   test("should initialize with default values", () => {
     expect(dstCamera.distance).toBeCloseTo(defaultDistance);

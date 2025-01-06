@@ -21,7 +21,7 @@ export const pivotMin = -halfPi;
 const pivotOffset = .05;
 const legalPivot = (pivot: number) => Math.max(pivotMin, Math.min(pivotMax, normalizeRadianMinusPi(pivot)));
 
-const animationDuration = 250;
+const animationDuration = 200;
 
 class DSTCamera {
   distance = defaultDistance;
