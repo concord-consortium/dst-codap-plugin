@@ -1,11 +1,11 @@
 import { makeAutoObservable } from "mobx";
 import { getCameraFormatFromPosition, getPositionFromCameraFormat } from "../utilities/camera-utils";
-import { halfPi, normalizeRadian2Pi, normalizeRadianMinusPi } from "../utilities/trig-utils";
+import { halfPi, normalizeRadian2Pi, normalizeRadianMinusPi, twoPi } from "../utilities/trig-utils";
 
-const defaultCameraX = -10;
-const defaultCameraY = 14;
-const defaultCameraZ = 0;
-const { distance: defaultDistance, pivot: defaultPivot, rotation: defaultRotation} =
+export const defaultCameraX = -10;
+export const defaultCameraY = 14;
+export const defaultCameraZ = 0;
+export const { distance: defaultDistance, pivot: defaultPivot, rotation: defaultRotation} =
   getCameraFormatFromPosition(defaultCameraX, defaultCameraY, defaultCameraZ);
 // const defaultDistance = 20;
 // const defaultRotation = halfPi;
@@ -13,35 +13,107 @@ const { distance: defaultDistance, pivot: defaultPivot, rotation: defaultRotatio
 // const { x: defaultCameraX, y: defaultCameraY, z: defaultCameraZ } =
 //   getPositionFromCameraFormat(defaultDistance, defaultPivot, defaultRotation);
 
-const distanceMax = 30;
-const distanceMin = 1;
-const pivotMax = halfPi;
-const pivotMin = -halfPi;
+export const distanceMax = 30;
+export const distanceMin = 1;
+const legalDistance = (distance: number) => Math.max(distanceMin, Math.min(distanceMax, distance));
+export const pivotMax = halfPi;
+export const pivotMin = -halfPi;
 const pivotOffset = .05;
+const legalPivot = (pivot: number) => Math.max(pivotMin, Math.min(pivotMax, normalizeRadianMinusPi(pivot)));
+
+const animationDuration = 200;
 
 class DSTCamera {
   distance = defaultDistance;
   pivot = defaultPivot;
   rotation = defaultRotation;
 
+  animationPercentage: Maybe<number>;
+  startDistance: Maybe<number>;
+  startPivot: Maybe<number>;
+  startRotation: Maybe<number>;
+
+  targetDistance: Maybe<number>;
+  targetPivot: Maybe<number>;
+  targetRotation: Maybe<number>;
+
   constructor() {
     makeAutoObservable(this);
   }
 
+  // Animate the camera towards its target values.
+  // This is called every frame by the component.
+  animate(dt: number) {
+    if (this.animationPercentage == null) return;
+
+    this.animationPercentage = Math.min(this.animationPercentage + dt / animationDuration, 1);
+    const smoothPercentage = Math.sin((this.animationPercentage * 2 - 1) * halfPi) / 2 + .5;
+    if (this.targetDistance != null && this.startDistance != null) {
+      this.setDistance(this.startDistance + (this.targetDistance - this.startDistance) * smoothPercentage);
+    }
+    if (this.targetPivot != null && this.startPivot != null) {
+      this.setPivot(this.startPivot + (this.targetPivot - this.startPivot) * smoothPercentage);
+    }
+    if (this.targetRotation != null && this.startRotation != null) {
+      const baseDifference = this.targetRotation - this.startRotation;
+      const wrapOffset = baseDifference > Math.PI ? -twoPi : baseDifference < -Math.PI ? twoPi : 0;
+      this.setRotation(this.startRotation + (baseDifference + wrapOffset) * smoothPercentage);
+    }
+
+    // End the animation if we're done.
+    if (this.animationPercentage >= 1) {
+      this.animationPercentage = undefined;
+      this.startDistance = undefined;
+      this.startPivot = undefined;
+      this.startRotation = undefined;
+      this.targetDistance = undefined;
+      this.targetPivot = undefined;
+      this.targetRotation = undefined;
+    }
+  }
+
+  // Sets up an animation to move the camera by the given amounts.
+  animateBy(dDistance: number, dPivot: number, dRotation: number) {
+    // Capture the state when the animation starts.
+    this.animationPercentage = 0;
+    this.startDistance = this.distance;
+    this.startPivot = this.pivot;
+    this.startRotation = this.rotation;
+
+    // Either set or extend the target distance, pivot, and rotation.
+    this.targetDistance =
+      legalDistance((this.targetDistance != null ? this.targetDistance : this.distance) + dDistance);
+    this.targetPivot = legalPivot((this.targetPivot != null ? this.targetPivot : this.pivot) + dPivot);
+    this.targetRotation =
+      normalizeRadian2Pi((this.targetRotation != null ? this.targetRotation : this.rotation) + dRotation);
+  }
+
+  // Sets up an animation to move the camera to the given values.
+  animateTo(distance: number, pivot: number, rotation: number) {
+    const dDistance = distance - (this.targetDistance ?? this.distance);
+    const dPivot = pivot - (this.targetPivot ?? this.pivot);
+    const dRotation = rotation - (this.targetRotation ?? this.rotation);
+    this.animateBy(dDistance, dPivot, dRotation);
+  }
+
   get canPivotUp() {
-    return this.pivot < pivotMax - pivotOffset;
+    const pivot = this.pivot;
+    return this.targetPivot != null ? this.targetPivot < pivotMax - pivotOffset : pivot < pivotMax - pivotOffset;
   }
 
   get canPivotDown() {
-    return this.pivot > pivotMin + pivotOffset;
+    const pivot = this.pivot;
+    return this.targetPivot != null ? this.targetPivot > pivotMin + pivotOffset : pivot > pivotMin + pivotOffset;
   }
   
   get canZoomIn() {
-    return this.distance > distanceMin;
+    const distance = this.distance;
+    return this.targetDistance != null ? this.targetDistance > distanceMin : distance > distanceMin;
   }
 
   get canZoomOut() {
-    return this.distance < distanceMax;
+    const distance = this.distance;
+    return this.targetDistance != null ? this.targetDistance < distanceMax : distance < distanceMax;
   }
 
   get isHome() {
@@ -56,13 +128,15 @@ class DSTCamera {
   }
 
   resetHome() {
-    this.setDistance(defaultDistance);
-    this.setPivot(defaultPivot);
-    this.setRotation(defaultRotation);
+    this.animateTo(defaultDistance, defaultPivot, defaultRotation);
+  }
+
+  setDistance(distance: number) {
+    this.distance = legalDistance(distance);
   }
 
   setPivot(pivot: number) {
-    this.pivot = Math.max(pivotMin, Math.min(pivotMax, normalizeRadianMinusPi(pivot)));
+    this.pivot = legalPivot(pivot);
   }
 
   setRotation(rotation: number) {
@@ -74,10 +148,6 @@ class DSTCamera {
     this.setDistance(distance);
     this.setPivot(pivot);
     this.setRotation(rotation);
-  }
-
-  setDistance(distance: number) {
-    this.distance = Math.max(distanceMin, Math.min(distanceMax, distance));
   }
 }
 
