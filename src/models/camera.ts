@@ -21,6 +21,8 @@ export const pivotMin = -halfPi;
 const pivotOffset = .05;
 const legalPivot = (pivot: number) => Math.max(pivotMin, Math.min(pivotMax, normalizeRadianMinusPi(pivot)));
 
+const animationDuration = 250;
+
 class DSTCamera {
   distance = defaultDistance;
   pivot = defaultPivot;
@@ -39,6 +41,38 @@ class DSTCamera {
     makeAutoObservable(this);
   }
 
+  // Animate the camera towards its target values.
+  // This is called every frame by the component.
+  animate(dt: number) {
+    if (this.animationPercentage == null) return;
+
+    this.animationPercentage = Math.min(this.animationPercentage + dt / animationDuration, 1);
+    const smoothPercentage = Math.sin((this.animationPercentage * 2 - 1) * halfPi) / 2 + .5;
+    if (this.targetDistance != null && this.startDistance != null) {
+      this.setDistance(this.startDistance + (this.targetDistance - this.startDistance) * smoothPercentage);
+    }
+    if (this.targetPivot != null && this.startPivot != null) {
+      this.setPivot(this.startPivot + (this.targetPivot - this.startPivot) * smoothPercentage);
+    }
+    if (this.targetRotation != null && this.startRotation != null) {
+      const baseDifference = this.targetRotation - this.startRotation;
+      const wrapOffset = baseDifference > Math.PI ? -twoPi : baseDifference < -Math.PI ? twoPi : 0;
+      this.setRotation(this.startRotation + (baseDifference + wrapOffset) * smoothPercentage);
+    }
+
+    // End the animation if we're done.
+    if (this.animationPercentage >= 1) {
+      this.animationPercentage = undefined;
+      this.startDistance = undefined;
+      this.startPivot = undefined;
+      this.startRotation = undefined;
+      this.targetDistance = undefined;
+      this.targetPivot = undefined;
+      this.targetRotation = undefined;
+    }
+  }
+
+  // Sets up an animation to move the camera by the given amounts.
   animateBy(dDistance: number, dPivot: number, dRotation: number) {
     // Capture the state when the animation starts.
     this.animationPercentage = 0;
@@ -52,41 +86,9 @@ class DSTCamera {
     this.targetPivot = legalPivot((this.targetPivot != null ? this.targetPivot : this.pivot) + dPivot);
     this.targetRotation =
       normalizeRadian2Pi((this.targetRotation != null ? this.targetRotation : this.rotation) + dRotation);
-
-    const animate = () => {
-      // Update the distance, pivot, and rotation based on how far along we are in the animation.
-      this.animationPercentage = this.animationPercentage != null ? Math.min(this.animationPercentage + .1, 1) : 1;
-      const smoothPercentage = Math.sin((this.animationPercentage * 2 - 1) * halfPi) / 2 + .5;
-      if (this.targetDistance != null && this.startDistance != null) {
-        this.setDistance(this.startDistance + (this.targetDistance - this.startDistance) * smoothPercentage);
-      }
-      if (this.targetPivot != null && this.startPivot != null) {
-        this.setPivot(this.startPivot + (this.targetPivot - this.startPivot) * smoothPercentage);
-      }
-      if (this.targetRotation != null && this.startRotation != null) {
-        const baseDifference = this.targetRotation - this.startRotation;
-        const wrapOffset = baseDifference > Math.PI ? -twoPi : baseDifference < -Math.PI ? twoPi : 0;
-        this.setRotation(this.startRotation + (baseDifference + wrapOffset) * smoothPercentage);
-      }
-
-      // Either continue the animation or end it if we're done.
-      if (this.animationPercentage < 1) {
-        setTimeout(animate, 20);
-      } else {
-        this.animationPercentage = undefined;
-        this.startDistance = undefined;
-        this.startPivot = undefined;
-        this.startRotation = undefined;
-        this.targetDistance = undefined;
-        this.targetPivot = undefined;
-        this.targetRotation = undefined;
-      }
-    };
-
-    // Start the animation.
-    animate();
   }
 
+  // Sets up an animation to move the camera to the given values.
   animateTo(distance: number, pivot: number, rotation: number) {
     const dDistance = distance - (this.targetDistance ?? this.distance);
     const dPivot = pivot - (this.targetPivot ?? this.pivot);
