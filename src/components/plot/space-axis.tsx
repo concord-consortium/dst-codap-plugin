@@ -3,7 +3,6 @@ import { Vector3 } from "three";
 import { AxisTick } from "./axis-tick";
 
 const tickCount = 5;
-const count = tickCount - 1;
 
 interface IAxisProps {
   endPoint: Vector3;
@@ -15,11 +14,12 @@ interface IAxisProps {
 export function SpaceAxis({ endPoint, maxValue, minValue, startPoint, tickDirection }: IAxisProps) {
   return (
     <group>
-      {Array.from({ length: tickCount }, (_, i) => {
-        const value = minValue + (maxValue - minValue) / count * i;
-        const tickX = startPoint.x + (endPoint.x - startPoint.x) / count * i;
-        const tickY = startPoint.y + (endPoint.y - startPoint.y) / count * i;
-        const tickZ = startPoint.z + (endPoint.z - startPoint.z) / count * i;
+      {Array.from({ length: tickCount }, (_, _i) => {
+        const i = _i + .5;
+        const value = minValue + (maxValue - minValue) / tickCount * i;
+        const tickX = startPoint.x + (endPoint.x - startPoint.x) / tickCount * i;
+        const tickY = startPoint.y + (endPoint.y - startPoint.y) / tickCount * i;
+        const tickZ = startPoint.z + (endPoint.z - startPoint.z) / tickCount * i;
         const pivotPosition = new Vector3(tickX, tickY, tickZ);
         return (
           <AxisTick
