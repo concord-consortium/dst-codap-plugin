@@ -22,7 +22,7 @@ module.exports = (env, argv) => {
       static: 'dist',
       hot: true,
       headers: {
-        "Access-Control-Allow-Origin": "*"
+        'Access-Control-Allow-Origin': '*'
       },
       server: {
         type: 'https',
