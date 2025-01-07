@@ -21,6 +21,9 @@ module.exports = (env, argv) => {
     devServer: {
       static: 'dist',
       hot: true,
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      },
       server: {
         type: 'https',
         options: {
@@ -79,10 +82,8 @@ module.exports = (env, argv) => {
         {
           test: /data\/.*\.csv$/,
           type: 'asset/resource',
-          // TODO: we need to modify this so it preserves the file name and doesn't
-          // // use the cache busting name.
           generator: {
-            filename: '[name][ext]'
+            filename: 'data/[name][ext]'
           }
         },
         {

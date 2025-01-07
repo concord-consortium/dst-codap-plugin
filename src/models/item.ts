@@ -12,5 +12,6 @@ export interface IItem {
 export let items = observable.array<IItem>();
 
 export function getDate(item: IItem) {
-  return new Date(`${item.Year}-${item.Month}-${item.Day}`).getTime();
+  // We need at least a year. To make things simple we just use 2000 for now
+  return Date.UTC(item.Year || 2000, item.Month, item.Day);
 }
