@@ -109,19 +109,23 @@ class DSTCamera {
   }
 
   get canPivotUp() {
-    return (this.targetPivot ?? this.pivot) < pivotMax - pivotOffset;
+    const pivot = this.pivot; // This is required to make the view update for some reason.
+    return (this.targetPivot ?? pivot) < pivotMax - pivotOffset;
   }
 
   get canPivotDown() {
-    return (this.targetPivot ?? this.pivot) > pivotMin + pivotOffset;
+    const pivot = this.pivot; // This is required to make the view update for some reason.
+    return (this.targetPivot ?? pivot) > pivotMin + pivotOffset;
   }
   
   get canZoomIn() {
-    return (this.targetZoom ?? this.zoom) < zoomMax;
+    const zoom = this.zoom;
+    return (this.targetZoom ?? zoom) < zoomMax;
   }
 
   get canZoomOut() {
-    return (this.targetZoom ?? this.zoom) > zoomMin;
+    const zoom = this.zoom;
+    return (this.targetZoom ?? zoom) > zoomMin;
   }
 
   // Returns the Euler to make a flat object face the camera
@@ -167,11 +171,11 @@ class DSTCamera {
   }
 
   zoomIn() {
-    this.animateBy(this.zoom / 3, 0, 0);
+    this.animateBy((this.targetZoom ?? this.zoom) / 3, 0, 0);
   }
 
   zoomOut() {
-    this.animateBy(-this.zoom / 4, 0, 0);
+    this.animateBy(-(this.targetZoom ?? this.zoom) / 4, 0, 0);
   }
 }
 

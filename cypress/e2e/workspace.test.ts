@@ -59,7 +59,7 @@ context("Test the overall app", () => {
       ae.getUIButton("button-home").click();
       ae.getUIButton("button-zoom-out").should("be.enabled");
       ae.getUIButton("button-zoom-out").click();
-      Array(5).fill(1).forEach(() => ae.getUIButton("button-zoom-out").click());
+      ae.getUIButton("button-zoom-out").click();
       ae.getUIButton("button-zoom-out").should("be.enabled");
       ae.getUIButton("button-zoom-out").click();
       ae.getUIButton("button-zoom-out").should("not.be.enabled");
