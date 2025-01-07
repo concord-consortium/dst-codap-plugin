@@ -41,7 +41,6 @@ export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotP
           />
         )}
         <ambientLight intensity={1.5} />
-        {/* <directionalLight position={cameraPosition} intensity={1} /> */}
         <Points />
         <GridPlane zPosition={zPosition} />
       </Canvas>

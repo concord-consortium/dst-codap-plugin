@@ -32,7 +32,7 @@ export function AxisTick({ direction, position, text }: IAxisTickProps) {
     <group rotation={dstCamera.facingRotation} position={position}>
       <PlotLine points={[startPosition, endPosition]} />
       <Text
-        position={new Vector3(textPosition.x, textPosition.y, textPosition.z)}
+        position={textPosition}
         fontSize={.5}
         color="black"
         anchorX={anchorX}

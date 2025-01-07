@@ -16,10 +16,7 @@ export const Points = observer(function Points() {
         const outlineWidth = 2;
 
         // Determine the position of the point in graph space.
-        const convertedLat = convertLat(item.Latitude);
-        const convertedDate = convertDate(item);
-        const convertedLong = convertLong(item.Longitude);
-        const position = new THREE.Vector3(...[convertedLat, convertedDate, convertedLong]);
+        const position = new THREE.Vector3(convertLat(item.Latitude), convertDate(item), convertLong(item.Longitude));
 
         return (
           <mesh key={`point-${i}`} position={position}>

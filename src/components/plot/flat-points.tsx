@@ -25,7 +25,7 @@ export const FlatPoints = observer(function FlatPoints() {
         const convertedLat = convertLat(item.Latitude);
         const convertedDate = convertDate(item);
         const convertedLong = convertLong(item.Longitude);
-        const position = new THREE.Vector3(...[convertedLat, convertedDate, convertedLong]);
+        const position = new THREE.Vector3(convertedLat, convertedDate, convertedLong);
 
         // Project the point slightly towards the camera so it will appear in front of the outline.
         const { x, y, z } = dstCamera.position;
@@ -44,7 +44,7 @@ export const FlatPoints = observer(function FlatPoints() {
             </mesh>
             {/* The actual point */}
             <mesh
-              position={new THREE.Vector3(...[px, py, pz])}
+              position={new THREE.Vector3(px, py, pz)}
               rotation={facingRotation}
             >
               <circleGeometry args={[dotSize, 16]} />
