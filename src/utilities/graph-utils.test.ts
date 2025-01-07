@@ -1,5 +1,5 @@
-import { convertLat, convertLong, convertDate, dataRanges, graphMax, graphMin, projectPoint } from "./graph-utils";
 import { IItem } from "../models/item";
+import { convertLat, convertLong, convertDate, dataRanges, graphMax, graphMin, projectPoint } from "./graph-utils";
 
 describe("graph-utils", () => {
   describe("convertLat", () => {
