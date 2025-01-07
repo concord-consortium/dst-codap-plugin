@@ -1,13 +1,14 @@
 /* eslint-disable react/no-unknown-property */
 import { observer } from "mobx-react-lite";
 import React, { useRef, useState } from "react";
+import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Vector3 } from "three";
 import { dstCamera } from "../../models/camera";
 import { modeType } from "../../types/ui-types";
 import { AxisLabels } from "./axis-labels";
 import { CubeOutline } from "./cube-outline";
+import { DSTCamera } from "./dst-camera";
 import { GridPlane } from "./grid-plane";
 import { PlaneControls } from "./plane-controls";
 import { Points } from "./points";
@@ -28,8 +29,7 @@ export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotP
     <div className="w-full h-full relative scatter-plot" style={{backgroundColor: "#f9f9f9"}}>
       <Canvas>
         <CubeOutline />
-        <PerspectiveCamera
-          makeDefault
+        <DSTCamera
           position={cameraPosition}
           ref={cameraRef}
         />
