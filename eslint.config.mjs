@@ -151,7 +151,8 @@ export default typescriptEslint.config(
       "@typescript-eslint/consistent-type-definitions": "off",
       "@typescript-eslint/no-empty-function": "off",
       "@typescript-eslint/no-inferrable-types": "off",
-}
+      "react/jsx-no-useless-fragment": "off",
+    }
   },
   {
     name: "rules specific to Jest tests",

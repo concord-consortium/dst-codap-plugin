@@ -3,16 +3,15 @@ import React, {createRef, RefObject, useCallback, useRef} from "react"
 import {Active} from "@dnd-kit/core"
 import {DroppableSvg} from "../droppable-svg"
 import {useInstanceIdContext} from "../../../../hooks/use-instance-id-context"
-import {useDataDisplayModelContext} from "../../hooks/use-data-display-model"
+import {useBaseDataDisplayModelContext} from "../../hooks/use-base-data-display-model"
 import {getDragAttributeInfo, useDropHandler} from "../../../../hooks/use-drag-drop"
 import {useDropHintString} from "../../../../hooks/use-drop-hint-string"
 import {IDataSet} from "../../../../models/data/data-set"
+import {DataConfigurationContext} from "../../hooks/use-data-configuration-context"
 import {useDataDisplayLayout} from "../../hooks/use-data-display-layout"
 import {GraphAttrRole} from "../../data-display-types"
 import {GraphPlace} from "../../../axis-graph-shared"
 import {Legend} from "./legend"
-import { LegendDataDisplayModel } from "./legend-types"
-import { DataConfigurationContext } from "../../hooks/use-data-configuration-context"
 
 interface IMultiLegendProps {
   divElt: HTMLDivElement | null
@@ -20,7 +19,7 @@ interface IMultiLegendProps {
 }
 
 export const MultiLegend = observer(function MultiLegend({divElt, onDropAttribute}: IMultiLegendProps) {
-  const dataDisplayModel = useDataDisplayModelContext() as LegendDataDisplayModel,
+  const dataDisplayModel = useBaseDataDisplayModelContext(),
     layout = useDataDisplayLayout(),
     legendRef = useRef() as React.RefObject<HTMLDivElement>,
     instanceId = useInstanceIdContext(),
