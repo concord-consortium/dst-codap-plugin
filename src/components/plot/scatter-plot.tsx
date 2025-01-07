@@ -1,12 +1,12 @@
 /* eslint-disable react/no-unknown-property */
 import { observer } from "mobx-react-lite";
 import React, { useRef, useState } from "react";
+import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, OrthographicCamera } from "@react-three/drei";
-import { Vector3 } from "three";
 import { dstCamera, zoomMax, zoomMin } from "../../models/camera";
 import { modeType } from "../../types/ui-types";
 import { CubeOutline } from "./cube-outline";
+import { DSTCamera } from "./dst-camera";
 import { GridPlane } from "./grid-plane";
 import { PlaneControls } from "./plane-controls";
 import { Points } from "./points";
@@ -18,18 +18,13 @@ interface IScatterPlotProps {
 export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotProps) {
   const cameraRef = useRef<any>(null);
   const [zPosition, setZPosition] = useState(-5);
-  const { position, zoom } = dstCamera;
-  const cameraPosition = new Vector3(position.x, position.y, position.z);
 
   return (
     <div className="w-full h-full relative scatter-plot" style={{backgroundColor: "#f9f9f9"}}>
       <Canvas>
         <CubeOutline />
-        <OrthographicCamera
-          makeDefault
-          position={cameraPosition}
-          ref={cameraRef}
-          zoom={zoom}
+        <DSTCamera
+          cameraRef={cameraRef}
         />
         {mode === "pointer" && (
           <OrbitControls

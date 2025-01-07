@@ -20,6 +20,7 @@ import pluginCypress from "eslint-plugin-cypress/flat"
 // https://typescript-eslint.io/packages/typescript-eslint#config
 export default typescriptEslint.config(
   {
+    name: "ignore dist and node_modules",
     ignores: [ "dist/", "node_modules/" ]  
   },
   js.configs.recommended,
@@ -167,6 +168,7 @@ export default typescriptEslint.config(
     }
   },
   {
+    name: "json files",
     files: ["**/*.json"],
     ...json.configs["recommended"]
   },
