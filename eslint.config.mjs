@@ -25,7 +25,7 @@ export default typescriptEslint.config(
   js.configs.recommended,
   typescriptEslint.configs.recommended,
   typescriptEslint.configs.stylistic,
-  // @ts-ignore for some reason the rules in comments.recommend are not compatible with
+  // @ts-expect-error for some reason the rules in comments.recommend are not compatible with
   // RuleEntry
   comments.recommended,
   importPluginConfig.recommended,
@@ -61,6 +61,9 @@ export default typescriptEslint.config(
       ecmaVersion: 2018,
       sourceType: "module"
     },
+    linterOptions: {
+      reportUnusedDisableDirectives: false
+    },
     settings: {
       "import/parsers": {
         "@typescript-eslint/parser": [".ts", ".tsx"]
@@ -80,11 +83,13 @@ export default typescriptEslint.config(
       "@typescript-eslint/explicit-module-boundary-types": "off",
       "@typescript-eslint/no-confusing-non-null-assertion": "error",
       "@typescript-eslint/no-empty-interface": "off",
+      "@typescript-eslint/no-empty-object-type": ["error", { allowInterfaces: "always" }],
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-require-imports": "error",
       "@typescript-eslint/no-shadow": ["warn", { builtinGlobals: false, hoist: "all", allow: [] }],
       "@typescript-eslint/no-this-alias": "off",
-      "@typescript-eslint/no-unused-vars": ["warn", { args: "none", ignoreRestSiblings: true }],
+      "@typescript-eslint/no-unused-expressions": ["error", { allowShortCircuit: true }],
+      "@typescript-eslint/no-unused-vars": ["warn", { args: "none", caughtErrors: "none", ignoreRestSiblings: true }],
       "@typescript-eslint/prefer-optional-chain": "off",
       "@stylistic/semi": ["warn", "always"],
       "curly": ["error", "multi-line", "consistent"],
@@ -104,7 +109,8 @@ export default typescriptEslint.config(
       "no-shadow": "off", // superseded by @typescript-eslint/no-shadow
       "no-tabs": "error",
       "no-unneeded-ternary": "error",
-      "no-unused-expressions": ["error", { allowShortCircuit: true }],
+      // This is superseded by the typescript rule
+      "no-unused-expressions": "off",
       "no-unused-vars": "off",  // superseded by @typescript-eslint/no-unused-vars
       "no-useless-call": "error",
       "no-useless-concat": "error",
@@ -130,6 +136,22 @@ export default typescriptEslint.config(
       "react/no-unused-state": "error",
       "react/prop-types": "off",
     },
+  },
+  {
+    name: "CODAP relaxed rules",
+    files: ["src/codap/**"],
+    rules: {
+      "quotes": "off",
+      "@stylistic/js/jsx-quotes": "off",
+      "@stylistic/semi": ["warn", "never", { beforeStatementContinuationChars: "always" }],
+      "@typescript-eslint/array-type": "off",
+      "@typescript-eslint/class-literal-property-style": "off",
+      "@typescript-eslint/consistent-generic-constructors": "off",
+      "@typescript-eslint/consistent-indexed-object-style": "off",
+      "@typescript-eslint/consistent-type-definitions": "off",
+      "@typescript-eslint/no-empty-function": "off",
+      "@typescript-eslint/no-inferrable-types": "off",
+}
   },
   {
     name: "rules specific to Jest tests",
