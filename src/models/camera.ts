@@ -135,8 +135,8 @@ class DSTCamera {
 
   get isHome() {
     const { x, y, z } = this.position;
-    return Math.abs(x - defaultCameraX) <= .2 &&
-      Math.abs(y - defaultCameraY) <= .2 && Math.abs(z - defaultCameraZ) <= .2;
+    return Math.abs(x - defaultCameraX) <= .2 && Math.abs(y - defaultCameraY) <= .2 &&
+      Math.abs(z - defaultCameraZ) <= .2 && Math.abs(this.zoom - defaultZoom) <= 1;
   }
 
   get position() {
