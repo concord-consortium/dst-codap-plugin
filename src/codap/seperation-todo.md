@@ -1,17 +1,12 @@
 We are trying to avoid bringing in the tile infrastructure.
 
 Problem files:
-- components/data-display/use-data-display-model used by:
-  - components/data-display/components/attribute-label
-- components/data-display/pixi/pixi-points used by:
-  - components/graph/graphing-types
-- components/axis/components/axis-or-legend-attribute-menu used by:
-  - components/data-display/components/attribute-label
 - components/case-tile-common/case-tile-types used by:
   - models/data/data-set-utils.ts
 - data-interactive/data-interactive-type-utils used by:
   - models/data/data-set-notifications.ts
 - hooks/use-drag-drop used by:
+  - components/axis/components/axis-or-legend-attribute-menu
   - components/data-display/components/legend/multi-legend
   - hooks/use-drop-hint-string
 - models/data/data-set-conversion used by:
@@ -40,13 +35,10 @@ Problem files:
 
 
 Tasks to remove errors:
-- See if we can make a tile-less use-drag-drop
-- try updating attribute-label to using the BaseDataDisplayModel
-- figure out what we need to bring in axis-or-legend-attribute-menu
+- See if we can make a tile-less version use-drag-drop
 - look at the shared case metadata: how is it used? can we bring in a version of it without bringing in the shared model system which depends on the tile system?
 - look at shared-data-utils, maybe it would be OK to bring this in, but probably it is about the shared model system. data-set-utils uses it to get the shared case metadata from the dataset.
 - look at the formula system: do we need it? can we make it a service so data-configuration-model can look it up and handle the case where it isn't available?
-- try to remove the dependency on components/graph/graphing-types, I think just a couple of constants are imported from it
 - look at apply-model-change: can we make it a service that is basically a no-op in the plugin?
 - look at without-undo: can we make it a service that is basically a no-op in the plugin?
 - look at data-set-notifications: the plugin shouldn't need to do this so can it be made a service?
