@@ -1,6 +1,6 @@
 import {
-  defaultCameraX, defaultCameraY, defaultCameraZ, defaultDistance, defaultPivot, defaultRotation, distanceMax,
-  distanceMin, dstCamera, pivotMax, pivotMin
+  defaultCameraX, defaultCameraY, defaultCameraZ, defaultDistance, defaultPivot, defaultRotation, defaultZoom,
+  distanceMax, distanceMin, dstCamera, pivotMax, pivotMin, zoomMax, zoomMin
 } from "./camera";
 
 // Normally this would be handled by useFrame in the DSTCamera componet.
@@ -11,18 +11,19 @@ describe("DSTCamera", () => {
     dstCamera.setDistance(defaultDistance);
     dstCamera.setPivot(defaultPivot);
     dstCamera.setRotation(defaultRotation);
+    dstCamera.setZoom(defaultZoom);
   });
 
   afterAll(() => clearInterval(interval));
 
   test("should initialize with default values", () => {
-    expect(dstCamera.distance).toBeCloseTo(defaultDistance);
+    expect(dstCamera.zoom).toBeCloseTo(defaultZoom);
     expect(dstCamera.pivot).toBeCloseTo(defaultPivot);
     expect(dstCamera.rotation).toBeCloseTo(defaultRotation);
   });
 
   test("should reset to home position", (done) => {
-    dstCamera.setDistance(10);
+    dstCamera.setZoom(10);
     dstCamera.setPivot(0.5);
     dstCamera.setRotation(1);
 
@@ -30,7 +31,7 @@ describe("DSTCamera", () => {
 
 
     setTimeout(() => {
-      expect(dstCamera.distance).toBeCloseTo(defaultDistance);
+      expect(dstCamera.zoom).toBeCloseTo(defaultZoom);
       expect(dstCamera.pivot).toBeCloseTo(defaultPivot);
       expect(dstCamera.rotation).toBeCloseTo(defaultRotation);
       done();
@@ -38,14 +39,14 @@ describe("DSTCamera", () => {
   });
 
   test("should set distance within legal range", () => {
-    dstCamera.setDistance(50);
+    dstCamera.setDistance(100);
     expect(dstCamera.distance).toBe(distanceMax);
 
     dstCamera.setDistance(-10);
     expect(dstCamera.distance).toBe(distanceMin);
 
-    dstCamera.setDistance(15);
-    expect(dstCamera.distance).toBe(15);
+    dstCamera.setDistance(defaultDistance);
+    expect(dstCamera.distance).toBe(defaultDistance);
   });
 
   test("should set pivot within legal range", () => {
@@ -72,12 +73,12 @@ describe("DSTCamera", () => {
 
   test("should animate by given deltas", (done) => {
     dstCamera.animateBy(5, 0.1, Math.PI / 4);
-    expect(dstCamera.distance).toBeLessThan(defaultDistance + 5);
+    expect(dstCamera.zoom).toBeLessThan(defaultZoom + 5);
     expect(dstCamera.pivot).toBeLessThan(defaultPivot + 0.1);
     expect(dstCamera.rotation).toBeLessThan(defaultRotation + Math.PI / 4);
 
     setTimeout(() => {
-      expect(dstCamera.distance).toBeCloseTo(defaultDistance + 5);
+      expect(dstCamera.zoom).toBeCloseTo(defaultZoom + 5);
       expect(dstCamera.pivot).toBeCloseTo(defaultPivot + 0.1);
       expect(dstCamera.rotation).toBeCloseTo(defaultRotation + Math.PI / 4);
       done();
@@ -108,19 +109,15 @@ describe("DSTCamera", () => {
   });
 
   test("should determine if can zoom in", () => {
-    dstCamera.setDistance(distanceMin);
-    expect(dstCamera.canZoomIn).toBe(false);
-
-    dstCamera.setDistance(10);
     expect(dstCamera.canZoomIn).toBe(true);
+    dstCamera.setZoom(zoomMax);
+    expect(dstCamera.canZoomIn).toBe(false);
   });
 
   test("should determine if can zoom out", () => {
-    dstCamera.setDistance(distanceMax);
-    expect(dstCamera.canZoomOut).toBe(false);
-
-    dstCamera.setDistance(10);
     expect(dstCamera.canZoomOut).toBe(true);
+    dstCamera.setZoom(zoomMin);
+    expect(dstCamera.canZoomOut).toBe(false);
   });
 
   test("should determine if is home", () => {
