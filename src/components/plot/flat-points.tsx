@@ -15,7 +15,7 @@ export const FlatPoints = observer(function FlatPoints() {
   const { facingRotation } = dstCamera;
   return (
     <group>
-      {items.map((item, i) => {
+      {items.values.map((item, i) => {
         const dotColor = "#925987";
         const dotSize = 0.1;
         const outlineColor = "#FFFFFF";

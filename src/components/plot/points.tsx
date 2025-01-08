@@ -9,7 +9,7 @@ export const Points = observer(function Points() {
   /* eslint-disable react/no-unknown-property */
   return (
     <group>
-      {items.map((item, i) => {
+      {items.values.map((item, i) => {
         const dotColor = "#925987";
         const dotSize = 0.1;
         const outlineColor = "#FFFFFF";

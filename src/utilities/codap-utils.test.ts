@@ -41,6 +41,7 @@ describe("codap utilities", () => {
         success: true, 
         values: [
           {
+            id: 1,
             values: {
               date: "2020-01-01",
               Day: 1,
@@ -51,6 +52,7 @@ describe("codap utilities", () => {
             }
           },
           {
+            id: 2,
             values: {
               date: "2022-01-01",
               Day: 1,
@@ -63,7 +65,7 @@ describe("codap utilities", () => {
         ]
       }));
       await getData();
-      expect(items.length).toBe(2);
+      expect(items.values.length).toBe(2);
       expect(dataRanges.dateMin).toBe(Date.UTC(2020,0,1));
       expect(dataRanges.dateMax).toBe(Date.UTC(2022,0,1));
     });
@@ -77,6 +79,7 @@ describe("codap utilities", () => {
         success: true, 
         values: [
           {
+            id: 1,
             values: {
               date: "2020-01-01",
               Day: 1,
@@ -87,6 +90,7 @@ describe("codap utilities", () => {
             }
           },
           {
+            id: 2,
             values: {
               date: "2022-01-01",
               Day: 1,
@@ -100,7 +104,7 @@ describe("codap utilities", () => {
       }));
       await getData();
       expect(mockedCreateDataContextFromURL).not.toHaveBeenCalled();
-      expect(items.length).toBe(2);
+      expect(items.values.length).toBe(2);
       expect(dataRanges.dateMin).toBe(Date.UTC(2020,0,1));
       expect(dataRanges.dateMax).toBe(Date.UTC(2022,0,1));
     });

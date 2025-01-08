@@ -25,11 +25,10 @@ export async function getData() {
       return;
     }
 
-    const is = itemsResult.values.map((item: any) => item.values);
-    items.replace(is);
+    itemsResult.values.forEach((item: any) => items.addItem({ id: item.id, ...item.values }));
 
     // Update data ranges
-    const dates = is.map((item: any) => getDate(item)).filter((time: number) => isFinite(time));
+    const dates = items.values.map((item: any) => getDate(item)).filter((time: number) => isFinite(time));
     dataRanges.dateMin = Math.min(...dates);
     dataRanges.dateMax = Math.max(...dates);
     // const lats = is.map((item: any) => item.Latitude);
