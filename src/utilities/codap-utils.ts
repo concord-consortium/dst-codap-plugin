@@ -1,10 +1,21 @@
-import { createDataContextFromURL, getAllItems, getDataContext } from "@concord-consortium/codap-plugin-api";
+import { createDataContextFromURL, getAllItems, getDataContext, initializePlugin } from "@concord-consortium/codap-plugin-api";
 import { getDate, items } from "../models/item";
+import { kInitialDimensions, kPluginName, kVersion } from "./constants";
 import { dataRanges } from "./graph-utils";
 
-import tornadoTracks20to22 from "../data/Tornado_Tracks_2010-2022.csv";
+import tornadoTracks20to22 from "../data/Tornado_Tracks_2020-2022.csv";
 
-const dataContextName = "Tornado_Tracks_2010-2022";
+const dataContextName = "Tornado_Tracks_2020-2022";
+
+export async function initializeDST() {
+  initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions})
+    .catch(reason => {
+      // This will happen if not embedded in CODAP
+      console.warn("Not embedded in CODAP");
+    });
+
+  getData();
+}
 
 export async function getData() {
   try {
