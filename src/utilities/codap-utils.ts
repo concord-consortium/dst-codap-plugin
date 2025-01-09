@@ -69,6 +69,17 @@ export async function getData() {
   }
 }
 
-export async function _selectCases(caseIds: number[]) {
+export async function dstSelectCases(caseIds: number[]) {
+  codapCases.replaceSelectedCases(caseIds);
   return await selectCases(dataContextName, caseIds);
+}
+
+export async function dstAddCaseToSelection(caseId: number) {
+  codapCases.addCaseToSelection(caseId);
+  return await selectCases(dataContextName, Array.from(codapCases.selectedCaseIds));
+}
+
+export async function dstRemoveCaseFromSelection(caseId: number) {
+  codapCases.removeCaseFromSelection(caseId);
+  return await selectCases(dataContextName, Array.from(codapCases.selectedCaseIds));
 }

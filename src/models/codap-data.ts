@@ -45,6 +45,10 @@ class CodapCases {
   replaceCases(newCases: Record<number, ICase>) {
     this.caseMap.replace(newCases);
   }
+
+  replaceSelectedCases(newSelectedCaseIds: number[]) {
+    this.selectedCaseIds.replace(newSelectedCaseIds);
+  }
 }
 
 export const codapCases = new CodapCases();

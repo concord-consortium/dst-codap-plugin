@@ -3,7 +3,7 @@ import { Outlines } from "@react-three/drei";
 import { ThreeEvent, useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
 import { convertLat, convertLong } from "../../utilities/graph-utils";
-import { _selectCases as dstSelectCases } from "../../utilities/codap-utils";
+import { dstAddCaseToSelection, dstRemoveCaseFromSelection, dstSelectCases } from "../../utilities/codap-utils";
 
 interface IPointProps {
   id: number;
@@ -37,7 +37,15 @@ export function Point({ id, isSelected, Latitude, Longitude, y }: IPointProps) {
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();
-    dstSelectCases([id]);
+    if (event.shiftKey) {
+      if (isSelected) {
+        dstRemoveCaseFromSelection(id);
+      } else {
+        dstAddCaseToSelection(id);
+      }
+    } else {
+      dstSelectCases([id]);
+    }
   };
 
   const handlePointerEnter = (event: ThreeEvent<PointerEvent>) => {
