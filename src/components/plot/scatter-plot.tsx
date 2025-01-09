@@ -20,7 +20,7 @@ export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotP
   const [zPosition, setZPosition] = useState(-5);
 
   return (
-    <div className="w-full h-full relative scatter-plot" style={{backgroundColor: "#f9f9f9"}}>
+    <div className="w-full h-full relative scatter-plot">
       <Canvas>
         <CubeOutline />
         <DSTCamera

@@ -3,11 +3,11 @@ import React from "react";
 import { dstCamera } from "../../models/camera";
 import { kUIPivotChange, kUIRotationChange } from "../../utilities/constants";
 import { ArrowButton } from "./arrow-button";
-import "./navigation-cube.scss";
+import "./navigation-controls.scss";
 
-export const NavigationCube = observer(function NavigationCube() {
+export const NavigationControls = observer(function NavigationControls() {
   return (
-    <div className="navigation-cube-container">
+    <div className="navigation-controls">
       <ArrowButton direction="left" onClick={() => dstCamera.animateBy(0, 0, kUIRotationChange)} />
       <ArrowButton direction="right" onClick={() => dstCamera.animateBy(0, 0, -kUIRotationChange)} />
       <ArrowButton
