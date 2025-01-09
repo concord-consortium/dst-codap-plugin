@@ -11,7 +11,7 @@ export const Points = observer(function Points() {
         const { id, Latitude, Longitude } = aCase;
         return (
           <Point
-            key={id}
+            key={`point-${id}`}
             id={id}
             isSelected={codapCases.isSelected(id)}
             Latitude={Latitude ?? 0}

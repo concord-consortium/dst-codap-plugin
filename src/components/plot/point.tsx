@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Outlines } from "@react-three/drei";
 import { ThreeEvent } from "@react-three/fiber";
 import { Vector3 } from "three";
@@ -13,12 +13,14 @@ interface IPointProps {
   y: number;
 }
 export function Point({ id, isSelected, Latitude, Longitude, y }: IPointProps) {
+  const [isPointerOver, setPointerOver] = useState(false);
   const dotColor = "#925987";
-  const basePointSize = 0.1;
-  const selectedMultiplier = isSelected ? 1.5 : 1;
-  const pointSize = basePointSize * selectedMultiplier;
+  const basePointSize = 0.12;
+  const selectedExtra = isSelected ? .02 : 0;
+  const hoverMultiplier = isPointerOver ? 1.5 : 1;
+  const targetPointSize = (basePointSize + selectedExtra) * hoverMultiplier;
   const outlineColor = isSelected ? "#FF0000" : "#FFFFFF";
-  const outlineWidth = isSelected ? 2 : 1;
+  const outlineWidth = isSelected ? 3 : 1.5;
 
   // Determine the position of the point in graph space.
   const position = new Vector3(convertLat(Latitude), y, convertLong(Longitude));
@@ -28,10 +30,25 @@ export function Point({ id, isSelected, Latitude, Longitude, y }: IPointProps) {
     dstSelectCases([id]);
   };
 
+  const handlePointerEnter = (event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
+    setPointerOver(true);
+  };
+
+  const handlePointerLeave = (event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
+    setPointerOver(false);
+  };
+
   /* eslint-disable react/no-unknown-property */
   return (
-    <mesh key={`point-${id}`} position={position} onClick={handleClick}>
-      <sphereGeometry args={[pointSize, 16, 16]} />
+    <mesh
+      position={position}
+      onClick={handleClick}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+    >
+      <sphereGeometry args={[targetPointSize, 16, 16]} />
       <meshStandardMaterial color={dotColor} />
       <Outlines color={outlineColor} thickness={outlineWidth} />
     </mesh>
