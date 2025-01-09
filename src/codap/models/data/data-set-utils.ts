@@ -12,7 +12,6 @@ import {
   moveAttributeNotification, selectCasesNotification
 } from "./data-set-notifications"
 import { IAttributeChangeResult, IMoveAttributeOptions } from "./data-set-types"
-import { kIndexColumnKey } from "./data-set-constants"
 
 AttributeFormulaAdapter.register()
 FilterFormulaAdapter.register()
@@ -74,7 +73,7 @@ export function moveAttribute({
 }: IMoveAttributeParameters) {
   const firstAttr: IAttribute | undefined = getCollectionAttrs(targetCollection, dataset)[0]
   const options: IMoveAttributeOptions =
-    !afterAttrId || afterAttrId === kIndexColumnKey ? { before: firstAttr?.id } : { after: afterAttrId }
+    afterAttrId ? { after: afterAttrId }: { before: firstAttr?.id }
 
   // bail if we're moving the attribute before/after itself
   if (attrId === options.after || attrId === options.before) return
