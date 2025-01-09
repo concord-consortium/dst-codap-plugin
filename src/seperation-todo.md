@@ -1,3 +1,7 @@
+Script to update the src/codap folder in the dst-plugin:
+`rsync -av --existing --delete ../codap/v3/src/ src/codap/`
+To be complete after an update you need to review all of the files and see if the problem files list below needs to be updated.
+
 We are trying to avoid bringing in the tile infrastructure.
 
 Problem files:

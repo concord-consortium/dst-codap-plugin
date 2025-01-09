@@ -126,7 +126,7 @@ export const Attribute = V2Model.named("Attribute").props({
   getDateCount: cachedFnFactory<number>(() => {
     // Note that `self.changeCount` is absolutely not necessary here. However, historically, this function used to be
     // a MobX computed property, and `self.changeCount` was used to invalidate the cache. Also, there are tests
-    // (and possibly some features?) that depend on MobX reactivity. Hence, this is left here for now.    
+    // (and possibly some features?) that depend on MobX reactivity. Hence, this is left here for now.
     self.changeCount // eslint-disable-line @typescript-eslint/no-unused-expressions
     return self.strValues.reduce((prev, current) => isDateString(current) ? ++prev : prev, 0)
   }),

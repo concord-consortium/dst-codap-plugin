@@ -77,7 +77,6 @@ export function createAttributesNotification(attrs: IAttribute[], data?: IDataSe
   return attributeNotification("createAttributes", data, attrs.map(attr => attr.id), attrs)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-inferrable-types
 export function hideAttributeNotification(attrIDs: string[], data?: IDataSet, operation: string = "hideAttributes") {
   return attributeNotification(operation, data, attrIDs)
 }

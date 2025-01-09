@@ -3,15 +3,15 @@ import { IDataConfigurationModel } from "./data-configuration-model"
 import { GraphPlace } from "../../axis-graph-shared"
 import { IDataSet } from "../../../models/data/data-set"
 
-interface BaseLayerModel {
+interface IBaseLayerModel {
   layerIndex: number,
   id: string,
   dataConfiguration: IDataConfigurationModel
 };
 
-export interface BaseDataDisplayModel extends IAnyStateTreeNode {
+export interface IBaseDataDisplayModel extends IAnyStateTreeNode {
   placeCanAcceptAttributeIDDrop: (place: GraphPlace,
     dataset: IDataSet | undefined,
     attributeID: string | undefined) => boolean,
-  layers: BaseLayerModel[]
+  layers: IBaseLayerModel[]
 }

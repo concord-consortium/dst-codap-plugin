@@ -23,8 +23,6 @@ export const AttributeLabel = forwardRef((props: IProps, labelRef: ForwardedRef<
   const { place, refreshLabel, onChangeAttribute, onRemoveAttribute, onTreatAttributeAs } = props
   // labelRef must be a MutableRefObject, not a function
   const labelElt = typeof labelRef !== "function" ? labelRef?.current ?? null : null
-  // I'm not sure why this is needed, but eslint thinks the `as HTMLElement` isn't needed.
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const portal = labelElt?.closest(kPortalClassSelector) as HTMLElement ?? null
   const contentModel = useBaseDataDisplayModelContext()
   const layout = useDataDisplayLayout()
