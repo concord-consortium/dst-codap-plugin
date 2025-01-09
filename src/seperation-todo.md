@@ -5,8 +5,6 @@ To be complete after an update you need to review all of the files and see if th
 We are trying to avoid bringing in the tile infrastructure.
 
 Problem files:
-- components/case-tile-common/case-tile-types used by:
-  - models/data/data-set-utils.ts
 - data-interactive/data-interactive-type-utils used by:
   - models/data/data-set-notifications.ts
 - hooks/use-drag-drop used by:
@@ -46,7 +44,6 @@ Tasks to remove errors:
 - look at apply-model-change: can we make it a service that is basically a no-op in the plugin?
 - look at without-undo: can we make it a service that is basically a no-op in the plugin?
 - look at data-set-notifications: the plugin shouldn't need to do this so can it be made a service?
-- if data-set-utils is needed, extract kIndexColumnKey from case-tile-types
 - try to isolate data-set-conversion so plugins using the data-set model don't need to worry about conversion? Or perhaps they should because the data-set is transferred in v2 format??
 - bring in concord consortium MST so IOnActionOptions is supported, or perhaps the functions in mst-utils using it are not needed in the plugin so then split out the required functions from mst-utils
 

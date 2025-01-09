@@ -1,5 +1,4 @@
 import { isAlive } from "mobx-state-tree"
-import { kIndexColumnKey } from "../../components/case-tile-common/case-tile-types"
 import { logMessageWithReplacement } from "../../lib/log-message"
 import { AttributeFormulaAdapter } from "../formula/attribute-formula-adapter"
 import { FilterFormulaAdapter } from "../formula/filter-formula-adapter"
@@ -13,6 +12,7 @@ import {
   moveAttributeNotification, selectCasesNotification
 } from "./data-set-notifications"
 import { IAttributeChangeResult, IMoveAttributeOptions } from "./data-set-types"
+import { kIndexColumnKey } from "./data-set-constants"
 
 AttributeFormulaAdapter.register()
 FilterFormulaAdapter.register()
