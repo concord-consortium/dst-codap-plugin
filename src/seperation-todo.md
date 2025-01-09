@@ -45,7 +45,6 @@ Tasks to remove errors:
 - look at without-undo: can we make it a service that is basically a no-op in the plugin?
 - look at data-set-notifications: the plugin shouldn't need to do this so can it be made a service?
 - try to isolate data-set-conversion so plugins using the data-set model don't need to worry about conversion? Or perhaps they should because the data-set is transferred in v2 format??
-- bring in concord consortium MST so IOnActionOptions is supported, or perhaps the functions in mst-utils using it are not needed in the plugin so then split out the required functions from mst-utils
 
 Tasks to reduce unneeded code:
 - make translation a service so plugins using shared code don't need to a copy of the full set of translations
