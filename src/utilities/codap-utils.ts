@@ -1,11 +1,15 @@
-import { createDataContextFromURL, getAllItems, getDataContext, initializePlugin } from "@concord-consortium/codap-plugin-api";
-import { getDate, items } from "../models/item";
+import {
+  addDataContextChangeListener, createDataContextFromURL, getCaseByFormulaSearch, getDataContext,
+  initializePlugin
+} from "@concord-consortium/codap-plugin-api";
+import { getDate, codapCases } from "../models/codap-data";
 import { kInitialDimensions, kPluginName, kVersion } from "./constants";
 import { dataRanges } from "./graph-utils";
 
-import tornadoTracks20to22 from "../data/Tornado_Tracks_2020-2022.csv";
+import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
 
 const dataContextName = "Tornado_Tracks_2020-2022";
+const collectionName = "Cases";
 
 export async function initializeDST() {
   initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions})
@@ -15,6 +19,17 @@ export async function initializeDST() {
     });
 
   getData();
+
+  addDataContextChangeListener(dataContextName, notification => {
+    const { operation, result } = notification.values;
+
+    if (operation === "selectCases") {
+      const { extend, cases, removedCases } = result;
+      if (!extend) codapCases.clearSelectedCases();
+      if (cases) cases.forEach((aCase: any) => codapCases.addCaseToSelection(aCase.id));
+      if (removedCases) removedCases.forEach((aCase: any) => codapCases.removeCaseFromSelection(aCase.id));
+    }
+  });
 }
 
 export async function getData() {
@@ -22,24 +37,24 @@ export async function getData() {
     const result = await getDataContext(dataContextName);
 
     if (!result.success) {
-      const newDataContextResult = await createDataContextFromURL(tornadoTracks20to22);
+      const newDataContextResult = await createDataContextFromURL(dataURL);
       if (!newDataContextResult.success) {
         console.error("Couldn't load dataset");
         return;
       }      
     }
 
-    const itemsResult = await getAllItems(dataContextName);
+    const casesResult = await getCaseByFormulaSearch(dataContextName, collectionName, "true");
 
-    if (!itemsResult.success) {
-      console.error("Couldn't load items from dataset");
+    if (!casesResult.success) {
+      console.error("Couldn't load cases from dataset");
       return;
     }
 
-    itemsResult.values.forEach((item: any) => items.addItem({ id: item.id, ...item.values }));
+    casesResult.values.forEach((aCase: any) => codapCases.addCase({ id: aCase.id, ...aCase.values }));
 
     // Update data ranges
-    const dates = items.values.map((item: any) => getDate(item)).filter((time: number) => isFinite(time));
+    const dates = codapCases.cases.map((item: any) => getDate(item)).filter((time: number) => isFinite(time));
     dataRanges.dateMin = Math.min(...dates);
     dataRanges.dateMax = Math.max(...dates);
     // const lats = is.map((item: any) => item.Latitude);

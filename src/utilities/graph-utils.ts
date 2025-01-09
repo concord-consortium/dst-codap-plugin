@@ -1,4 +1,4 @@
-import { getDate, IItem } from "../models/item";
+import { getDate, ICase } from "../models/codap-data";
 import { kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin } from "./constants";
 
 export const dataRanges = {
@@ -30,8 +30,8 @@ export function convertLong(_long?: number) {
   return ((long - dataRanges.longMin) / longRange()) * graphRange + graphMin;
 }
 
-export function convertDate(item: IItem) {
-  const _date = getDate(item);
+export function convertDate(aCase: ICase) {
+  const _date = getDate(aCase);
   const date = isFinite(_date) ? _date : defaultDate();
   return ((date - dataRanges.dateMin) / dateRange()) * graphRange + graphMin;
 }
