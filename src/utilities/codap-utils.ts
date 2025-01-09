@@ -1,6 +1,6 @@
 import {
   addDataContextChangeListener, createDataContextFromURL, getCaseByFormulaSearch, getDataContext,
-  initializePlugin
+  initializePlugin, selectCases
 } from "@concord-consortium/codap-plugin-api";
 import { getDate, codapCases } from "../models/codap-data";
 import { kInitialDimensions, kPluginName, kVersion } from "./constants";
@@ -67,4 +67,8 @@ export async function getData() {
     // This will happen if not embedded in CODAP
     console.warn("Not embedded in CODAP", error);
   }
+}
+
+export async function _selectCases(caseIds: number[]) {
+  return await selectCases(dataContextName, caseIds);
 }
