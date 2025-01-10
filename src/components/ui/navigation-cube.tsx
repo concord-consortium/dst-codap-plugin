@@ -1,37 +1,54 @@
-import { observer } from "mobx-react-lite";
-import React, { useRef } from "react";
-import { OrbitControls, OrthographicCamera } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
+import React from "react";
+import { Box } from "@react-three/drei";
 import { Vector3 } from "three";
-import { dstCamera } from "../../models/camera";
-import "./navigation-cube.scss";
 
-export const NavigationCube = observer(function NavigationCube() {
-  const cameraRef = useRef<any>(null);
-  const position = new Vector3(dstCamera.position.x, dstCamera.position.y, dstCamera.position.z);
-
+export function NavigationCube() {
+  const boxDimension = 30;
+  const borderDimension = 2;
+  const borderOffset = 14.1;
   /* eslint-disable react/no-unknown-property */
   return (
-    <div className="navigation-cube-canvas">
-      <Canvas>
-        <OrthographicCamera
-          makeDefault
-          position={position}
-          ref={cameraRef}
-        />
-        <OrbitControls
-          enableDamping
-          onChange={() => {
-            if (cameraRef.current) {
-              const {x, y, z} = cameraRef.current.position;
-              dstCamera.setPosition(x, y, z);
-            }
-          }}
-          enableZoom={false}
-        />
-        <ambientLight intensity={1.5} />
-      </Canvas>
-    </div>
+    <>
+      <Box args={[boxDimension, boxDimension, boxDimension]}>
+        <meshStandardMaterial attach="material" color="#FFFFFF" />
+      </Box>
+      <Box args={[borderDimension, borderDimension, boxDimension]} position={new Vector3(borderOffset, borderOffset, 0)}>
+        <meshStandardMaterial attach="material" color="#177991" />
+      </Box>
+      <Box args={[borderDimension, borderDimension, boxDimension]} position={new Vector3(borderOffset, -borderOffset, 0)}>
+        <meshStandardMaterial attach="material" color="#177991" />
+      </Box>
+      <Box args={[borderDimension, borderDimension, boxDimension]} position={new Vector3(-borderOffset, -borderOffset, 0)}>
+        <meshStandardMaterial attach="material" color="#177991" />
+      </Box>
+      <Box args={[borderDimension, borderDimension, boxDimension]} position={new Vector3(-borderOffset, borderOffset, 0)}>
+        <meshStandardMaterial attach="material" color="#177991" />
+      </Box>
+      <Box args={[borderDimension, boxDimension, borderDimension]} position={new Vector3(borderOffset, 0, borderOffset)}>
+        <meshStandardMaterial attach="material" color="#177991" />
+      </Box>
+      <Box args={[borderDimension, boxDimension, borderDimension]} position={new Vector3(borderOffset, 0, -borderOffset)}>
+        <meshStandardMaterial attach="material" color="#177991" />
+      </Box>
+      <Box args={[borderDimension, boxDimension, borderDimension]} position={new Vector3(-borderOffset, 0, -borderOffset)}>
+        <meshStandardMaterial attach="material" color="#177991" />
+      </Box>
+      <Box args={[borderDimension, boxDimension, borderDimension]} position={new Vector3(-borderOffset, 0, borderOffset)}>
+        <meshStandardMaterial attach="material" color="#177991" />
+      </Box>
+      <Box args={[boxDimension, borderDimension, borderDimension]} position={new Vector3(0, borderOffset, borderOffset)}>
+        <meshStandardMaterial attach="material" color="#177991" />
+      </Box>
+      <Box args={[boxDimension, borderDimension, borderDimension]} position={new Vector3(0, borderOffset, -borderOffset)}>
+        <meshStandardMaterial attach="material" color="#177991" />
+      </Box>
+      <Box args={[boxDimension, borderDimension, borderDimension]} position={new Vector3(0, -borderOffset, -borderOffset)}>
+        <meshStandardMaterial attach="material" color="#177991" />
+      </Box>
+      <Box args={[boxDimension, borderDimension, borderDimension]} position={new Vector3(0, -borderOffset, borderOffset)}>
+        <meshStandardMaterial attach="material" color="#177991" />
+      </Box>
+    </>
   );
-  /* eslint-enable react/no-unknown-property */
-});
+}
+/* eslint-enable react/no-unknown-property */

@@ -4,6 +4,7 @@ import { dstCamera } from "../../models/camera";
 import { kUIPivotChange, kUIRotationChange } from "../../utilities/constants";
 import { ArrowButton } from "./arrow-button";
 import "./navigation-controls.scss";
+import { NavigationCubeContainer } from "./navigation-cube-container";
 
 export const NavigationControls = observer(function NavigationControls() {
   return (
@@ -20,6 +21,7 @@ export const NavigationControls = observer(function NavigationControls() {
         disabled={!dstCamera.canPivotDown}
         onClick={() => dstCamera.animateBy(0, -kUIPivotChange, 0)}
       />
+      <NavigationCubeContainer />
     </div>
   );
 });
