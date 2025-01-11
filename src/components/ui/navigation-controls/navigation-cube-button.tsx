@@ -4,15 +4,13 @@ import { ThreeEvent } from "@react-three/fiber";
 import { Vector3 } from "three";
 import { dstCamera } from "../../../models/camera";
 
-const kCornerSize = 8;
-const kCornerArgs = [kCornerSize, kCornerSize, kCornerSize] as [number, number, number];
-
 interface INavigationCubeCornerProps {
   position: Vector3;
+  size: [number, number, number];
   targetPivot: number;
   targetRotation: number;
 }
-export function NavigationCubeCorner({ position, targetPivot, targetRotation }: INavigationCubeCornerProps) {
+export function NavigationCubeButton({ position, size, targetPivot, targetRotation }: INavigationCubeCornerProps) {
   const [hovering, setHovering] = useState(false);
   const opacity = hovering ? 0.5 : 0.2;
 
@@ -35,7 +33,7 @@ export function NavigationCubeCorner({ position, targetPivot, targetRotation }: 
   /* eslint-disable react/no-unknown-property */
   return (
     <Box
-      args={kCornerArgs}
+      args={size}
       onClick={handleClick}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
