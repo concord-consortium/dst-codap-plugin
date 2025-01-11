@@ -1,6 +1,6 @@
 import React from "react";
 import { Box } from "@react-three/drei";
-import { kNavigationCubeSize } from "../../utilities/constants";
+import { kNavigationCubeSize } from "../../../utilities/constants";
 import { NavigationCubeBorders } from "./navigation-cube-borders";
 
 export function NavigationCube() {

@@ -1,10 +1,10 @@
 import React from "react";
 import { Box } from "@react-three/drei";
 import { Vector3 } from "three";
-import { kNavigationCubeSize } from "../../utilities/constants";
+import { kNavigationCubeSize } from "../../../utilities/constants";
 
 const borderDimension = 2;
-const borderOffset = 14.1;
+const borderOffset = 14.5;
 
 type DimensionType = [Maybe<number>, Maybe<number>, Maybe<number>];
 const xDimensions = [kNavigationCubeSize, borderDimension, borderDimension] as DimensionType;

@@ -11,7 +11,7 @@ import PointIcon from "../assets/icons/point-selection.svg";
 import { dstCamera } from "../models/camera";
 import { modeType } from "../types/ui-types";
 import { ScatterPlot } from "./plot/scatter-plot";
-import { NavigationControls } from "./ui/navigation-controls";
+import { NavigationControls } from "./ui/navigation-controls/navigation-controls";
 import { UIButton } from "./ui/ui-button";
 import { UIButtonContainer } from "./ui/ui-button-container";
 import "./graph-tab.scss";
