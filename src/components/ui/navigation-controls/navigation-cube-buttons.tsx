@@ -69,13 +69,101 @@ export function NavigationCubeButtons() {
         targetRotation={7 * quarterPi}
       />
 
-      {/* Cube faces: front and back */}
+      {/* Top front edge */}
+      <NavigationCubeButton
+        position={new Vector3(-borderOffset, borderOffset, 0)}
+        size={[shortDimension, shortDimension, longDimension]}
+        targetPivot={quarterPi}
+        targetRotation={0}
+      />
+      {/* Top back edge */}
+      <NavigationCubeButton
+        position={new Vector3(borderOffset, borderOffset, 0)}
+        size={[shortDimension, shortDimension, longDimension]}
+        targetPivot={quarterPi}
+        targetRotation={Math.PI}
+      />
+      {/* Bottom back edge */}
+      <NavigationCubeButton
+        position={new Vector3(borderOffset, -borderOffset, 0)}
+        size={[shortDimension, shortDimension, longDimension]}
+        targetPivot={-quarterPi}
+        targetRotation={Math.PI}
+      />
+      {/* Bottom front edge */}
+      <NavigationCubeButton
+        position={new Vector3(-borderOffset, -borderOffset, 0)}
+        size={[shortDimension, shortDimension, longDimension]}
+        targetPivot={-quarterPi}
+        targetRotation={0}
+      />
+
+      {/* Top left edge */}
+      <NavigationCubeButton
+        position={new Vector3(0, borderOffset, -borderOffset)}
+        size={[longDimension, shortDimension, shortDimension]}
+        targetPivot={quarterPi}
+        targetRotation={halfPi}
+      />
+      {/* Top right edge */}
+      <NavigationCubeButton
+        position={new Vector3(0, borderOffset, borderOffset)}
+        size={[longDimension, shortDimension, shortDimension]}
+        targetPivot={quarterPi}
+        targetRotation={3 * halfPi}
+      />
+      {/* Bottom right edge */}
+      <NavigationCubeButton
+        position={new Vector3(0, -borderOffset, borderOffset)}
+        size={[longDimension, shortDimension, shortDimension]}
+        targetPivot={-quarterPi}
+        targetRotation={3 * halfPi}
+      />
+      {/* Bottom left edge */}
+      <NavigationCubeButton
+        position={new Vector3(0, -borderOffset, -borderOffset)}
+        size={[longDimension, shortDimension, shortDimension]}
+        targetPivot={-quarterPi}
+        targetRotation={halfPi}
+      />
+
+      {/* Front left edge */}
+      <NavigationCubeButton
+        position={new Vector3(-borderOffset, 0, -borderOffset)}
+        size={[shortDimension, longDimension, shortDimension]}
+        targetPivot={0}
+        targetRotation={quarterPi}
+      />
+      {/* Back left edge */}
+      <NavigationCubeButton
+        position={new Vector3(borderOffset, 0, -borderOffset)}
+        size={[shortDimension, longDimension, shortDimension]}
+        targetPivot={0}
+        targetRotation={3 * quarterPi}
+      />
+      {/* Back right edge */}
+      <NavigationCubeButton
+        position={new Vector3(borderOffset, 0, borderOffset)}
+        size={[shortDimension, longDimension, shortDimension]}
+        targetPivot={0}
+        targetRotation={5 * quarterPi}
+      />
+      {/* Front right edge */}
+      <NavigationCubeButton
+        position={new Vector3(-borderOffset, 0, borderOffset)}
+        size={[shortDimension, longDimension, shortDimension]}
+        targetPivot={0}
+        targetRotation={7 * quarterPi}
+      />
+
+      {/* Front face */}
       <NavigationCubeButton
         position={new Vector3(-borderOffset, 0, 0)}
         size={[shortDimension, longDimension, longDimension]}
         targetPivot={0}
         targetRotation={0}
       />
+      {/* Back face */}
       <NavigationCubeButton
         position={new Vector3(borderOffset, 0, 0)}
         size={[shortDimension, longDimension, longDimension]}
@@ -83,13 +171,14 @@ export function NavigationCubeButtons() {
         targetRotation={Math.PI}
       />
 
-      {/* Cube faces: left and right */}
+      {/* Left face */}
       <NavigationCubeButton
         position={new Vector3(0, 0, -borderOffset)}
         size={[longDimension, longDimension, shortDimension]}
         targetPivot={0}
         targetRotation={halfPi}
       />
+      {/* Right face */}
       <NavigationCubeButton
         position={new Vector3(0, 0, borderOffset)}
         size={[longDimension, longDimension, shortDimension]}
@@ -97,13 +186,14 @@ export function NavigationCubeButtons() {
         targetRotation={3 * halfPi}
       />
 
-      {/* Cube faces: top and bottom */}
+      {/* Top face */}
       <NavigationCubeButton
         position={new Vector3(0, borderOffset, 0)}
         size={[longDimension, shortDimension, longDimension]}
         targetPivot={halfPi}
         targetRotation={0}
       />
+      {/* Bottom face */}
       <NavigationCubeButton
         position={new Vector3(0, -borderOffset, 0)}
         size={[longDimension, shortDimension, longDimension]}
