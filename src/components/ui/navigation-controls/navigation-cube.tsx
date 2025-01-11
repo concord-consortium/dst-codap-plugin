@@ -2,6 +2,7 @@ import React from "react";
 import { Box } from "@react-three/drei";
 import { kNavigationCubeSize } from "../../../utilities/constants";
 import { NavigationCubeBorders } from "./navigation-cube-borders";
+import { NavigationCubeLabels } from "./navigation-cube-labels";
 
 export function NavigationCube() {
   /* eslint-disable react/no-unknown-property */
@@ -11,15 +12,7 @@ export function NavigationCube() {
         <meshStandardMaterial attach="material" color="#FFFFFF" />
       </Box>
       <NavigationCubeBorders />
-      {/* <Text
-        position={textPosition}
-        fontSize={.5}
-        color="black"
-        anchorX={anchorX}
-        anchorY={anchorY}
-      >
-        {text}
-      </Text> */}
+      <NavigationCubeLabels />
     </>
   );
 }

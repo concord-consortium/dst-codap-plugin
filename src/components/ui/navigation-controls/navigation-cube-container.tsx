@@ -19,6 +19,7 @@ export const NavigationCubeContainer = observer(function NavigationCubeContainer
           makeDefault
           position={position}
           ref={cameraRef}
+          zoom={1.2}
         />
         <OrbitControls
           enableDamping
@@ -30,7 +31,7 @@ export const NavigationCubeContainer = observer(function NavigationCubeContainer
           }}
           enableZoom={false}
         />
-        <ambientLight intensity={3} />
+        <ambientLight intensity={4} />
         <NavigationCube />
       </Canvas>
     </div>

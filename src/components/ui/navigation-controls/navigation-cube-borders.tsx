@@ -3,7 +3,7 @@ import { Box } from "@react-three/drei";
 import { Vector3 } from "three";
 import { kNavigationCubeSize } from "../../../utilities/constants";
 
-const borderDimension = 2;
+const borderDimension = 1.5;
 const borderOffset = 14.5;
 
 type DimensionType = [Maybe<number>, Maybe<number>, Maybe<number>];
