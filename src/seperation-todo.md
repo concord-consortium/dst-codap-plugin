@@ -21,10 +21,6 @@ Problem files:
   - models/data/data-set-utils.ts
 - models/formula/filter-formula-adapter used by:
   - models/data/data-set-utils.ts
-- models/history/apply-model-change used by:
-  - models/data/attribute.ts
-  - models/data/data-set-utils.ts
-  - models/data/data-set.ts
 - models/history/without-undo used by:
   - models/data/attribute.ts
   - models/data/data-set.ts
@@ -41,7 +37,6 @@ Tasks to remove errors:
 - look at the shared case metadata: how is it used? can we bring in a version of it without bringing in the shared model system which depends on the tile system?
 - look at shared-data-utils, maybe it would be OK to bring this in, but probably it is about the shared model system. data-set-utils uses it to get the shared case metadata from the dataset.
 - look at the formula system: do we need it? can we make it a service so data-configuration-model can look it up and handle the case where it isn't available?
-- look at apply-model-change: can we make it a service that is basically a no-op in the plugin?
 - look at without-undo: can we make it a service that is basically a no-op in the plugin?
 - look at data-set-notifications: the plugin shouldn't need to do this so can it be made a service?
 - try to isolate data-set-conversion so plugins using the data-set model don't need to worry about conversion? Or perhaps they should because the data-set is transferred in v2 format??
