@@ -12,7 +12,7 @@ interface INavigationCubeCornerProps {
 }
 export function NavigationCubeButton({ position, size, targetPivot, targetRotation }: INavigationCubeCornerProps) {
   const [hovering, setHovering] = useState(false);
-  const opacity = hovering ? 0.5 : 0.2;
+  const opacity = hovering ? 0.5 : 0;
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();
@@ -20,12 +20,12 @@ export function NavigationCubeButton({ position, size, targetPivot, targetRotati
     setHovering(false);
   };
 
-  const handlePointerEnter = (event: ThreeEvent<PointerEvent>) => {
+  const handlePointerOver = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
     setHovering(true);
   };
 
-  const handlePointerLeave = (event: ThreeEvent<PointerEvent>) => {
+  const handlePointerOut = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
     setHovering(false);
   };
@@ -35,8 +35,8 @@ export function NavigationCubeButton({ position, size, targetPivot, targetRotati
     <Box
       args={size}
       onClick={handleClick}
-      onPointerEnter={handlePointerEnter}
-      onPointerLeave={handlePointerLeave}
+      onPointerOver={handlePointerOver}
+      onPointerOut={handlePointerOut}
       position={position}
     >
       <meshStandardMaterial attach="material" color="#177991" opacity={opacity} transparent={true} />
