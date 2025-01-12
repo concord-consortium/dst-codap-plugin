@@ -11,8 +11,6 @@ Problem files:
   - components/axis/components/axis-or-legend-attribute-menu
   - components/data-display/components/legend/multi-legend
   - hooks/use-drop-hint-string
-- models/data/data-set-conversion used by:
-  - models/data/data-set.ts
 - models/formula/formula used by:
   - components/data-display/models/data-configuration-model.ts
   - models/data/attribute.ts
@@ -35,7 +33,6 @@ Tasks to remove errors:
 - look at shared-data-utils, maybe it would be OK to bring this in, but probably it is about the shared model system. data-set-utils uses it to get the shared case metadata from the dataset.
 - look at the formula system: do we need it? can we make it a service so data-configuration-model can look it up and handle the case where it isn't available?
 - look at data-set-notifications: the plugin shouldn't need to do this so can it be made a service?
-- try to isolate data-set-conversion so plugins using the data-set model don't need to worry about conversion? Or perhaps they should because the data-set is transferred in v2 format??
 
 Tasks to reduce unneeded code:
 - make translation a service so plugins using shared code don't need to a copy of the full set of translations
@@ -45,5 +42,3 @@ Ideas:
 Handling the conversion of types to v2 format in the notifications.
 This can be done with a notification-service like the history service.
 It can provide methods for converting/processing/exporting cases and attributes
-
-This could be combined with code for handling the preProcessing of data set snapshots. This conversion is what uses the methods from data-set-conversion.
