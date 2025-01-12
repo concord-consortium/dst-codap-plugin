@@ -1,9 +1,10 @@
 import { observer } from "mobx-react-lite";
 import React, { useRef } from "react";
-import { OrbitControls, OrthographicCamera } from "@react-three/drei";
+import { OrthographicCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Vector3 } from "three";
 import { dstCamera } from "../../../models/camera";
+import { DSTOrbitControls } from "../../dst-orbit-controls";
 import { NavigationCube } from "./navigation-cube";
 import "./navigation-cube-container.scss";
 
@@ -21,14 +22,8 @@ export const NavigationCubeContainer = observer(function NavigationCubeContainer
           ref={cameraRef}
           zoom={1.2}
         />
-        <OrbitControls
-          enableDamping
-          onChange={() => {
-            if (cameraRef.current) {
-              const {x, y, z} = cameraRef.current.position;
-              dstCamera.setPosition(x, y, z);
-            }
-          }}
+        <DSTOrbitControls
+          cameraRef={cameraRef}
           enableZoom={false}
         />
         <ambientLight intensity={4} />
