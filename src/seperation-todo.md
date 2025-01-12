@@ -19,20 +19,15 @@ Problem files:
   - models/data/data-set-utils.ts
 - models/formula/filter-formula-adapter used by:
   - models/data/data-set-utils.ts
-- models/shared/shared-case-metadata used by:
-  - components/data-display/models/data-configuration-model.ts
-- models/shared/shared-case-metadata-constants used by:
-  - components/data-display/models/data-configuration-model.ts
 - models/shared/shared-data-utils used by:
   - models/data/data-set-utils.ts
 
 
 Tasks to remove errors:
 - See if we can make a tile-less version use-drag-drop
-- look at the shared case metadata: how is it used? can we bring in a version of it without bringing in the shared model system which depends on the tile system?
-- look at shared-data-utils, maybe it would be OK to bring this in, but probably it is about the shared model system. data-set-utils uses it to get the shared case metadata from the dataset.
 - look at the formula system: do we need it? can we make it a service so data-configuration-model can look it up and handle the case where it isn't available?
 - look at data-set-notifications: the plugin shouldn't need to do this so can it be made a service?
+- shared-data-utils depends on the tile system
 
 Tasks to reduce unneeded code:
 - make translation a service so plugins using shared code don't need to a copy of the full set of translations
