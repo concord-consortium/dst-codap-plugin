@@ -14,7 +14,7 @@ export function DSTOrbitControls({
 }: IDSTOrbitControlsProps) {
 
   const handleChange = () => {
-    if (cameraRef.current) {
+    if (cameraRef.current && !dstCamera.animating) {
       const {x, y, z} = cameraRef.current.position;
       dstCamera.setPosition(x, y, z);
     }
