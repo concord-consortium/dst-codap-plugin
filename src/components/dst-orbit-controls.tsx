@@ -23,6 +23,7 @@ export function DSTOrbitControls({
   return (
     <OrbitControls
       enabled={enabled}
+      enableDamping={false}
       enableZoom={enableZoom}
       maxZoom={maxZoom}
       minZoom={minZoom}
