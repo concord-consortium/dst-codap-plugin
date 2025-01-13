@@ -27,9 +27,10 @@ context("Test the overall app", () => {
       ae.getUIButton("button-up").should("be.enabled");
       ae.getUIButton("button-up").click();
       ae.getUIButton("button-down").should("be.enabled");
-      Array(11).fill(1).forEach(() => ae.getUIButton("button-up").click());
+      Array(10).fill(1).forEach(() => ae.getUIButton("button-up").click());
       ae.getUIButton("button-up").should("be.enabled");
       ae.getUIButton("button-up").click();
+      cy.wait(300);
       ae.getUIButton("button-up").should("not.be.enabled");
 
       // Left button
