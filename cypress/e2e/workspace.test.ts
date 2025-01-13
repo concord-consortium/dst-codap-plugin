@@ -15,22 +15,22 @@ context("Test the overall app", () => {
 
     it("ui renders and functions", () => {
       // Up button
-      ae.getUIButton("button-up").should("be.enabled");
-      ae.getUIButton("button-up").click();
-      ae.getUIButton("button-up").should("be.enabled");
-      ae.getUIButton("button-up").click();
-      ae.getUIButton("button-up").should("be.enabled");
-      ae.getUIButton("button-up").click();
-      ae.getUIButton("button-up").should("not.be.enabled");
-
-      // Down button
       ae.getUIButton("button-down").should("be.enabled");
       ae.getUIButton("button-down").click();
-      ae.getUIButton("button-up").should("be.enabled");
-      Array(10).fill(1).forEach(() => ae.getUIButton("button-down").click());
+      ae.getUIButton("button-down").should("be.enabled");
+      ae.getUIButton("button-down").click();
       ae.getUIButton("button-down").should("be.enabled");
       ae.getUIButton("button-down").click();
       ae.getUIButton("button-down").should("not.be.enabled");
+
+      // Down button
+      ae.getUIButton("button-up").should("be.enabled");
+      ae.getUIButton("button-up").click();
+      ae.getUIButton("button-down").should("be.enabled");
+      Array(10).fill(1).forEach(() => ae.getUIButton("button-up").click());
+      ae.getUIButton("button-up").should("be.enabled");
+      ae.getUIButton("button-up").click();
+      ae.getUIButton("button-up").should("not.be.enabled");
 
       // Left button
       ae.getUIButton("button-left").should("be.enabled");
