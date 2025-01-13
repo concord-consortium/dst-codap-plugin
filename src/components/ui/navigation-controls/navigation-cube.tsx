@@ -1,6 +1,6 @@
 import React from "react";
 import { Box } from "@react-three/drei";
-import { kNavigationCubeSize } from "../../../utilities/constants";
+import { kNavigationCubeSize } from "./navigation-cube-constants";
 import { NavigationCubeBorders } from "./navigation-cube-borders";
 import { NavigationCubeButtons } from "./navigation-cube-buttons";
 import { NavigationCubeLabels } from "./navigation-cube-labels";
@@ -17,5 +17,5 @@ export function NavigationCube() {
       <NavigationCubeButtons />
     </>
   );
+  /* eslint-enable react/no-unknown-property */
 }
-/* eslint-enable react/no-unknown-property */

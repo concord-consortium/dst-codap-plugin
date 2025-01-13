@@ -22,5 +22,3 @@ export const kBackgroundLatMin = baseBackgroundLatMid - backgroundLongRange / 2;
 
 export const kUIPivotChange = Math.PI / 12;
 export const kUIRotationChange = Math.PI / 12;
-
-export const kNavigationCubeSize = 30;

@@ -1,15 +1,12 @@
 import React from "react";
 import { Box } from "@react-three/drei";
 import { Vector3 } from "three";
-import { kNavigationCubeSize } from "../../../utilities/constants";
-
-const borderDimension = 1.5;
-const borderOffset = 14.5;
+import { kBorderPosition, kBorderSize, kNavigationCubeSize } from "./navigation-cube-constants";
 
 type DimensionType = [Maybe<number>, Maybe<number>, Maybe<number>];
-const xDimensions = [kNavigationCubeSize, borderDimension, borderDimension] as DimensionType;
-const yDimensions = [borderDimension, kNavigationCubeSize, borderDimension] as DimensionType;
-const zDimensions = [borderDimension, borderDimension, kNavigationCubeSize] as DimensionType;
+const xDimensions = [kNavigationCubeSize, kBorderSize, kBorderSize] as DimensionType;
+const yDimensions = [kBorderSize, kNavigationCubeSize, kBorderSize] as DimensionType;
+const zDimensions = [kBorderSize, kBorderSize, kNavigationCubeSize] as DimensionType;
 
 interface IBorderProps {
   dimensions: DimensionType;
@@ -28,18 +25,18 @@ function Border({ dimensions, position }: IBorderProps) {
 export function NavigationCubeBorders() {
   return (
     <>
-      <Border dimensions={xDimensions} position={new Vector3(0, borderOffset, borderOffset)} />
-      <Border dimensions={xDimensions} position={new Vector3(0, borderOffset, -borderOffset)} />
-      <Border dimensions={xDimensions} position={new Vector3(0, -borderOffset, borderOffset)} />
-      <Border dimensions={xDimensions} position={new Vector3(0, -borderOffset, -borderOffset)} />
-      <Border dimensions={yDimensions} position={new Vector3(borderOffset, 0, borderOffset)} />
-      <Border dimensions={yDimensions} position={new Vector3(borderOffset, 0, -borderOffset)} />
-      <Border dimensions={yDimensions} position={new Vector3(-borderOffset, 0, borderOffset)} />
-      <Border dimensions={yDimensions} position={new Vector3(-borderOffset, 0, -borderOffset)} />
-      <Border dimensions={zDimensions} position={new Vector3(borderOffset, borderOffset, 0)} />
-      <Border dimensions={zDimensions} position={new Vector3(borderOffset, -borderOffset, 0)} />
-      <Border dimensions={zDimensions} position={new Vector3(-borderOffset, borderOffset, 0)} />
-      <Border dimensions={zDimensions} position={new Vector3(-borderOffset, -borderOffset, 0)} />
+      <Border dimensions={xDimensions} position={new Vector3(0, kBorderPosition, kBorderPosition)} />
+      <Border dimensions={xDimensions} position={new Vector3(0, kBorderPosition, -kBorderPosition)} />
+      <Border dimensions={xDimensions} position={new Vector3(0, -kBorderPosition, kBorderPosition)} />
+      <Border dimensions={xDimensions} position={new Vector3(0, -kBorderPosition, -kBorderPosition)} />
+      <Border dimensions={yDimensions} position={new Vector3(kBorderPosition, 0, kBorderPosition)} />
+      <Border dimensions={yDimensions} position={new Vector3(kBorderPosition, 0, -kBorderPosition)} />
+      <Border dimensions={yDimensions} position={new Vector3(-kBorderPosition, 0, kBorderPosition)} />
+      <Border dimensions={yDimensions} position={new Vector3(-kBorderPosition, 0, -kBorderPosition)} />
+      <Border dimensions={zDimensions} position={new Vector3(kBorderPosition, kBorderPosition, 0)} />
+      <Border dimensions={zDimensions} position={new Vector3(kBorderPosition, -kBorderPosition, 0)} />
+      <Border dimensions={zDimensions} position={new Vector3(-kBorderPosition, kBorderPosition, 0)} />
+      <Border dimensions={zDimensions} position={new Vector3(-kBorderPosition, -kBorderPosition, 0)} />
     </>
   );
 }

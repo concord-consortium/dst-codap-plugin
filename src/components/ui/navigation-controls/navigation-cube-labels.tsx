@@ -1,11 +1,8 @@
 import React from "react";
 import { Text } from "@react-three/drei";
 import { Euler, Vector3 } from "three";
-import { kNavigationCubeSize } from "../../../utilities/constants";
 import { halfPi } from "../../../utilities/trig-utils";
-
-const kLabelOffset = 1;
-const kLabelPosition = kNavigationCubeSize / 2 + kLabelOffset;
+import { kLabelPosition } from "./navigation-cube-constants";
 
 interface INavigationCubeLabelProps {
   position: Vector3;
