@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Box } from "@react-three/drei";
 import { ThreeEvent } from "@react-three/fiber";
 import { Vector3 } from "three";
@@ -17,27 +17,28 @@ interface INavigationCubeCornerProps {
 }
 export function NavigationCubeButton({ position, size, targetPivot, targetRotation }: INavigationCubeCornerProps) {
   const [hovering, setHovering] = useState(false);
-  const [clickPosition, setClickPosition] = useState<clickPositionType|null>(null);
+  const clickPosition = useRef<clickPositionType|null>(null);
   const opacity = hovering ? 0.5 : 0;
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();
 
     // Only rotate to the proper location if the user didn't drag the cube.
-    if (clickPosition) {
-      const distanceSquared = (event.clientX - clickPosition.x) ** 2 + (event.clientY - clickPosition.y) ** 2;
+    if (clickPosition.current != null) {
+      const { x, y } = clickPosition.current;
+      const distanceSquared = (event.clientX - x) ** 2 + (event.clientY - y) ** 2;
       if (distanceSquared < 25) {
         dstCamera.animateTo(dstCamera.targetZoom ?? dstCamera.zoom, targetPivot, targetRotation);
       }
     }
-    
-    setClickPosition(null);
+
+    clickPosition.current = null;
     setHovering(false);
   };
 
   const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
-    setClickPosition({ x: event.clientX, y: event.clientY });
+    clickPosition.current = { x: event.clientX, y: event.clientY };
   };
 
   const handlePointerOver = (event: ThreeEvent<PointerEvent>) => {
