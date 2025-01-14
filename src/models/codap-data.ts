@@ -43,6 +43,7 @@ class CodapCases {
   }
 
   replaceCases(newCases: Record<number, ICase>) {
+    console.log(`>>> replacing cases`);
     this.caseMap.replace(newCases);
   }
 

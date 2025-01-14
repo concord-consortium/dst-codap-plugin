@@ -2,13 +2,13 @@ import {
   addDataContextChangeListener, createDataContextFromURL, getCaseByFormulaSearch, getDataContext,
   getSelectionList, initializePlugin, selectCases
 } from "@concord-consortium/codap-plugin-api";
-import { getDate, codapCases } from "../models/codap-data";
+import { codapCases, getDate, ICase } from "../models/codap-data";
 import { kInitialDimensions, kPluginName, kVersion } from "./constants";
 import { dataRanges } from "./graph-utils";
 
-import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
+import dataURL from "../data/Tornado_Tracks_2010-2022.csv";
 
-const dataContextName = "Tornado_Tracks_2020-2022";
+const dataContextName = "Tornado_Tracks_2010-2022";
 const collectionName = "Cases";
 
 export async function initializeDST() {
@@ -49,12 +49,22 @@ export async function getData() {
       return;
     }
 
-    casesResult.values.forEach((aCase: any) => codapCases.addCase({ id: aCase.id, ...aCase.values }));
+    const cases: Record<number, ICase> = {};
+    casesResult.values.forEach((aCase: any) => cases[aCase.id] = { id: aCase.id, ...aCase.values });
 
     // Update data ranges
-    const dates = codapCases.cases.map((aCase: any) => getDate(aCase)).filter((time: number) => isFinite(time));
-    dataRanges.dateMin = Math.min(...dates);
-    dataRanges.dateMax = Math.max(...dates);
+    const dates = codapCases.cases.map((aCase: ICase) => getDate(aCase)).filter((time: number) => isFinite(time));
+    dataRanges.setDateRange(Math.min(...dates), Math.max(...dates));
+    // dataRanges.setDateMin(Math.min(...dates));
+    // dataRanges.setDateMax(Math.max(...dates));
+
+    codapCases.replaceCases(cases);
+    // casesResult.values.forEach((aCase: any) => codapCases.addCase({ id: aCase.id, ...aCase.values }));
+
+    // Update data ranges
+    // const dates = codapCases.cases.map((aCase: ICase) => getDate(aCase)).filter((time: number) => isFinite(time));
+    // dataRanges.setDateMin(Math.min(...dates));
+    // dataRanges.setDateMax(Math.max(...dates));
     // const lats = is.map((item: any) => item.Latitude);
     // dataRanges.latMin = Math.min(...lats);
     // dataRanges.latMax = Math.max(...lats);
