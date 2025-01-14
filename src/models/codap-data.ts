@@ -42,9 +42,11 @@ class CodapCases {
     if (id != null) this.selectedCaseIds.delete(id);
   }
 
-  replaceCases(newCases: Record<number, ICase>) {
-    console.log(`>>> replacing cases`);
-    this.caseMap.replace(newCases);
+  replaceCases(newCases: ICase[]) {
+    this.caseMap.clear();
+    newCases.forEach(aCase => {
+      this.caseMap.set(aCase.id, aCase);
+    });
   }
 
   replaceSelectedCases(newSelectedCaseIds: number[]) {

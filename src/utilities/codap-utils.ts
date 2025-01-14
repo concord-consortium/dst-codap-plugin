@@ -49,28 +49,19 @@ export async function getData() {
       return;
     }
 
-    const cases: Record<number, ICase> = {};
-    casesResult.values.forEach((aCase: any) => cases[aCase.id] = { id: aCase.id, ...aCase.values });
+    const cases: ICase[] = casesResult.values.map((aCase: any) => ({ id: aCase.id, ...aCase.values }));
 
     // Update data ranges
-    const dates = codapCases.cases.map((aCase: ICase) => getDate(aCase)).filter((time: number) => isFinite(time));
+    const dates = cases.map(aCase => getDate(aCase)).filter((time: number) => isFinite(time));
     dataRanges.setDateRange(Math.min(...dates), Math.max(...dates));
-    // dataRanges.setDateMin(Math.min(...dates));
-    // dataRanges.setDateMax(Math.max(...dates));
-
-    codapCases.replaceCases(cases);
-    // casesResult.values.forEach((aCase: any) => codapCases.addCase({ id: aCase.id, ...aCase.values }));
-
-    // Update data ranges
-    // const dates = codapCases.cases.map((aCase: ICase) => getDate(aCase)).filter((time: number) => isFinite(time));
-    // dataRanges.setDateMin(Math.min(...dates));
-    // dataRanges.setDateMax(Math.max(...dates));
     // const lats = is.map((item: any) => item.Latitude);
     // dataRanges.latMin = Math.min(...lats);
     // dataRanges.latMax = Math.max(...lats);
     // const longs = is.map((item: any) => item.Longitude);
     // dataRanges.longMin = Math.min(...longs);
     // dataRanges.longMax = Math.max(...longs);
+
+    codapCases.replaceCases(cases);
   } catch (error) {
     // This will happen if not embedded in CODAP
     console.warn("Not embedded in CODAP", error);

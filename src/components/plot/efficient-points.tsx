@@ -1,13 +1,12 @@
 import { autorun, /*reaction*/ } from "mobx";
-import { observer } from "mobx-react-lite";
 import * as THREE from "three";
 import { useEffect, useRef } from "react";
 import { useThree } from "@react-three/fiber";
 import { InstancedMesh2 } from "@three.ez/instanced-mesh";
 import { ICase, codapCases } from "../../models/codap-data";
-import { convertDate, convertLat, convertLong/*, dataRanges*/ } from "../../utilities/graph-utils";
+import { convertDate, convertLat, convertLong } from "../../utilities/graph-utils";
 
-export const EfficientPoints = observer(function EfficientPoints() {
+export const EfficientPoints = function EfficientPoints() {
   const { scene } = useThree();
   const points = useRef(new InstancedMesh2(
     new THREE.SphereGeometry(0.1, 16, 16),
@@ -23,7 +22,6 @@ export const EfficientPoints = observer(function EfficientPoints() {
 
     // Create points when cases change
     autorun(() => {
-      console.log(`--- cases`, codapCases.caseMap.size);
       points.current.clear();
       idToIndexMap.current.clear();
       indexToCaseMap.current.clear();
@@ -41,4 +39,4 @@ export const EfficientPoints = observer(function EfficientPoints() {
   }, [scene]);
 
   return null;
-});
+};
