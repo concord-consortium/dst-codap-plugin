@@ -1,6 +1,6 @@
 import {
   addDataContextChangeListener, createDataContextFromURL, getCaseByFormulaSearch, getDataContext,
-  initializePlugin, selectCases
+  getSelectionList, initializePlugin, selectCases
 } from "@concord-consortium/codap-plugin-api";
 import { getDate, codapCases } from "../models/codap-data";
 import { kInitialDimensions, kPluginName, kVersion } from "./constants";
@@ -19,15 +19,13 @@ export async function initializeDST() {
     });
 
   getData();
+  updateSelection();
 
   addDataContextChangeListener(dataContextName, notification => {
-    const { operation, result } = notification.values;
+    const { operation } = notification.values;
 
     if (operation === "selectCases") {
-      const { extend, cases, removedCases } = result;
-      if (!extend) codapCases.clearSelectedCases();
-      if (cases) cases.forEach((aCase: any) => codapCases.addCaseToSelection(aCase.id));
-      if (removedCases) removedCases.forEach((aCase: any) => codapCases.removeCaseFromSelection(aCase.id));
+      updateSelection();
     }
   });
 }
@@ -54,7 +52,7 @@ export async function getData() {
     casesResult.values.forEach((aCase: any) => codapCases.addCase({ id: aCase.id, ...aCase.values }));
 
     // Update data ranges
-    const dates = codapCases.cases.map((item: any) => getDate(item)).filter((time: number) => isFinite(time));
+    const dates = codapCases.cases.map((aCase: any) => getDate(aCase)).filter((time: number) => isFinite(time));
     dataRanges.dateMin = Math.min(...dates);
     dataRanges.dateMax = Math.max(...dates);
     // const lats = is.map((item: any) => item.Latitude);
@@ -63,6 +61,19 @@ export async function getData() {
     // const longs = is.map((item: any) => item.Longitude);
     // dataRanges.longMin = Math.min(...longs);
     // dataRanges.longMax = Math.max(...longs);
+  } catch (error) {
+    // This will happen if not embedded in CODAP
+    console.warn("Not embedded in CODAP", error);
+  }
+}
+
+export async function updateSelection() {
+  try {
+    const selectionListResult = await getSelectionList(dataContextName);
+    if (selectionListResult.success) {
+      codapCases.clearSelectedCases();
+      codapCases.replaceSelectedCases(selectionListResult.values.map((aCase: any) => aCase.caseID));
+    }
   } catch (error) {
     // This will happen if not embedded in CODAP
     console.warn("Not embedded in CODAP", error);

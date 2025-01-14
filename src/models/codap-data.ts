@@ -22,8 +22,8 @@ class CodapCases {
     this.caseMap.set(aCase.id, aCase);
   }
 
-  addCaseToSelection(id: number) {
-    this.selectedCaseIds.add(id);
+  addCaseToSelection(id?: number) {
+    if (id != null) this.selectedCaseIds.add(id);
   }
 
   clearSelectedCases() {
@@ -38,8 +38,8 @@ class CodapCases {
     return this.selectedCaseIds.has(id);
   }
 
-  removeCaseFromSelection(id: number) {
-    this.selectedCaseIds.delete(id);
+  removeCaseFromSelection(id?: number) {
+    if (id != null) this.selectedCaseIds.delete(id);
   }
 
   replaceCases(newCases: Record<number, ICase>) {
