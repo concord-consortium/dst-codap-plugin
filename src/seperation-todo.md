@@ -13,16 +13,11 @@ Problem files:
   - hooks/use-drop-hint-string
 - `linkTileToDataSet` in shared-data-utils.ts needs `ITileModel` (we are trying to avoid that)
 - `getGlobalValueManager` in tile-environment.ts needs global value manager stuff, it should be moved out of the tile environment file. It is just a specific shared model. 
-- `DIMessage` in tile-environment.ts should be replaced, that will come with the changes from the history PR.
-- `withoutUndoRedoString` in apply-model-change.ts, this will get fixed by history PR
-- `tree-types` is being imported by without-undo.ts, this will get fixed by the history PR
-
 
 Tasks to remove errors:
 - See if we can make a tile-less version use-drag-drop
 - shared-data-utils depends on the tile system
 - look at data-set-notifications: the plugin shouldn't need to do this so can it be made a service?
-- re-apply history PRs to fix the apply-model-change and without-undo
 - separate out linkTileToDataSet from shared-data-utils
 - move getGlobalValueManager out of tile-environment
 
