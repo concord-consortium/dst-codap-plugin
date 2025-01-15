@@ -1,6 +1,6 @@
 import { clsx } from "clsx";
 import React from "react";
-import ArrowIcon from "../../assets/icons/cube-arrow-icon.svg";
+import ArrowIcon from "../../../assets/icons/cube-arrow-icon.svg";
 import "./arrow-button.scss";
 
 interface IArrowButtonProps {
