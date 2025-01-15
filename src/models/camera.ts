@@ -35,6 +35,7 @@ class DSTCamera {
   rotation = defaultRotation;
   zoom = defaultZoom;
 
+  animating = false;
   animationPercentage: Maybe<number>;
   startDistance: Maybe<number>;
   startPivot: Maybe<number>;
@@ -53,7 +54,12 @@ class DSTCamera {
   // Animate the camera towards its target values.
   // This is called every frame by the component.
   animate(dt: number) {
-    if (this.animationPercentage == null) return;
+    if (this.animationPercentage == null) {
+      // Change animating to false one frame behind the animation actually ending to prevent the
+      // three camera from updating the dst camera incorrectly.
+      this.animating = false;
+      return;
+    }
 
     this.animationPercentage = Math.min(this.animationPercentage + dt / animationDuration, 1);
     const smoothPercentage = Math.sin((this.animationPercentage * 2 - 1) * halfPi) / 2 + .5;
@@ -88,6 +94,7 @@ class DSTCamera {
   // Sets up an animation to move the camera by the given amounts.
   animateBy(dZoom: number, dPivot: number, dRotation: number) {
     // Capture the state when the animation starts.
+    this.animating = true;
     this.animationPercentage = 0;
     this.startPivot = this.pivot;
     this.startRotation = this.rotation;

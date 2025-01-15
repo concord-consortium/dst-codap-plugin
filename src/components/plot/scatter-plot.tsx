@@ -1,10 +1,11 @@
 /* eslint-disable react/no-unknown-property */
 import { observer } from "mobx-react-lite";
 import React, { useRef, useState } from "react";
-import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { dstCamera, zoomMax, zoomMin } from "../../models/camera";
+import { zoomMax, zoomMin } from "../../models/camera";
+import { uiState } from "../../models/ui";
 import { modeType } from "../../types/ui-types";
+import { DSTOrbitControls } from "../dst-orbit-controls";
 import { CubeOutline } from "./cube-outline";
 import { DSTCamera } from "./dst-camera";
 import { GridPlane } from "./grid-plane";
@@ -20,28 +21,25 @@ interface IScatterPlotProps {
 export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotProps) {
   const cameraRef = useRef<any>(null);
   const [zPosition, setZPosition] = useState(-5);
+  const controlName = "scatter-plot-controls";
 
   return (
-    <div className="w-full h-full relative scatter-plot" style={{backgroundColor: "#f9f9f9"}}>
+    <div
+      className="w-full h-full relative scatter-plot"
+      onPointerDown={() => uiState.setActiveControls(controlName)}
+    >
       <Canvas>
         <CubeOutline />
         <DSTCamera
           cameraRef={cameraRef}
         />
-        {mode === "pointer" && (
-          <OrbitControls
-            enableDamping
-            onChange={() => {
-              if (cameraRef.current) {
-                const {x, y, z} = cameraRef.current.position;
-                dstCamera.setPosition(x, y, z);
-                dstCamera.setZoom(cameraRef.current.zoom);
-              }
-            }}
-            maxZoom={zoomMax}
-            minZoom={zoomMin}
-          />
-        )}
+        <DSTOrbitControls
+          cameraRef={cameraRef}
+          enabled={mode === "pointer"}
+          maxZoom={zoomMax}
+          minZoom={zoomMin}
+          name={controlName}
+        />
         <ambientLight intensity={1.5} />
         <FlatEfficientPoints />
         {/* <Points /> */}
