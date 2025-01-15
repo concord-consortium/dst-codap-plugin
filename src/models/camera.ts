@@ -144,7 +144,8 @@ class DSTCamera {
   }
 
   get scaleFactor() {
-    return 40 / this.zoom;
+    return 60 / this.zoom;
+    // return 40 / this.zoom;
   }
 
   resetHome() {
