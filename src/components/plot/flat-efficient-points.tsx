@@ -1,23 +1,27 @@
 import { /*autorun,*/ reaction } from "mobx";
 import * as THREE from "three";
-import { useEffect, useRef } from "react";
-import { useThree } from "@react-three/fiber";
+import React, { useEffect, useMemo, useRef } from "react";
+import { extend, useFrame, useThree } from "@react-three/fiber";
 import { InstancedMesh2 } from "@three.ez/instanced-mesh";
 import { dstCamera } from "../../models/camera";
 import { ICase, codapCases } from "../../models/codap-data";
 import { convertDate, convertLat, convertLong } from "../../utilities/graph-utils";
 
+extend({ InstancedMesh2 });
+
 // let throttleScale = false;
 let throttleRotation = false;
+let rotationKey = "";
 
 export function FlatEfficientPoints() {
   const { scene } = useThree();
   const basePointSize = 0.12;
-  const points = useRef(new InstancedMesh2(
-    new THREE.CircleGeometry(basePointSize, 16),
-    new THREE.MeshStandardMaterial({ color: "#925987" }),
-    { allowsEuler: true, createEntities: true }
-  ));
+  const points = useRef<InstancedMesh2>();
+  // const points = useRef(new InstancedMesh2(
+  //   new THREE.CircleGeometry(basePointSize, 16),
+  //   new THREE.MeshStandardMaterial({ color: "#925987" }),
+  //   { allowsEuler: true, createEntities: true }
+  // ));
   const idToIndexMap = useRef<Map<number, number>>(new Map());
   const indexToCaseMap = useRef<Map<number, ICase>>(new Map());
   // const selectedPoints = useRef(new InstancedMesh2(
@@ -27,12 +31,44 @@ export function FlatEfficientPoints() {
   // const selectedIdToIndexMap = useRef<Map<number, number>>(new Map());
   // const selectedIndexToCaseMap = useRef<Map<number, ICase>>(new Map());
 
+  const geometry = useMemo(() => new THREE.CircleGeometry(basePointSize, 16), [basePointSize]);
+  const material = useMemo(() => new THREE.MeshStandardMaterial({ color: "#925987" }), []);
+
+  useFrame(() => {
+    if (!points.current) return;
+
+    // Update point rotation based on camera position
+    if (!throttleRotation) {
+      const { position } = dstCamera;
+      const newRotationKey = `${position.x},${position.y},${position.z}`;
+      if (rotationKey !== newRotationKey) {
+        throttleRotation = true;
+        rotationKey = newRotationKey;
+        // const { x, y, z, order } = dstCamera.facingRotation;
+        points.current.updateInstances((instance, index) => {
+          // instance.rotation.set(x, y, z, order);
+          instance.updateMatrix();
+        });
+        // points.current.instances.forEach(instance => {
+        //   const { x, y, z, order } = dstCamera.facingRotation;
+        //   instance.rotation.set(x, y, z, order);
+        //   instance.updateMatrix();
+        // });
+        setTimeout(() => throttleRotation = false, 100);
+      }
+    }
+  });
+
   useEffect(() => {
-    scene.add(points.current);
+    if (!points.current) return;
+
+    // scene.add(points.current);
 
     // Create points when cases change
     reaction(() => codapCases.cases.map(aCase => aCase.id).join(","),
       () => {
+        if (!points.current) return;
+
         // Clear old points
         points.current.clear();
         idToIndexMap.current.clear();
@@ -75,23 +111,24 @@ export function FlatEfficientPoints() {
       }, { fireImmediately: true}
     );
 
-    reaction(
-      () => {
-        const { x, y, z} = dstCamera.position;
-        return `${x},${y},${z}`;
-      },
-      () => {
-        if (!throttleRotation) {
-          throttleRotation = true;
-          const { x, y, z, order } = dstCamera.facingRotation;
-          points.current.instances.forEach(instance => {
-            instance.rotation.set(x, y, z, order);
-            instance.updateMatrix();
-          });
-          setTimeout(() => throttleRotation = false, 100);
-        }
-      }
-    );
+    // Rotate points when camera moves
+    // reaction(
+    //   () => {
+    //     const { x, y, z } = dstCamera.position;
+    //     return `${x},${y},${z}`;
+    //   },
+    //   () => {
+    //     if (!throttleRotation) {
+    //       throttleRotation = true;
+    //       const { x, y, z, order } = dstCamera.facingRotation;
+    //       points.current.instances.forEach(instance => {
+    //         instance.rotation.set(x, y, z, order);
+    //         instance.updateMatrix();
+    //       });
+    //       setTimeout(() => throttleRotation = false, 100);
+    //     }
+    //   }
+    // );
 
     // const normalColor = new THREE.Color("#925987");
     // const selectedColor = new THREE.Color("#FF0000");
@@ -119,14 +156,14 @@ export function FlatEfficientPoints() {
     //     if (!throttleScale) {
     //       throttleScale = true;
     //       setTimeout(() => throttleScale = false, 100);
-    //       points.current.updateInstances((instance, index) => {
-    //         const scale = baseDotSize * dstCamera.scaleFactor;
-    //         console.log(`--- rescale`, index);
-    //         // console.log(` -- instance`, instance);
-    //         console.log(` -- scale`, instance.scale);
-    //         instance.scale.set(scale, scale, scale);
-    //         console.log(` -- post scale`, instance.scale);
-    //       });
+          // points.current.updateInstances((instance, index) => {
+          //   const scale = baseDotSize * dstCamera.scaleFactor;
+          //   console.log(`--- rescale`, index);
+          //   // console.log(` -- instance`, instance);
+          //   console.log(` -- scale`, instance.scale);
+          //   instance.scale.set(scale, scale, scale);
+          //   console.log(` -- post scale`, instance.scale);
+          // });
     //     }
     //   }
     // );
@@ -134,5 +171,10 @@ export function FlatEfficientPoints() {
     points.current.computeBVH();
   }, [scene]);
 
-  return null;
+  /* eslint-disable react/no-unknown-property */
+  return (
+    <instancedMesh2 args={[geometry, material]} ref={points} />
+  );
+  /* eslint-enable react/no-unknown-property */
+  // return null;
 };
