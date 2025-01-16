@@ -1,4 +1,4 @@
-import { autorun } from "mobx";
+import { autorun, reaction } from "mobx";
 import { observer } from "mobx-react-lite";
 import * as THREE from "three";
 import { useEffect, useRef } from "react";
@@ -7,6 +7,7 @@ import { useThree } from "@react-three/fiber";
 import { InstancedMesh2 } from "@three.ez/instanced-mesh";
 import { IItem, items } from "../../models/item";
 import { convertDate, convertLat, convertLong } from "../../utilities/graph-utils";
+import { dstCamera } from "../../models/camera";
 
 export const Points = observer(function Points() {
   const { scene } = useThree();
@@ -20,7 +21,8 @@ export const Points = observer(function Points() {
     points.current.computeBVH();
     scene.add(points.current);
 
-    autorun(() => {
+    // Set up points
+    const setupDisposer = autorun(() => {
       points.current.clear();
       itemMap.current.clear();
       items.forEach((item) => {
@@ -33,6 +35,24 @@ export const Points = observer(function Points() {
         });
       });
     });
+
+    // Scale points on zoom
+    const scaleDisposer = reaction(
+      () => dstCamera.scaleFactor,
+      () => {
+        points.current.updateInstances((instance) => {
+          console.log(`--- instance`, instance);
+          // const scale = 0.1 * dstCamera.scaleFactor;
+          // instance.scale.set(scale, scale, scale);
+          // instance.updateMatrix();
+        });
+      }
+    );
+
+    return () => {
+      setupDisposer();
+      scaleDisposer();
+    };
   }, [scene]);
 
   return null;
