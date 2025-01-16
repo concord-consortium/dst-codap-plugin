@@ -10,7 +10,7 @@ export interface ICase {
   Year?: number;
 }
 
-class CodapCases {
+class CodapData {
   caseMap = observable.map<number, ICase>();
   selectedCaseIds = observable.set<number>();
 
@@ -54,7 +54,7 @@ class CodapCases {
   }
 }
 
-export const codapCases = new CodapCases();
+export const codapData = new CodapData();
 
 export function getDate(aCase: ICase) {
   // // We need at least a year. To make things simple we just use 2000 for now

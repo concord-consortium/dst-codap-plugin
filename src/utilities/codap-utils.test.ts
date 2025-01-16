@@ -1,4 +1,4 @@
-import { codapCases } from "../models/codap-data";
+import { codapData } from "../models/codap-data";
 import { getData } from "./codap-utils";
 import { createDataContextFromURL, getCaseByFormulaSearch, getDataContext } from "@concord-consortium/codap-plugin-api";
 import { dataRanges } from "./graph-utils";
@@ -65,7 +65,7 @@ describe("codap utilities", () => {
         ]
       }));
       await getData();
-      expect(codapCases.cases.length).toBe(2);
+      expect(codapData.cases.length).toBe(2);
       expect(dataRanges.dateMin).toBe(Date.UTC(2020,0,1));
       expect(dataRanges.dateMax).toBe(Date.UTC(2022,0,1));
     });
@@ -104,7 +104,7 @@ describe("codap utilities", () => {
       }));
       await getData();
       expect(mockedCreateDataContextFromURL).not.toHaveBeenCalled();
-      expect(codapCases.cases.length).toBe(2);
+      expect(codapData.cases.length).toBe(2);
       expect(dataRanges.dateMin).toBe(Date.UTC(2020,0,1));
       expect(dataRanges.dateMax).toBe(Date.UTC(2022,0,1));
     });

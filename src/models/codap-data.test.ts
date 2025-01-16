@@ -1,31 +1,31 @@
-import { codapCases, ICase, getDate } from "./codap-data";
+import { codapData, ICase, getDate } from "./codap-data";
 
 describe("CodapCases", () => {
   beforeEach(() => {
-    codapCases.replaceCases([]);
-    codapCases.clearSelectedCases();
+    codapData.replaceCases([]);
+    codapData.clearSelectedCases();
   });
 
   test("should add a case", () => {
     const aCase: ICase = { id: 1, Year: 2021 };
-    codapCases.addCase(aCase);
-    expect(codapCases.cases.find(({ id, Year }) => id === aCase.id && Year === aCase.Year)).toBeTruthy();
+    codapData.addCase(aCase);
+    expect(codapData.cases.find(({ id, Year }) => id === aCase.id && Year === aCase.Year)).toBeTruthy();
   });
 
   test("should add a case to selection", () => {
     const aCase: ICase = { id: 1, Year: 2021 };
-    codapCases.addCase(aCase);
-    codapCases.addCaseToSelection(aCase.id);
-    expect(codapCases.isSelected(aCase.id)).toBe(true);
+    codapData.addCase(aCase);
+    codapData.addCaseToSelection(aCase.id);
+    expect(codapData.isSelected(aCase.id)).toBe(true);
   });
 
   test("should clear selected cases", () => {
     const aCase: ICase = { id: 1, Year: 2021 };
-    codapCases.addCase(aCase);
-    codapCases.addCaseToSelection(aCase.id);
-    expect(codapCases.isSelected(aCase.id)).toBe(true);
-    codapCases.clearSelectedCases();
-    expect(codapCases.isSelected(aCase.id)).toBe(false);
+    codapData.addCase(aCase);
+    codapData.addCaseToSelection(aCase.id);
+    expect(codapData.isSelected(aCase.id)).toBe(true);
+    codapData.clearSelectedCases();
+    expect(codapData.isSelected(aCase.id)).toBe(false);
   });
 
   test("should replace cases", () => {
@@ -33,8 +33,8 @@ describe("CodapCases", () => {
       { id: 1, Year: 2021 },
       { id: 2, Year: 2022 }
     ];
-    codapCases.replaceCases(cases);
-    expect(codapCases.cases).toEqual(cases);
+    codapData.replaceCases(cases);
+    expect(codapData.cases).toEqual(cases);
   });
 
   test("should replace selected cases", () => {
@@ -42,19 +42,19 @@ describe("CodapCases", () => {
       { id: 1, Year: 2021 },
       { id: 2, Year: 2022 }
     ];
-    codapCases.replaceCases(cases);
-    codapCases.replaceSelectedCases([1, 2]);
-    expect(codapCases.isSelected(1)).toBe(true);
-    expect(codapCases.isSelected(2)).toBe(true);
+    codapData.replaceCases(cases);
+    codapData.replaceSelectedCases([1, 2]);
+    expect(codapData.isSelected(1)).toBe(true);
+    expect(codapData.isSelected(2)).toBe(true);
   });
 
   test("should remove case from selection", () => {
     const aCase: ICase = { id: 1, Year: 2021 };
-    codapCases.addCase(aCase);
-    codapCases.addCaseToSelection(aCase.id);
-    expect(codapCases.isSelected(aCase.id)).toBe(true);
-    codapCases.removeCaseFromSelection(aCase.id);
-    expect(codapCases.isSelected(aCase.id)).toBe(false);
+    codapData.addCase(aCase);
+    codapData.addCaseToSelection(aCase.id);
+    expect(codapData.isSelected(aCase.id)).toBe(true);
+    codapData.removeCaseFromSelection(aCase.id);
+    expect(codapData.isSelected(aCase.id)).toBe(false);
   });
 });
 

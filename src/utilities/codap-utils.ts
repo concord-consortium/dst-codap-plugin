@@ -2,7 +2,7 @@ import {
   addDataContextChangeListener, createDataContextFromURL, getCaseByFormulaSearch, getDataContext,
   getSelectionList, initializePlugin, selectCases
 } from "@concord-consortium/codap-plugin-api";
-import { codapCases, getDate, ICase } from "../models/codap-data";
+import { codapData, getDate, ICase } from "../models/codap-data";
 import { kInitialDimensions, kPluginName, kVersion } from "./constants";
 import { dataRanges } from "./graph-utils";
 
@@ -61,7 +61,7 @@ export async function getData() {
     // dataRanges.longMin = Math.min(...longs);
     // dataRanges.longMax = Math.max(...longs);
 
-    codapCases.replaceCases(cases);
+    codapData.replaceCases(cases);
   } catch (error) {
     // This will happen if not embedded in CODAP
     console.warn("Not embedded in CODAP", error);
@@ -72,8 +72,8 @@ export async function updateSelection() {
   try {
     const selectionListResult = await getSelectionList(dataContextName);
     if (selectionListResult.success) {
-      codapCases.clearSelectedCases();
-      codapCases.replaceSelectedCases(selectionListResult.values.map((aCase: any) => aCase.caseID));
+      codapData.clearSelectedCases();
+      codapData.replaceSelectedCases(selectionListResult.values.map((aCase: any) => aCase.caseID));
     }
   } catch (error) {
     // This will happen if not embedded in CODAP
@@ -82,16 +82,16 @@ export async function updateSelection() {
 }
 
 export async function dstSelectCases(caseIds: number[]) {
-  codapCases.replaceSelectedCases(caseIds);
+  codapData.replaceSelectedCases(caseIds);
   return await selectCases(dataContextName, caseIds);
 }
 
 export async function dstAddCaseToSelection(caseId: number) {
-  codapCases.addCaseToSelection(caseId);
-  return await selectCases(dataContextName, Array.from(codapCases.selectedCaseIds));
+  codapData.addCaseToSelection(caseId);
+  return await selectCases(dataContextName, Array.from(codapData.selectedCaseIds));
 }
 
 export async function dstRemoveCaseFromSelection(caseId: number) {
-  codapCases.removeCaseFromSelection(caseId);
-  return await selectCases(dataContextName, Array.from(codapCases.selectedCaseIds));
+  codapData.removeCaseFromSelection(caseId);
+  return await selectCases(dataContextName, Array.from(codapData.selectedCaseIds));
 }

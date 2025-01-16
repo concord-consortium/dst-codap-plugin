@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite";
 import * as THREE from "three";
 import React from "react";
 import { dstCamera } from "../../models/camera";
-import { codapCases } from "../../models/codap-data";
+import { codapData } from "../../models/codap-data";
 import { convertDate, convertLat, convertLong, projectPoint } from "../../utilities/graph-utils";
 
 // This component displays flat points that are rotated towards the camera.
@@ -15,7 +15,7 @@ export const FlatPoints = observer(function FlatPoints() {
   const { facingRotation } = dstCamera;
   return (
     <group>
-      {codapCases.cases.map((item, i) => {
+      {codapData.cases.map((item, i) => {
         const dotColor = "#925987";
         const dotSize = 0.1;
         const outlineColor = "#FFFFFF";
