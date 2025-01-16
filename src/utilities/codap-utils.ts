@@ -6,9 +6,9 @@ import { codapCases, getDate, ICase } from "../models/codap-data";
 import { kInitialDimensions, kPluginName, kVersion } from "./constants";
 import { dataRanges } from "./graph-utils";
 
-import dataURL from "../data/Tornado_Tracks_2010-2022.csv";
+import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
 
-const dataContextName = "Tornado_Tracks_2010-2022";
+const dataContextName = "Tornado_Tracks_2020-2022";
 const collectionName = "Cases";
 
 export async function initializeDST() {
