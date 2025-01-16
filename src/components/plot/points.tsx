@@ -18,23 +18,20 @@ export const Points = observer(function Points() {
 
   useEffect(() => {
     points.current.computeBVH();
-    // TODO any type
-    scene.add(points.current as any);
+    scene.add(points.current);
 
     autorun(() => {
-      setTimeout(() => {
-        points.current.clear();
-        itemMap.current.clear();
-        items.forEach((item) => {
-          points.current.addInstances(1, (instance, index) => {
-            itemMap.current.set(index, item);
-            instance.position
-              .setX(convertLat(item.Latitude))
-              .setY(convertDate(item))
-              .setZ(convertLong(item.Longitude));
-          });
+      points.current.clear();
+      itemMap.current.clear();
+      items.forEach((item) => {
+        points.current.addInstances(1, (instance, index) => {
+          itemMap.current.set(index, item);
+          instance.position
+            .setX(convertLat(item.Latitude))
+            .setY(convertDate(item))
+            .setZ(convertLong(item.Longitude));
         });
-      }, 1);
+      });
     });
   }, [scene]);
 
