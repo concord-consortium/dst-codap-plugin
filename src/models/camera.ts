@@ -150,6 +150,10 @@ class DSTCamera {
     return getPositionFromCameraFormat(this.distance, this.pivot, this.rotation);
   }
 
+  get scaleFactor() {
+    return 60 / this.zoom;
+  }
+
   resetHome() {
     this.animateTo(defaultZoom, defaultPivot, defaultRotation);
   }
