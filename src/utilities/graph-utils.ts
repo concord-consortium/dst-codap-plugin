@@ -19,14 +19,6 @@ class DataRanges {
     this.longMin = kBackgroundLongMin;
     this.longMax = kBackgroundLongMax;
   }
-  
-  setDateMax(time: number) {
-    this.dateMax = time;
-  }
-
-  setDateMin(time: number) {
-    this.dateMin = time;
-  }
 
   setDateRange(min: number, max: number) {
     this.dateMin = min;
