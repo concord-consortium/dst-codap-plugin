@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import { getDate, ICase } from "../models/codap-data";
+import { getDate, IItem } from "../models/item";
 import { kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin } from "./constants";
 
 class DataRanges {
@@ -49,7 +49,7 @@ export function convertLong(_long?: number) {
   return ((long - dataRanges.longMin) / longRange()) * graphRange + graphMin;
 }
 
-export function convertDate(aCase: ICase) {
+export function convertDate(aCase: IItem) {
   const _date = getDate(aCase);
   const date = isFinite(_date) ? _date : defaultDate();
   return ((date - dataRanges.dateMin) / dateRange()) * graphRange + graphMin;
