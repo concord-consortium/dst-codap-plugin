@@ -9,8 +9,8 @@ import { CubeOutline } from "./cube-outline";
 import { DSTCamera } from "./dst-camera";
 import { GridPlane } from "./grid-plane";
 import { PlaneControls } from "./plane-controls";
-// import { EfficientPoints } from "./efficient-points";
-import { Points } from "./points";
+import { FlatEfficientPoints } from "./flat-efficient-points";
+// import { Points } from "./points";
 import "./scatter-plot.scss";
 
 interface IScatterPlotProps {
@@ -42,8 +42,8 @@ export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotP
           />
         )}
         <ambientLight intensity={1.5} />
-        {/* <EfficientPoints /> */}
-        <Points />
+        <FlatEfficientPoints />
+        {/* <Points /> */}
         <GridPlane zPosition={zPosition} />
       </Canvas>
       <PlaneControls zPosition={zPosition} onZPositionChange={setZPosition} />
