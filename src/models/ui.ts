@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx";
 
-export type modeType = "pointer" | "marquee" | "map";
+export type modeType = "pointer" | "marquee";
 
 class UI {
   // The name of the orbit controls currently being used.

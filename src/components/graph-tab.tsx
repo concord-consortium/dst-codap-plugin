@@ -82,59 +82,46 @@ export const GraphTab = observer(function GraphTab() {
           testId="button-xy-controls"
         />
       </UIButtonContainer>
-      <UIButtonContainer className="map-container">
+      <UIButtonContainer className="map-controls horizontal">
         <UIButton
-          active={ui.mode === "map"}
-          className="top bottom"
-          Icon={XYIcon}
-          onClick={() => ui.setMode("map")}
-          testId="button-map-mode"
+          className="horizontal left"
+          disabled={!graph.canZoomIn}
+          Icon={PlusIcon}
+          onClick={() => graph.zoomIn()}
+          testId="button-map-zoom-in"
+        />
+        <UIButton
+          className="horizontal right"
+          disabled={!graph.canZoomOut}
+          Icon={MinusIcon}
+          onClick={() => graph.zoomOut()}
+          testId="button-map-zoom-out"
         />
       </UIButtonContainer>
-      {ui.mode === "map" && (
-        <>
-          <UIButtonContainer className="map-controls horizontal">
-            <UIButton
-              className="horizontal left"
-              disabled={!graph.canZoomIn}
-              Icon={PlusIcon}
-              onClick={() => graph.zoomIn()}
-              testId="button-map-zoom-in"
-            />
-            <UIButton
-              className="horizontal right"
-              disabled={!graph.canZoomOut}
-              Icon={MinusIcon}
-              onClick={() => graph.zoomOut()}
-              testId="button-map-zoom-out"
-            />
-          </UIButtonContainer>
-          <ArrowButton
-            className="map-arrow"
-            direction="left"
-            disabled={!graph.canPanLeft}
-            onClick={() => graph.panLeft()}
-          />
-          <ArrowButton
-            className="map-arrow"
-            direction="right"
-            disabled={!graph.canPanRight}
-            onClick={() => graph.panRight()}
-          />
-          <ArrowButton
-            className="map-arrow"
-            direction="up"
-            disabled={!graph.canPanUp}
-            onClick={() => graph.panUp()}
-          />
-          <ArrowButton
-            className="map-arrow"
-            direction="down"
-            disabled={!graph.canPanDown}
-            onClick={() => graph.panDown()}
-          />
-        </>
-      )}
+      <ArrowButton
+        className="map-arrow"
+        direction="left"
+        disabled={!graph.canPanLeft}
+        onClick={() => graph.panLeft()}
+      />
+      <ArrowButton
+        className="map-arrow"
+        direction="right"
+        disabled={!graph.canPanRight}
+        onClick={() => graph.panRight()}
+      />
+      <ArrowButton
+        className="map-arrow"
+        direction="up"
+        disabled={!graph.canPanUp}
+        onClick={() => graph.panUp()}
+      />
+      <ArrowButton
+        className="map-arrow"
+        direction="down"
+        disabled={!graph.canPanDown}
+        onClick={() => graph.panDown()}
+      />
     </div>
   );
 });
