@@ -7,6 +7,7 @@ export const graphMax = 5;
 const graphRange = graphMax - graphMin;
 
 const minWidth = 1;
+const panAmount = 5;
 const zoomAmount = 5;
 
 class Graph {
@@ -49,6 +50,22 @@ class Graph {
     return ((date - this.dateMin) / this.dateRange) * graphRange + graphMin;
   }
 
+  get canPanDown() {
+    return this.minLatitude > this.latMin;
+  }
+
+  get canPanLeft() {
+    return this.minLongitude > this.longMin;
+  }
+
+  get canPanRight() {
+    return this.maxLongitude < this.longMax;
+  }
+
+  get canPanUp() {
+    return this.maxLatitude < this.latMax;
+  }
+
   get canZoomIn() {
     return this.latRange > minWidth;
   }
@@ -83,6 +100,38 @@ class Graph {
 
   get maxWidth() {
     return this.longMax - this.longMin;
+  }
+
+  panDown(amount = panAmount) {
+    if (!this.canPanDown) return;
+
+    const _amount = Math.min(Math.abs(amount), this.minLatitude - this.latMin);
+    this.setMaxLatitude(this.maxLatitude - _amount);
+    this.setMinLatitude(this.minLatitude - _amount);
+  }
+
+  panLeft(amount = panAmount) {
+    if (!this.canPanLeft) return;
+
+    const _amount = Math.min(Math.abs(amount), this.minLongitude - this.longMin);
+    this.setMaxLongitude(this.maxLongitude - _amount);
+    this.setMinLongitude(this.minLongitude - _amount);
+  }
+
+  panRight(amount = panAmount) {
+    if (!this.canPanRight) return;
+
+    const _amount = Math.min(Math.abs(amount), this.longMax - this.maxLongitude);
+    this.setMaxLongitude(this.maxLongitude + _amount);
+    this.setMinLongitude(this.minLongitude + _amount);
+  }
+
+  panUp(amount = panAmount) {
+    if (!this.canPanUp) return;
+
+    const _amount = Math.min(Math.abs(amount), this.latMax - this.maxLatitude);
+    this.setMaxLatitude(this.maxLatitude + _amount);
+    this.setMinLatitude(this.minLatitude + _amount);
   }
 
   setDateRange(min: number, max: number) {

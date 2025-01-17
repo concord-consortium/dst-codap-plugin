@@ -1,0 +1,84 @@
+.arrow-button {
+  border: none;
+  position: absolute;
+
+  &.down {
+    &.map-arrow {
+      left: 256px;
+      top: 406px;
+    }
+
+    &.navigation-cube-arrow {
+      left: 41px;
+      top: 88px;
+    }
+
+    svg {
+      rotate: 180deg;
+    }
+  }
+
+  &.left {
+    &.map-arrow {
+      left: 215px;
+      top: 361px;
+    }
+
+    &.navigation-cube-arrow {
+      left: 0;
+      top: 43px;
+    }
+
+    svg {
+      rotate: 270deg;
+    }
+  }
+
+  &.right {
+    &.map-arrow {
+      left: 297px;
+      top: 361px;
+    }
+
+    &.navigation-cube-arrow {
+      left: 82px;
+      top: 43px;
+    }
+
+    svg {
+      rotate: 90deg;
+    }
+  }
+
+  &.up {
+    &.map-arrow {
+      left: 256px;
+      top: 318px;
+    }
+
+    &.navigation-cube-arrow {
+      left: 41px;
+      top: 0;
+    }
+  }
+
+  &:disabled {
+    svg {
+      opacity: .25;
+
+      &:hover {
+        opacity: .25;
+      }
+    }
+  }
+
+  &:hover {
+    svg {
+      opacity: .75;
+    }
+  }
+
+  svg {
+    opacity: .5;
+  }
+}

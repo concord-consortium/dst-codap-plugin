@@ -12,6 +12,7 @@ import { dstCamera } from "../models/camera";
 import { graph } from "../models/graph";
 import { ui } from "../models/ui";
 import { ScatterPlot } from "./plot/scatter-plot";
+import { ArrowButton } from "./ui/arrow-button";
 import { NavigationControls } from "./ui/navigation-controls/navigation-controls";
 import { UIButton } from "./ui/ui-button";
 import { UIButtonContainer } from "./ui/ui-button-container";
@@ -91,22 +92,48 @@ export const GraphTab = observer(function GraphTab() {
         />
       </UIButtonContainer>
       {ui.mode === "map" && (
-        <UIButtonContainer className="map-controls horizontal">
-          <UIButton
-            className="horizontal left"
-            disabled={!graph.canZoomIn}
-            Icon={PlusIcon}
-            onClick={() => graph.zoomIn()}
-            testId="button-map-zoom-in"
+        <>
+          <UIButtonContainer className="map-controls horizontal">
+            <UIButton
+              className="horizontal left"
+              disabled={!graph.canZoomIn}
+              Icon={PlusIcon}
+              onClick={() => graph.zoomIn()}
+              testId="button-map-zoom-in"
+            />
+            <UIButton
+              className="horizontal right"
+              disabled={!graph.canZoomOut}
+              Icon={MinusIcon}
+              onClick={() => graph.zoomOut()}
+              testId="button-map-zoom-out"
+            />
+          </UIButtonContainer>
+          <ArrowButton
+            className="map-arrow"
+            direction="left"
+            disabled={!graph.canPanLeft}
+            onClick={() => graph.panLeft()}
           />
-          <UIButton
-            className="horizontal right"
-            disabled={!graph.canZoomOut}
-            Icon={MinusIcon}
-            onClick={() => graph.zoomOut()}
-            testId="button-map-zoom-out"
+          <ArrowButton
+            className="map-arrow"
+            direction="right"
+            disabled={!graph.canPanRight}
+            onClick={() => graph.panRight()}
           />
-        </UIButtonContainer>
+          <ArrowButton
+            className="map-arrow"
+            direction="up"
+            disabled={!graph.canPanUp}
+            onClick={() => graph.panUp()}
+          />
+          <ArrowButton
+            className="map-arrow"
+            direction="down"
+            disabled={!graph.canPanDown}
+            onClick={() => graph.panDown()}
+          />
+        </>
       )}
     </div>
   );
