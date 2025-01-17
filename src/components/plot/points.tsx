@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { codapData } from "../../models/codap-data";
-import { dataRanges } from "../../utilities/graph-utils";
+import { graph } from "../../models/graph";
 import { Point } from "./point";
 
 export const Points = observer(function Points() {
@@ -14,10 +14,10 @@ export const Points = observer(function Points() {
             key={`point-${id}`}
             id={id}
             isSelected={codapData.isSelected(id)}
-            visible={dataRanges.caseIsVisible(aCase)}
-            x={dataRanges.convertLat(Latitude)}
-            y={dataRanges.convertDate(aCase)}
-            z={dataRanges.convertLong(Longitude)}
+            visible={graph.caseIsVisible(aCase)}
+            x={graph.convertLat(Latitude)}
+            y={graph.convertDate(aCase)}
+            z={graph.convertLong(Longitude)}
           />
         );
       })}

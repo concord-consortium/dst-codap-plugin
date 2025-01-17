@@ -9,8 +9,8 @@ import MinusIcon from "../assets/icons/minus.svg";
 import PlusIcon from "../assets/icons/plus.svg";
 import PointIcon from "../assets/icons/point-selection.svg";
 import { dstCamera } from "../models/camera";
+import { graph } from "../models/graph";
 import { ui } from "../models/ui";
-import { dataRanges } from "../utilities/graph-utils";
 import { ScatterPlot } from "./plot/scatter-plot";
 import { NavigationControls } from "./ui/navigation-controls/navigation-controls";
 import { UIButton } from "./ui/ui-button";
@@ -94,16 +94,16 @@ export const GraphTab = observer(function GraphTab() {
         <UIButtonContainer className="map-controls horizontal">
           <UIButton
             className="horizontal left"
-            disabled={!dataRanges.canZoomIn}
+            disabled={!graph.canZoomIn}
             Icon={PlusIcon}
-            onClick={() => dataRanges.zoomIn()}
+            onClick={() => graph.zoomIn()}
             testId="button-map-zoom-in"
           />
           <UIButton
             className="horizontal right"
-            disabled={!dataRanges.canZoomOut}
+            disabled={!graph.canZoomOut}
             Icon={MinusIcon}
-            onClick={() => dataRanges.zoomOut()}
+            onClick={() => graph.zoomOut()}
             testId="button-map-zoom-out"
           />
         </UIButtonContainer>

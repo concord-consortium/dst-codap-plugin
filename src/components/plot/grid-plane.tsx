@@ -3,8 +3,8 @@ import React, { useMemo } from "react";
 import { useTexture } from "@react-three/drei";
 import { Plane, Vector3 } from "three";
 import map from "../../assets/USA_location_map.svg.png";
+import { graph, graphMax, graphMin } from "../../models/graph";
 import { backgroundLongRange, kBackgroundHeight, kBackgroundWidth } from "../../utilities/constants";
-import { dataRanges, graphMax, graphMin } from "../../utilities/graph-utils";
 import { halfPi } from "../../utilities/trig-utils";
 
 const mapBaseSize = graphMax - graphMin;
@@ -14,7 +14,7 @@ interface IMapPlaneProps {
 }
 export const MapPlane = observer(function MapPlane({ zPosition }: IMapPlaneProps) {
   const texture = useTexture(map);
-  const scale = backgroundLongRange / dataRanges.latRange;
+  const scale = backgroundLongRange / graph.latRange;
 
   const clippingPlanes = useMemo(() => {
     return [

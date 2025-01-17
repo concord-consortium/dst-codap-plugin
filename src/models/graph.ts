@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx";
-import { getDate, ICase } from "../models/codap-data";
-import { kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin } from "./constants";
+import { kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin } from "../utilities/constants";
+import { getDate, ICase } from "./codap-data";
 
 export const graphMin = -5;
 export const graphMax = 5;
@@ -9,18 +9,18 @@ const graphRange = graphMax - graphMin;
 const minWidth = 1;
 const zoomAmount = 5;
 
-class DataRanges {
+class Graph {
   dateMin = 1578124800000;
   dateMax = 1672358400000;
-  latMin = kBackgroundLatMin;
-  latMax = kBackgroundLatMax;
-  longMin = kBackgroundLongMin;
-  longMax = kBackgroundLongMax;
+  latMin = kBackgroundLatMin; // The absolute min latitude
+  latMax = kBackgroundLatMax; // The absolute max latitude
+  longMin = kBackgroundLongMin; // The absolute min longitude
+  longMax = kBackgroundLongMax; // The absolute max longitude
 
-  maxLatitude = kBackgroundLatMax;
-  minLatitude = kBackgroundLatMin;
-  maxLongitude = kBackgroundLongMax;
-  minLongitude = kBackgroundLongMin;
+  maxLatitude = kBackgroundLatMax; // The current max latitude of the graph
+  minLatitude = kBackgroundLatMin; // The current min latitude of the graph
+  maxLongitude = kBackgroundLongMax; // The current max longitude of the graph
+  minLongitude = kBackgroundLongMin; // The current min longitude of the graph
 
   constructor() {
     makeAutoObservable(this);
@@ -28,7 +28,7 @@ class DataRanges {
 
   caseIsVisible(aCase: ICase) {
     if (aCase.Latitude == null || aCase.Longitude == null) return false;
-    
+
     return aCase.Latitude >= this.minLatitude && aCase.Latitude <= this.maxLatitude &&
       aCase.Longitude >= this.minLongitude && aCase.Longitude <= this.maxLongitude;
   }
@@ -122,13 +122,4 @@ class DataRanges {
   }
 }
 
-export const dataRanges = new DataRanges();
-
-// Returns a point between the start and end points, offset distance from the start point.
-export function projectPoint(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number, offset: number) {
-  const distance = Math.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2);
-  const x = x1 + offset * ((x2 - x1) / distance);
-  const y = y1 + offset * ((y2 - y1) / distance);
-  const z = z1 + offset * ((z2 - z1) / distance);
-  return { x, y, z };
-}
+export const graph = new Graph();
