@@ -1,14 +1,33 @@
-import { getDate, IItem } from "../models/item";
+import { makeAutoObservable } from "mobx";
+import { getDate, ICase } from "../models/codap-data";
 import { kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin } from "./constants";
 
-export const dataRanges = {
-  dateMin: 1578124800000,
-  dateMax: 1672358400000,
-  latMin: kBackgroundLatMin,
-  latMax: kBackgroundLatMax,
-  longMin: kBackgroundLongMin,
-  longMax: kBackgroundLongMax
-};
+class DataRanges {
+  dateMin: number;
+  dateMax: number;
+  latMin: number;
+  latMax: number;
+  longMin: number;
+  longMax: number;
+
+  constructor() {
+    makeAutoObservable(this);
+    this.dateMin = 1578124800000;
+    this.dateMax = 1672358400000;
+    this.latMin = kBackgroundLatMin;
+    this.latMax = kBackgroundLatMax;
+    this.longMin = kBackgroundLongMin;
+    this.longMax = kBackgroundLongMax;
+  }
+
+  setDateRange(min: number, max: number) {
+    this.dateMin = min;
+    this.dateMax = max;
+  }
+}
+
+export const dataRanges = new DataRanges();
+
 const dateRange = () => dataRanges.dateMax - dataRanges.dateMin;
 const defaultDate = () =>  dataRanges.dateMin + dateRange() / 2;
 const latRange = () => dataRanges.latMax - dataRanges.latMin;
@@ -30,8 +49,8 @@ export function convertLong(_long?: number) {
   return ((long - dataRanges.longMin) / longRange()) * graphRange + graphMin;
 }
 
-export function convertDate(item: IItem) {
-  const _date = getDate(item);
+export function convertDate(aCase: ICase) {
+  const _date = getDate(aCase);
   const date = isFinite(_date) ? _date : defaultDate();
   return ((date - dataRanges.dateMin) / dateRange()) * graphRange + graphMin;
 }

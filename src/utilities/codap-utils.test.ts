@@ -1,12 +1,12 @@
-import { items } from "../models/item";
+import { codapData } from "../models/codap-data";
 import { getData } from "./codap-utils";
-import { createDataContextFromURL, getAllItems, getDataContext } from "@concord-consortium/codap-plugin-api";
+import { createDataContextFromURL, getCaseByFormulaSearch, getDataContext } from "@concord-consortium/codap-plugin-api";
 import { dataRanges } from "./graph-utils";
 
 jest.mock("@concord-consortium/codap-plugin-api");
 
 const mockedGetDataContext = getDataContext as jest.MockedFunction<typeof getDataContext>;
-const mockedGetAllItems = getAllItems as jest.MockedFunction<typeof getAllItems>;
+const mockedGetCaseByFormulaSearch = getCaseByFormulaSearch as jest.MockedFunction<typeof getCaseByFormulaSearch>;
 const mockedCreateDataContextFromURL = createDataContextFromURL as jest.MockedFunction<typeof createDataContextFromURL>;
 
 describe("codap utilities", () => {
@@ -21,26 +21,27 @@ describe("codap utilities", () => {
       const consoleError = jest.spyOn(console, "error").mockImplementation(() => null);
       await getData();
       expect(consoleError).toHaveBeenCalled();
-      expect(mockedGetAllItems).not.toHaveBeenCalled();
+      expect(mockedGetCaseByFormulaSearch).not.toHaveBeenCalled();
     });
 
     it("handles no existing data and an error getting the items from the dataset", async () => {
       mockedGetDataContext.mockReturnValue(Promise.resolve({success: false, values: ""}));
       mockedCreateDataContextFromURL.mockReturnValue(Promise.resolve({success: true, values: ""}));
-      mockedGetAllItems.mockReturnValue(Promise.resolve({success: false, values: ""}));
+      mockedGetCaseByFormulaSearch.mockReturnValue(Promise.resolve({success: false, values: ""}));
       const consoleError = jest.spyOn(console, "error").mockImplementation(() => null);
       await getData();
       expect(consoleError).toHaveBeenCalled();
-      expect(mockedGetAllItems).toHaveBeenCalled();
+      expect(mockedGetCaseByFormulaSearch).toHaveBeenCalled();
     });
 
     it("handles no existing data", async () => {
       mockedGetDataContext.mockReturnValue(Promise.resolve({success: false, values: ""}));
       mockedCreateDataContextFromURL.mockReturnValue(Promise.resolve({success: true, values: ""}));
-      mockedGetAllItems.mockReturnValue(Promise.resolve({
+      mockedGetCaseByFormulaSearch.mockReturnValue(Promise.resolve({
         success: true, 
         values: [
           {
+            id: 1,
             values: {
               date: "2020-01-01",
               Day: 1,
@@ -51,6 +52,7 @@ describe("codap utilities", () => {
             }
           },
           {
+            id: 2,
             values: {
               date: "2022-01-01",
               Day: 1,
@@ -63,7 +65,7 @@ describe("codap utilities", () => {
         ]
       }));
       await getData();
-      expect(items.length).toBe(2);
+      expect(codapData.cases.length).toBe(2);
       expect(dataRanges.dateMin).toBe(Date.UTC(2020,0,1));
       expect(dataRanges.dateMax).toBe(Date.UTC(2022,0,1));
     });
@@ -73,10 +75,11 @@ describe("codap utilities", () => {
         success: true, 
         values: ""
       }));
-      mockedGetAllItems.mockReturnValue(Promise.resolve({
+      mockedGetCaseByFormulaSearch.mockReturnValue(Promise.resolve({
         success: true, 
         values: [
           {
+            id: 1,
             values: {
               date: "2020-01-01",
               Day: 1,
@@ -87,6 +90,7 @@ describe("codap utilities", () => {
             }
           },
           {
+            id: 2,
             values: {
               date: "2022-01-01",
               Day: 1,
@@ -100,7 +104,7 @@ describe("codap utilities", () => {
       }));
       await getData();
       expect(mockedCreateDataContextFromURL).not.toHaveBeenCalled();
-      expect(items.length).toBe(2);
+      expect(codapData.cases.length).toBe(2);
       expect(dataRanges.dateMin).toBe(Date.UTC(2020,0,1));
       expect(dataRanges.dateMax).toBe(Date.UTC(2022,0,1));
     });
@@ -111,7 +115,7 @@ describe("codap utilities", () => {
       await getData();
       expect(consoleWarn).toHaveBeenCalled();
       expect(mockedCreateDataContextFromURL).not.toHaveBeenCalled();
-      expect(mockedGetAllItems).not.toHaveBeenCalled();
+      expect(mockedGetCaseByFormulaSearch).not.toHaveBeenCalled();
     });
   });
 });
