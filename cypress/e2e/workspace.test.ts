@@ -15,31 +15,31 @@ context("Test the overall app", () => {
 
     it("ui renders and functions", () => {
       // Up button
-      ae.getUIButton("button-down").should("be.enabled");
-      ae.getUIButton("button-down").click();
-      ae.getUIButton("button-down").should("be.enabled");
-      ae.getUIButton("button-down").click();
-      ae.getUIButton("button-down").should("be.enabled");
-      ae.getUIButton("button-down").click();
-      ae.getUIButton("button-down").should("not.be.enabled");
+      ae.getNavigationArrow("down").should("be.enabled");
+      ae.getNavigationArrow("down").click();
+      ae.getNavigationArrow("down").should("be.enabled");
+      ae.getNavigationArrow("down").click();
+      ae.getNavigationArrow("down").should("be.enabled");
+      ae.getNavigationArrow("down").click();
+      ae.getNavigationArrow("down").should("not.be.enabled");
 
       // Down button
-      ae.getUIButton("button-up").should("be.enabled");
-      ae.getUIButton("button-up").click();
-      ae.getUIButton("button-down").should("be.enabled");
-      Array(10).fill(1).forEach(() => ae.getUIButton("button-up").click());
-      ae.getUIButton("button-up").should("be.enabled");
-      ae.getUIButton("button-up").click();
+      ae.getNavigationArrow("up").should("be.enabled");
+      ae.getNavigationArrow("up").click();
+      ae.getNavigationArrow("down").should("be.enabled");
+      Array(10).fill(1).forEach(() => ae.getNavigationArrow("up").click());
+      ae.getNavigationArrow("up").should("be.enabled");
+      ae.getNavigationArrow("up").click();
       // This is always failing on github for some unknown reason. It works fine locally.
       // ae.getUIButton("button-up").should("not.be.enabled");
 
       // Left button
-      ae.getUIButton("button-left").should("be.enabled");
-      ae.getUIButton("button-left").click();
+      ae.getNavigationArrow("left").should("be.enabled");
+      ae.getNavigationArrow("left").click();
 
       // Right button
-      ae.getUIButton("button-right").should("be.enabled");
-      ae.getUIButton("button-right").click();
+      ae.getNavigationArrow("right").should("be.enabled");
+      ae.getNavigationArrow("right").click();
 
       // Home button
       ae.getUIButton("button-home").should("be.enabled");

@@ -13,7 +13,7 @@ export function ArrowButton({ className, direction, disabled, onClick }: IArrowB
   return (
     <button
       className={clsx("arrow-button", className, direction)}
-      data-testid={`button-${direction}`}
+      data-testid={`${className}-button-${direction}`}
       disabled={disabled}
       onClick={onClick}
     >
