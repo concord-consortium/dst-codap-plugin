@@ -3,7 +3,7 @@ import * as THREE from "three";
 import React from "react";
 import { dstCamera } from "../../models/camera";
 import { codapData } from "../../models/codap-data";
-import { convertDate, convertLat, convertLong, projectPoint } from "../../utilities/graph-utils";
+import { dataRanges, projectPoint } from "../../utilities/graph-utils";
 
 // This component displays flat points that are rotated towards the camera.
 // Unfortunately, this requires them to be rerendered whenever the camera moves, which is expensive,
@@ -22,9 +22,9 @@ export const FlatPoints = observer(function FlatPoints() {
         const outlineWidth = 0.01;
 
         // Determine the position of the point in graph space.
-        const convertedLat = convertLat(item.Latitude);
-        const convertedDate = convertDate(item);
-        const convertedLong = convertLong(item.Longitude);
+        const convertedLat = dataRanges.convertLat(item.Latitude);
+        const convertedDate = dataRanges.convertDate(item);
+        const convertedLong = dataRanges.convertLong(item.Longitude);
         const position = new THREE.Vector3(convertedLat, convertedDate, convertedLong);
 
         // Project the point slightly towards the camera so it will appear in front of the outline.

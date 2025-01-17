@@ -2,6 +2,10 @@ import { makeAutoObservable } from "mobx";
 import { getDate, ICase } from "../models/codap-data";
 import { kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin } from "./constants";
 
+export const graphMin = -5;
+export const graphMax = 5;
+const graphRange = graphMax - graphMin;
+
 const minWidth = 1;
 const zoomAmount = 5;
 
@@ -21,21 +25,57 @@ class DataRanges {
   constructor() {
     makeAutoObservable(this);
   }
+
+  convertLat(_lat?: number) {
+    const lat = _lat ?? this.defaultLat;
+    return ((lat - this.minLatitude) / this.latRange) * graphRange + graphMin;
+  }
   
+  convertLong(_long?: number) {
+    const long = _long ?? this.defaultLong;
+    return ((long - this.minLongitude) / this.longRange) * graphRange + graphMin;
+  }
+  
+  convertDate(aCase: ICase) {
+    const _date = getDate(aCase);
+    const date = isFinite(_date) ? _date : this.defaultDate;
+    return ((date - this.dateMin) / this.dateRange) * graphRange + graphMin;
+  }
+
   get canZoomIn() {
-    return this.width > minWidth;
+    return this.latRange > minWidth;
   }
 
   get canZoomOut() {
-    return this.width < this.maxWidth;
+    return this.latRange < this.maxWidth;
+  }
+
+  get dateRange() {
+    return this.dateMax - this.dateMin;
+  }
+
+  get defaultDate() {
+    return this.dateMin + this.dateRange / 2;
+  }
+
+  get defaultLat() {
+    return this.minLatitude + this.latRange / 2;
+  }
+
+  get defaultLong() {
+    return this.minLongitude + this.longRange / 2;
+  }
+
+  get latRange() {
+    return this.maxLongitude - this.minLongitude;
+  }
+
+  get longRange() {
+    return this.maxLatitude - this.minLatitude;
   }
 
   get maxWidth() {
     return this.longMax - this.longMin;
-  }
-
-  get width() {
-    return this.maxLongitude - this.minLongitude;
   }
 
   setDateRange(min: number, max: number) {
@@ -60,7 +100,7 @@ class DataRanges {
   }
 
   zoomIn() {
-    const _zoomAmount = Math.min(zoomAmount, (this.width - minWidth) / 2);
+    const _zoomAmount = Math.min(zoomAmount, (this.latRange - minWidth) / 2);
     this.setMaxLatitude(this.maxLatitude - _zoomAmount);
     this.setMaxLongitude(this.maxLongitude - _zoomAmount);
     this.setMinLatitude(this.minLatitude + _zoomAmount);
@@ -76,33 +116,6 @@ class DataRanges {
 }
 
 export const dataRanges = new DataRanges();
-
-const dateRange = () => dataRanges.dateMax - dataRanges.dateMin;
-const defaultDate = () =>  dataRanges.dateMin + dateRange() / 2;
-const latRange = () => dataRanges.latMax - dataRanges.latMin;
-const defaultLat = () => dataRanges.latMin + latRange() / 2;
-const longRange = () => dataRanges.longMax - dataRanges.longMin;
-const defaultLong = () => dataRanges.longMin + longRange() / 2;
-
-export const graphMin = -5;
-export const graphMax = 5;
-const graphRange = graphMax - graphMin;
-
-export function convertLat(_lat?: number) {
-  const lat = _lat ?? defaultLat();
-  return ((lat - dataRanges.latMin) / latRange()) * graphRange + graphMin;
-}
-
-export function convertLong(_long?: number) {
-  const long = _long ?? defaultLong();
-  return ((long - dataRanges.longMin) / longRange()) * graphRange + graphMin;
-}
-
-export function convertDate(aCase: ICase) {
-  const _date = getDate(aCase);
-  const date = isFinite(_date) ? _date : defaultDate();
-  return ((date - dataRanges.dateMin) / dateRange()) * graphRange + graphMin;
-}
 
 // Returns a point between the start and end points, offset distance from the start point.
 export function projectPoint(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number, offset: number) {

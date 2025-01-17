@@ -1,33 +1,33 @@
 import { ICase } from "../models/codap-data";
-import { convertLat, convertLong, convertDate, dataRanges, graphMax, graphMin, projectPoint } from "./graph-utils";
+import { dataRanges, graphMax, graphMin, projectPoint } from "./graph-utils";
 
 describe("graph-utils", () => {
   describe("convertLat", () => {
     it("should convert latitude to graph coordinates", () => {
-      expect(convertLat(dataRanges.latMin)).toBeCloseTo(graphMin);
-      expect(convertLat(dataRanges.latMax)).toBeCloseTo(graphMax);
+      expect(dataRanges.convertLat(dataRanges.latMin)).toBeCloseTo(graphMin);
+      expect(dataRanges.convertLat(dataRanges.latMax)).toBeCloseTo(graphMax);
     });
 
     it("should use default latitude if none is provided", () => {
-      expect(convertLat()).toBeCloseTo(0);
+      expect(dataRanges.convertLat()).toBeCloseTo(0);
     });
   });
 
   describe("convertLong", () => {
     it("should convert longitude to graph coordinates", () => {
-      expect(convertLong(dataRanges.longMin)).toBeCloseTo(graphMin);
-      expect(convertLong(dataRanges.longMax)).toBeCloseTo(graphMax);
+      expect(dataRanges.convertLong(dataRanges.longMin)).toBeCloseTo(graphMin);
+      expect(dataRanges.convertLong(dataRanges.longMax)).toBeCloseTo(graphMax);
     });
 
     it("should use default longitude if none is provided", () => {
-      expect(convertLong()).toBeCloseTo(0);
+      expect(dataRanges.convertLong()).toBeCloseTo(0);
     });
   });
 
   describe("convertDate", () => {
     it("should convert date to graph coordinates", () => {
       const aCase: ICase = { id: 1, Day: 4, Month: 1, Year: 2020 };
-      expect(convertDate(aCase)).toBeCloseTo(-5);
+      expect(dataRanges.convertDate(aCase)).toBeCloseTo(-5);
     });
   });
 
