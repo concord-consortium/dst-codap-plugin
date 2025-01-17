@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite";
 import React, { useMemo } from "react";
 import { useTexture } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 import { Plane, Vector3 } from "three";
 import map from "../../assets/USA_location_map.svg.png";
 import { graph, graphMax, graphMin } from "../../models/graph";
@@ -15,6 +16,8 @@ interface IMapPlaneProps {
   zPosition: number;
 }
 export const MapPlane = observer(function MapPlane({ zPosition }: IMapPlaneProps) {
+  useFrame((_state, delta) => graph.animate(delta * 1000));
+
   const texture = useTexture(map);
   const scale = backgroundLongRange / graph.latRange;
   const x = graph.latitudeInGraphSpace(kBackgroundLatMid);

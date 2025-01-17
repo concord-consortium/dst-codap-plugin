@@ -1,5 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin } from "../utilities/constants";
+import { halfPi } from "../utilities/trig-utils";
 import { getDate, ICase } from "./codap-data";
 
 export const graphMin = -5;
@@ -8,6 +9,8 @@ const graphRange = graphMax - graphMin;
 
 const minWidth = 5;
 const zoomAmount = 2.5;
+
+const animationDuration = 200;
 
 class Graph {
   dateMin = 1578124800000;
@@ -22,8 +25,71 @@ class Graph {
   maxLongitude = kBackgroundLongMax; // The current max longitude of the graph
   minLongitude = kBackgroundLongMin; // The current min longitude of the graph
 
+  animationPercentage: Maybe<number>;
+  startMaxLat: Maybe<number>;
+  startMinLat: Maybe<number>;
+  startMaxLong: Maybe<number>;
+  startMinLong: Maybe<number>;
+
+  targetMaxLat: Maybe<number>;
+  targetMinLat: Maybe<number>;
+  targetMaxLong: Maybe<number>;
+  targetMinLong: Maybe<number>;
+
   constructor() {
     makeAutoObservable(this);
+  }
+  
+  // Animate the graph towards its target values.
+  // This is called every frame by the component.
+  animate(dt: number) {
+    if (this.animationPercentage == null) return;
+
+    this.animationPercentage = Math.min(this.animationPercentage + dt / animationDuration, 1);
+    const smoothPercentage = Math.sin((this.animationPercentage * 2 - 1) * halfPi) / 2 + .5;
+    if (this.targetMaxLat != null && this.startMaxLat != null) {
+      this.setMaxLatitude(this.startMaxLat + (this.targetMaxLat - this.startMaxLat) * smoothPercentage);
+    }
+    if (this.targetMinLat != null && this.startMinLat != null) {
+      this.setMinLatitude(this.startMinLat + (this.targetMinLat - this.startMinLat) * smoothPercentage);
+    }
+    if (this.targetMaxLong != null && this.startMaxLong != null) {
+      this.setMaxLongitude(this.startMaxLong + (this.targetMaxLong - this.startMaxLong) * smoothPercentage);
+    }
+    if (this.targetMinLong != null && this.startMinLong != null) {
+      this.setMinLongitude(this.startMinLong + (this.targetMinLong - this.startMinLong) * smoothPercentage);
+    }
+
+    // End the animation if we're done.
+    if (this.animationPercentage >= 1) {
+      this.animationPercentage = undefined;
+      this.startMaxLat = undefined;
+      this.startMinLat = undefined;
+      this.startMaxLong = undefined;
+      this.startMinLong = undefined;
+      this.targetMaxLat = undefined;
+      this.targetMinLat = undefined;
+      this.targetMaxLong = undefined;
+      this.targetMinLong = undefined;
+    }
+  }
+
+  // Sets up an animation to move the camera to the given values.
+  animateTo({ maxLatitude, minLatitude, maxLongitude, minLongitude }:
+    { maxLatitude?: number, minLatitude?: number, maxLongitude?: number, minLongitude?: number }
+  ) {
+    if (maxLatitude == null && minLatitude == null && maxLongitude == null && minLongitude == null) return;
+
+    this.animationPercentage = 0;
+    this.startMaxLat = this.maxLatitude;
+    this.startMinLat = this.minLatitude;
+    this.startMaxLong = this.maxLongitude;
+    this.startMinLong = this.minLongitude;
+
+    this.targetMaxLat = maxLatitude ?? this.targetMaxLat ?? this.maxLatitude;
+    this.targetMinLat = minLatitude ?? this.targetMinLat ?? this.minLatitude;
+    this.targetMaxLong = maxLongitude ?? this.targetMaxLong ?? this.maxLongitude;
+    this.targetMinLong = minLongitude ?? this.targetMinLong ?? this.minLongitude;
   }
 
   caseIsVisible(aCase: ICase) {
@@ -130,8 +196,7 @@ class Graph {
 
     const __amount = amount ?? this.latRange / 4;
     const _amount = Math.min(Math.abs(__amount), this.minLatitude - this.latMin);
-    this.setMaxLatitude(this.maxLatitude - _amount);
-    this.setMinLatitude(this.minLatitude - _amount);
+    this.animateTo({ maxLatitude: this.maxLatitude - _amount, minLatitude: this.minLatitude - _amount });
   }
 
   panLeft(amount?: number) {
@@ -139,8 +204,7 @@ class Graph {
 
     const __amount = amount ?? this.longRange / 4;
     const _amount = Math.min(Math.abs(__amount), this.minLongitude - this.longMin);
-    this.setMaxLongitude(this.maxLongitude - _amount);
-    this.setMinLongitude(this.minLongitude - _amount);
+    this.animateTo({ maxLongitude: this.maxLongitude - _amount, minLongitude: this.minLongitude - _amount });
   }
 
   panRight(amount?: number) {
@@ -148,8 +212,7 @@ class Graph {
 
     const __amount = amount ?? this.longRange / 4;
     const _amount = Math.min(Math.abs(__amount), this.longMax - this.maxLongitude);
-    this.setMaxLongitude(this.maxLongitude + _amount);
-    this.setMinLongitude(this.minLongitude + _amount);
+    this.animateTo({ maxLongitude: this.maxLongitude + _amount, minLongitude: this.minLongitude + _amount });
   }
 
   panUp(amount?: number) {
@@ -157,8 +220,7 @@ class Graph {
 
     const __amount = amount ?? this.latRange / 4;
     const _amount = Math.min(Math.abs(__amount), this.latMax - this.maxLatitude);
-    this.setMaxLatitude(this.maxLatitude + _amount);
-    this.setMinLatitude(this.minLatitude + _amount);
+    this.animateTo({ maxLatitude: this.maxLatitude + _amount, minLatitude: this.minLatitude + _amount });
   }
 
   setDateRange(min: number, max: number) {
@@ -184,41 +246,39 @@ class Graph {
 
   zoomIn() {
     const _zoomAmount = Math.min(zoomAmount, (this.latRange - minWidth) / 2);
-    this.setMaxLatitude(this.maxLatitude - _zoomAmount);
-    this.setMaxLongitude(this.maxLongitude - _zoomAmount);
-    this.setMinLatitude(this.minLatitude + _zoomAmount);
-    this.setMinLongitude(this.minLongitude + _zoomAmount);
+    const maxLatitude = this.maxLatitude - _zoomAmount;
+    const minLatitude = this.minLatitude + _zoomAmount;
+    const maxLongitude = this.maxLongitude - _zoomAmount;
+    const minLongitude = this.minLongitude + _zoomAmount;
+    this.animateTo({ maxLatitude, minLatitude, maxLongitude, minLongitude });
   }
 
   zoomOut() {
     // Always make sure we zoom out zoomAmount * 2 so we maintain a square.
     // To do this, if we bump into the max or min, we increase the other side by the amount we'd go over.
     // If both sides go over, then we'll be capped at the max dimensions anyway.
-    let targetMaxLatitude = this.maxLatitude + zoomAmount;
-    let targetMinLatitude = this.minLatitude - zoomAmount;
-    if (targetMaxLatitude > this.latMax) {
-      targetMinLatitude -= targetMaxLatitude - this.latMax;
-      targetMaxLatitude = this.latMax;
+    let maxLatitude = (this.targetMaxLat ?? this.maxLatitude) + zoomAmount;
+    let minLatitude = (this.targetMinLat ?? this.minLatitude) - zoomAmount;
+    if (maxLatitude > this.latMax) {
+      minLatitude -= maxLatitude - this.latMax;
+      maxLatitude = this.latMax;
     }
-    if (targetMinLatitude < this.latMin) {
-      targetMaxLatitude += this.latMin - targetMinLatitude;
-      targetMinLatitude = this.latMin;
+    if (minLatitude < this.latMin) {
+      maxLatitude += this.latMin - minLatitude;
+      minLatitude = this.latMin;
     }
-    let targetMaxLongitude = this.maxLongitude + zoomAmount;
-    let targetMinLongitude = this.minLongitude - zoomAmount;
-    if (targetMaxLongitude > this.longMax) {
-      targetMinLongitude -= targetMaxLongitude - this.longMax;
-      targetMaxLongitude = this.longMax;
+    let maxLongitude = (this.targetMaxLong ?? this.maxLongitude) + zoomAmount;
+    let minLongitude = (this.targetMinLong ?? this.minLongitude) - zoomAmount;
+    if (maxLongitude > this.longMax) {
+      minLongitude -= maxLongitude - this.longMax;
+      maxLongitude = this.longMax;
     }
-    if (targetMinLongitude < this.longMin) {
-      targetMaxLongitude += this.longMin - targetMinLongitude;
-      targetMinLongitude = this.longMin;
+    if (minLongitude < this.longMin) {
+      maxLongitude += this.longMin - minLongitude;
+      minLongitude = this.longMin;
     }
-    
-    this.setMaxLatitude(targetMaxLatitude);
-    this.setMaxLongitude(targetMaxLongitude);
-    this.setMinLatitude(targetMinLatitude);
-    this.setMinLongitude(targetMinLongitude);
+
+    this.animateTo({ maxLatitude, minLatitude, maxLongitude, minLongitude });
   }
 }
 
