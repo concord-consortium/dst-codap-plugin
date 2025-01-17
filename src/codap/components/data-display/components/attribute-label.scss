@@ -1,0 +1,7 @@
+@use "../../vars";
+
+.attribute-label {
+  fill: blue !important;
+  text-decoration: underline;
+  font: vars.$label-font !important;
+}

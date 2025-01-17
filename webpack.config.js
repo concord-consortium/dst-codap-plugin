@@ -140,6 +140,9 @@ module.exports = (env, argv) => {
       ]
     },
     resolve: {
+      alias: {
+        'mobx-state-tree': '@concord-consortium/mobx-state-tree'
+      },
       extensions: [ '.ts', '.tsx', '.js' ],
     },
     stats: {

@@ -1,0 +1,58 @@
+@use "../../../vars";
+
+.legend-component {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  .legend-background {
+    fill: vars.$background-fill;
+    opacity: 1;
+    stroke: none;
+  }
+
+  .legend-key {
+    cursor: pointer;
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  text {
+    fill: black;
+    font: 12px sans-serif;
+  }
+
+  rect {
+    opacity: 0.85;
+    stroke: #315B7D;
+  }
+
+}
+
+.multi-legend {
+  position: absolute;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: vars.$background-fill;
+}
+
+.legend-rect-selected {
+  stroke: black !important;
+  stroke-width: 2px !important;
+}
+
+.choropleth-rect {
+  cursor: pointer;
+}
+
+.legend-categories {
+
+}
+
+.key {
+
+}
