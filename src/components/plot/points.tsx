@@ -14,6 +14,7 @@ export const Points = observer(function Points() {
             key={`point-${id}`}
             id={id}
             isSelected={codapData.isSelected(id)}
+            visible={dataRanges.caseIsVisible(aCase)}
             x={dataRanges.convertLat(Latitude)}
             y={dataRanges.convertDate(aCase)}
             z={dataRanges.convertLong(Longitude)}

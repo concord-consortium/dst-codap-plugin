@@ -26,6 +26,13 @@ class DataRanges {
     makeAutoObservable(this);
   }
 
+  caseIsVisible(aCase: ICase) {
+    if (aCase.Latitude == null || aCase.Longitude == null) return false;
+    
+    return aCase.Latitude >= this.minLatitude && aCase.Latitude <= this.maxLatitude &&
+      aCase.Longitude >= this.minLongitude && aCase.Longitude <= this.maxLongitude;
+  }
+
   convertLat(_lat?: number) {
     const lat = _lat ?? this.defaultLat;
     return ((lat - this.minLatitude) / this.latRange) * graphRange + graphMin;

@@ -7,11 +7,12 @@ import { dstAddCaseToSelection, dstRemoveCaseFromSelection, dstSelectCases } fro
 interface IPointProps {
   id: number;
   isSelected: boolean;
+  visible?: boolean;
   x: number;
   y: number;
   z: number;
 }
-export function Point({ id, isSelected, x, y, z }: IPointProps) {
+export function Point({ id, isSelected, visible, x, y, z }: IPointProps) {
   const [isPointerOver, setPointerOver] = useState(false);
   const dotColor = "#925987";
   const basePointSize = 0.12;
@@ -64,6 +65,7 @@ export function Point({ id, isSelected, x, y, z }: IPointProps) {
       onClick={handleClick}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
+      visible={visible}
     >
       <sphereGeometry args={[pointSize, 16, 16]} />
       <meshStandardMaterial color={dotColor} />

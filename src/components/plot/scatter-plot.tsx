@@ -7,7 +7,7 @@ import { ui } from "../../models/ui";
 import { DSTOrbitControls } from "../dst-orbit-controls";
 import { CubeOutline } from "./cube-outline";
 import { DSTCamera } from "./dst-camera";
-import { GridPlane } from "./grid-plane";
+import { MapPlane } from "./grid-plane";
 import { PlaneControls } from "./plane-controls";
 import { Points } from "./points";
 import "./scatter-plot.scss";
@@ -22,7 +22,7 @@ export const ScatterPlot = observer(function ScatterPlot() {
       className="w-full h-full relative scatter-plot"
       onPointerDown={() => ui.setActiveControls(controlName)}
     >
-      <Canvas>
+      <Canvas gl={{ localClippingEnabled: true }}>
         <CubeOutline />
         <DSTCamera
           cameraRef={cameraRef}
@@ -36,7 +36,7 @@ export const ScatterPlot = observer(function ScatterPlot() {
         />
         <ambientLight intensity={1.5} />
         <Points />
-        <GridPlane zPosition={zPosition} />
+        <MapPlane zPosition={zPosition} />
       </Canvas>
       <PlaneControls zPosition={zPosition} onZPositionChange={setZPosition} />
     </div>
