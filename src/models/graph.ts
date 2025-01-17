@@ -74,6 +74,22 @@ class Graph {
     return this.latRange < this.maxWidth;
   }
 
+  get centerLat() {
+    return (this.minLatitude + this.maxLatitude) / 2;
+  }
+
+  get centerLong() {
+    return (this.minLongitude + this.maxLongitude) / 2;
+  }
+
+  get centerX() {
+    return this.convertLat(this.centerLat);
+  }
+
+  get centerZ() {
+    return this.convertLong(this.centerLong);
+  }
+
   get dateRange() {
     return this.dateMax - this.dateMin;
   }

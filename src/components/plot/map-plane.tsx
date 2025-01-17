@@ -4,7 +4,9 @@ import { useTexture } from "@react-three/drei";
 import { Plane, Vector3 } from "three";
 import map from "../../assets/USA_location_map.svg.png";
 import { graph, graphMax, graphMin } from "../../models/graph";
-import { backgroundLongRange, kBackgroundHeight, kBackgroundWidth } from "../../utilities/constants";
+import {
+  backgroundLongRange, kBackgroundHeight, kBackgroundLatMid, kBackgroundLongMid, kBackgroundWidth
+} from "../../utilities/constants";
 import { halfPi } from "../../utilities/trig-utils";
 
 const mapBaseSize = graphMax - graphMin;
@@ -15,6 +17,8 @@ interface IMapPlaneProps {
 export const MapPlane = observer(function MapPlane({ zPosition }: IMapPlaneProps) {
   const texture = useTexture(map);
   const scale = backgroundLongRange / graph.latRange;
+  const x = graph.convertLat(kBackgroundLatMid) - graph.centerX;
+  const z = graph.convertLong(kBackgroundLongMid) - graph.centerZ;
 
   const clippingPlanes = useMemo(() => {
     return [
@@ -27,7 +31,7 @@ export const MapPlane = observer(function MapPlane({ zPosition }: IMapPlaneProps
 
   /* eslint-disable react/no-unknown-property */
   return (
-    <mesh rotation={[-halfPi, 0, -halfPi]} position={[0, zPosition, 0]}>
+    <mesh rotation={[-halfPi, 0, -halfPi]} position={[x, zPosition, z]}>
       <planeGeometry args={[mapBaseSize * scale, mapBaseSize * scale * kBackgroundHeight / kBackgroundWidth]} />
       <meshStandardMaterial clippingPlanes={clippingPlanes} map={texture} />
     </mesh>

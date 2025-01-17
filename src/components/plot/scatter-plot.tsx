@@ -7,7 +7,7 @@ import { ui } from "../../models/ui";
 import { DSTOrbitControls } from "../dst-orbit-controls";
 import { CubeOutline } from "./cube-outline";
 import { DSTCamera } from "./dst-camera";
-import { MapPlane } from "./grid-plane";
+import { MapPlane } from "./map-plane";
 import { PlaneControls } from "./plane-controls";
 import { Points } from "./points";
 import "./scatter-plot.scss";
