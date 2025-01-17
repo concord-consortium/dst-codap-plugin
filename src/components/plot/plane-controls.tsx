@@ -1,4 +1,5 @@
 import React from "react";
+import "./plane-controls.scss";
 
 interface PlaneControlsProps {
   zPosition: number;
@@ -7,8 +8,8 @@ interface PlaneControlsProps {
 
 export function PlaneControls({ zPosition, onZPositionChange }: PlaneControlsProps) {
   return (
-    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gray-800/80 p-4 rounded-lg">
-      <label className="flex items-center gap-4">
+    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gray-800/80 p-4 rounded-lg plane-controls">
+      <label className="flex gap-4">
         <span className="text-white">Z Position: {zPosition.toFixed(1)}</span>
         <input
           type="range"

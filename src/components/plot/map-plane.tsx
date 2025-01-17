@@ -17,8 +17,8 @@ interface IMapPlaneProps {
 export const MapPlane = observer(function MapPlane({ zPosition }: IMapPlaneProps) {
   const texture = useTexture(map);
   const scale = backgroundLongRange / graph.latRange;
-  const x = graph.convertLat(kBackgroundLatMid) - graph.centerX;
-  const z = graph.convertLong(kBackgroundLongMid) - graph.centerZ;
+  const x = graph.latitudeInGraphSpace(kBackgroundLatMid);
+  const z = graph.longitudeInGraphSpace(kBackgroundLongMid);
 
   const clippingPlanes = useMemo(() => {
     return [
