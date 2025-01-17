@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite";
 import * as THREE from "three";
 import React from "react";
+import { Outlines } from "@react-three/drei";
 import { items } from "../../models/item";
 import { convertDate, convertLat, convertLong } from "../../utilities/graph-utils";
 
@@ -9,11 +10,19 @@ export const Points = observer(function Points() {
   return (
     <group>
       {items.map((item, i) => {
-        const position = [convertLat(item.Latitude), convertDate(item), convertLong(item.Longitude)];
+        const dotColor = "#925987";
+        const dotSize = 0.1;
+        const outlineColor = "#FFFFFF";
+        const outlineWidth = 2;
+
+        // Determine the position of the point in graph space.
+        const position = new THREE.Vector3(convertLat(item.Latitude), convertDate(item), convertLong(item.Longitude));
+
         return (
-          <mesh key={i} position={new THREE.Vector3(...position)}>
-            <sphereGeometry args={[0.1, 8, 8]} />
-            <meshStandardMaterial color="#925987" />
+          <mesh key={`point-${i}`} position={position}>
+            <sphereGeometry args={[dotSize, 16, 16]} />
+            <meshStandardMaterial color={dotColor} />
+            <Outlines color={outlineColor} thickness={outlineWidth} />
           </mesh>
         );
       })}

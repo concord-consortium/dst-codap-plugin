@@ -1,7 +1,5 @@
 import { ChakraProvider, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
-import {
-  addDataContextsListListener, initializePlugin, ClientNotification,
-} from "@concord-consortium/codap-plugin-api";
+import { initializePlugin } from "@concord-consortium/codap-plugin-api";
 import React, { useEffect } from "react";
 import { getData } from "../utilities/codap-utils";
 import {
@@ -18,14 +16,6 @@ export const App = () => {
         // This will happen if not embedded in CODAP
         console.warn("Not embedded in CODAP");
       });
-
-    // Update data when there are new datasets in the document
-    const documentChangeListener = (notification: ClientNotification) => {
-      if (notification.values.operation === "dataContextCountChanged") {
-        getData();
-      }
-    };
-    addDataContextsListListener(documentChangeListener);
 
     getData();
   }, []);

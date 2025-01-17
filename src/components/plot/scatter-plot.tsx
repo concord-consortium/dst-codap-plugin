@@ -2,12 +2,12 @@
 import { observer } from "mobx-react-lite";
 import React, { useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { Vector3 } from "three";
-import { dstCamera } from "../../models/camera";
+import { zoomMax, zoomMin } from "../../models/camera";
+import { uiState } from "../../models/ui";
 import { modeType } from "../../types/ui-types";
-import { AxisLabels } from "./axis-labels";
+import { DSTOrbitControls } from "../dst-orbit-controls";
 import { CubeOutline } from "./cube-outline";
+import { DSTCamera } from "./dst-camera";
 import { GridPlane } from "./grid-plane";
 import { PlaneControls } from "./plane-controls";
 import { Points } from "./points";
@@ -18,39 +18,28 @@ interface IScatterPlotProps {
 }
 export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotProps) {
   const cameraRef = useRef<any>(null);
-  const gridSize = 10;
-  const tickCount = 10;
   const [zPosition, setZPosition] = useState(-5);
-  const { position } = dstCamera;
-  const cameraPosition = new Vector3(position.x, position.y, position.z);
+  const controlName = "scatter-plot-controls";
 
   return (
-    <div className="w-full h-full relative scatter-plot" style={{backgroundColor: "#f9f9f9"}}>
+    <div
+      className="w-full h-full relative scatter-plot"
+      onPointerDown={() => uiState.setActiveControls(controlName)}
+    >
       <Canvas>
         <CubeOutline />
-        <PerspectiveCamera
-          makeDefault
-          position={cameraPosition}
-          ref={cameraRef}
+        <DSTCamera
+          cameraRef={cameraRef}
         />
-        {mode === "pointer" && (
-          <OrbitControls enableDamping
-            onChange={() => {
-              if (cameraRef.current) {
-                const {x, y, z} = cameraRef.current.position;
-                dstCamera.setPosition(x, y, z);
-              }
-            }}
-          />
-        )}
-        <ambientLight intensity={0.5} />
-        <directionalLight position={cameraPosition} intensity={1} />
+        <DSTOrbitControls
+          cameraRef={cameraRef}
+          enabled={mode === "pointer"}
+          maxZoom={zoomMax}
+          minZoom={zoomMin}
+          name={controlName}
+        />
+        <ambientLight intensity={1.5} />
         <Points />
-        <gridHelper args={[gridSize, tickCount]} />
-        <axesHelper args={[gridSize / 2]} />
-        <AxisLabels axis="x" length={gridSize} ticks={tickCount} />
-        <AxisLabels axis="y" length={gridSize} ticks={tickCount} />
-        <AxisLabels axis="z" length={gridSize} ticks={tickCount} />
         <GridPlane zPosition={zPosition} />
       </Canvas>
       <PlaneControls zPosition={zPosition} onZPositionChange={setZPosition} />

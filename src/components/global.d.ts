@@ -5,6 +5,7 @@ declare module "*.png" {
 }
 declare module "*.svg";
 declare module "*.scss";
+declare module "*.csv";
 
 // used by libraries like React and MST to control runtime behavior
 declare namespace process {
