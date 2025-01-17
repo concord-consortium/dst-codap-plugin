@@ -3,8 +3,7 @@ import { observer } from "mobx-react-lite";
 import React, { useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { zoomMax, zoomMin } from "../../models/camera";
-import { uiState } from "../../models/ui";
-import { modeType } from "../../types/ui-types";
+import { ui } from "../../models/ui";
 import { DSTOrbitControls } from "../dst-orbit-controls";
 import { CubeOutline } from "./cube-outline";
 import { DSTCamera } from "./dst-camera";
@@ -13,10 +12,7 @@ import { PlaneControls } from "./plane-controls";
 import { Points } from "./points";
 import "./scatter-plot.scss";
 
-interface IScatterPlotProps {
-  mode: modeType;
-}
-export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotProps) {
+export const ScatterPlot = observer(function ScatterPlot() {
   const cameraRef = useRef<any>(null);
   const [zPosition, setZPosition] = useState(-5);
   const controlName = "scatter-plot-controls";
@@ -24,7 +20,7 @@ export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotP
   return (
     <div
       className="w-full h-full relative scatter-plot"
-      onPointerDown={() => uiState.setActiveControls(controlName)}
+      onPointerDown={() => ui.setActiveControls(controlName)}
     >
       <Canvas>
         <CubeOutline />
@@ -33,7 +29,7 @@ export const ScatterPlot = observer(function ScatterPlot({ mode }: IScatterPlotP
         />
         <DSTOrbitControls
           cameraRef={cameraRef}
-          enabled={mode === "pointer"}
+          enabled={ui.mode === "pointer"}
           maxZoom={zoomMax}
           minZoom={zoomMin}
           name={controlName}

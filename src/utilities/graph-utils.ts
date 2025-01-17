@@ -2,27 +2,76 @@ import { makeAutoObservable } from "mobx";
 import { getDate, ICase } from "../models/codap-data";
 import { kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin } from "./constants";
 
+const minWidth = 1;
+const zoomAmount = 5;
+
 class DataRanges {
-  dateMin: number;
-  dateMax: number;
-  latMin: number;
-  latMax: number;
-  longMin: number;
-  longMax: number;
+  dateMin = 1578124800000;
+  dateMax = 1672358400000;
+  latMin = kBackgroundLatMin;
+  latMax = kBackgroundLatMax;
+  longMin = kBackgroundLongMin;
+  longMax = kBackgroundLongMax;
+
+  maxLatitude = kBackgroundLatMax;
+  minLatitude = kBackgroundLatMin;
+  maxLongitude = kBackgroundLongMax;
+  minLongitude = kBackgroundLongMin;
 
   constructor() {
     makeAutoObservable(this);
-    this.dateMin = 1578124800000;
-    this.dateMax = 1672358400000;
-    this.latMin = kBackgroundLatMin;
-    this.latMax = kBackgroundLatMax;
-    this.longMin = kBackgroundLongMin;
-    this.longMax = kBackgroundLongMax;
+  }
+  
+  get canZoomIn() {
+    return this.width > minWidth;
+  }
+
+  get canZoomOut() {
+    return this.width < this.maxWidth;
+  }
+
+  get maxWidth() {
+    return this.longMax - this.longMin;
+  }
+
+  get width() {
+    return this.maxLongitude - this.minLongitude;
   }
 
   setDateRange(min: number, max: number) {
     this.dateMin = min;
     this.dateMax = max;
+  }
+  
+  setMaxLatitude(lat: number) {
+    this.maxLatitude = Math.min(this.latMax, lat);
+  }
+
+  setMaxLongitude(long: number) {
+    this.maxLongitude = Math.min(this.longMax, long);
+  }
+
+  setMinLatitude(lat: number) {
+    this.minLatitude = Math.max(this.latMin, lat);
+  }
+
+  setMinLongitude(long: number) {
+    this.minLongitude = Math.max(this.longMin, long);
+  }
+
+  zoomIn() {
+    const _zoomAmount = Math.min(zoomAmount, (this.width - minWidth) / 2);
+    this.setMaxLatitude(this.maxLatitude - _zoomAmount);
+    this.setMaxLongitude(this.maxLongitude - _zoomAmount);
+    this.setMinLatitude(this.minLatitude + _zoomAmount);
+    this.setMinLongitude(this.minLongitude + _zoomAmount);
+  }
+
+  zoomOut() {
+    this.setMaxLatitude(this.maxLatitude + zoomAmount);
+    this.setMaxLongitude(this.maxLongitude + zoomAmount);
+    this.setMinLatitude(this.minLatitude - zoomAmount);
+    this.setMinLongitude(this.minLongitude - zoomAmount);
   }
 }
 
