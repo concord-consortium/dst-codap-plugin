@@ -19,6 +19,25 @@
     height: 32px;
   }
 
+  &.horizontal {
+    border-bottom: 1px solid #177991;
+    border-right: none;
+    height: 32px;
+    width: 31px;
+  }
+
+  &.left {
+    border-bottom-left-radius: 3px;
+    border-top-left-radius: 3px;
+  }
+
+  &.right {
+    border-bottom-right-radius: 3px;
+    border-top-right-radius: 3px;
+    border-right: 1px solid #177991;
+    width: 32px;
+  }
+
   &.top {
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;

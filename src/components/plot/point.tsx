@@ -2,17 +2,17 @@ import React, { useState } from "react";
 import { Outlines } from "@react-three/drei";
 import { ThreeEvent, useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
-import { convertLat, convertLong } from "../../utilities/graph-utils";
 import { dstAddCaseToSelection, dstRemoveCaseFromSelection, dstSelectCases } from "../../utilities/codap-utils";
 
 interface IPointProps {
   id: number;
   isSelected: boolean;
-  Latitude: number;
-  Longitude: number;
+  visible?: boolean;
+  x: number;
   y: number;
+  z: number;
 }
-export function Point({ id, isSelected, Latitude, Longitude, y }: IPointProps) {
+export function Point({ id, isSelected, visible, x, y, z }: IPointProps) {
   const [isPointerOver, setPointerOver] = useState(false);
   const dotColor = "#925987";
   const basePointSize = 0.12;
@@ -33,7 +33,7 @@ export function Point({ id, isSelected, Latitude, Longitude, y }: IPointProps) {
   });
 
   // Determine the position of the point in graph space.
-  const position = new Vector3(convertLat(Latitude), y, convertLong(Longitude));
+  const position = new Vector3(x, y, z);
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();
@@ -65,6 +65,7 @@ export function Point({ id, isSelected, Latitude, Longitude, y }: IPointProps) {
       onClick={handleClick}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
+      visible={visible}
     >
       <sphereGeometry args={[pointSize, 16, 16]} />
       <meshStandardMaterial color={dotColor} />

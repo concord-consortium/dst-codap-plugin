@@ -1,7 +1,7 @@
 import React from "react";
 import { OrbitControls } from "@react-three/drei";
 import { dstCamera } from "../models/camera";
-import { uiState } from "../models/ui";
+import { ui } from "../models/ui";
 
 interface IDSTOrbitControlsProps {
   cameraRef: React.MutableRefObject<any>;
@@ -16,7 +16,7 @@ export function DSTOrbitControls({
 }: IDSTOrbitControlsProps) {
 
   const handleChange = () => {
-    if (cameraRef.current && !dstCamera.animating && uiState.activeControls === name) {
+    if (cameraRef.current && !dstCamera.animating && ui.activeControls === name) {
       const {x, y, z} = cameraRef.current.position;
       dstCamera.setPosition(x, y, z);
     }

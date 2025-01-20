@@ -7,5 +7,8 @@ export const AppElements = {
   },
   getUIButton(testId: string) {
     return this.getApp().get(`[data-testid="${testId}"`);
+  },
+  getNavigationArrow(direction: "up" | "down" | "left" | "right") {
+    return this.getApp().get(`.navigation-cube-arrow.${direction}`);
   }
 };

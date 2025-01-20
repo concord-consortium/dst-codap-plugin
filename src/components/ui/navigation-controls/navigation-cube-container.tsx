@@ -4,7 +4,7 @@ import { OrthographicCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Vector3 } from "three";
 import { dstCamera } from "../../../models/camera";
-import { uiState } from "../../../models/ui";
+import { ui } from "../../../models/ui";
 import { DSTOrbitControls } from "../../dst-orbit-controls";
 import { NavigationCube } from "./navigation-cube";
 import "./navigation-cube-container.scss";
@@ -18,7 +18,7 @@ export const NavigationCubeContainer = observer(function NavigationCubeContainer
   return (
     <div
       className="navigation-cube-container"
-      onPointerDown={() => uiState.setActiveControls(controlName)}
+      onPointerDown={() => ui.setActiveControls(controlName)}
     >
       <Canvas>
         <OrthographicCamera
