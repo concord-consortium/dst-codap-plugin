@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import { kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin } from "../utilities/constants";
+import { kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin, kLatScale } from "../utilities/constants";
 import { halfPi } from "../utilities/trig-utils";
 import { getDate, ICase } from "./codap-data";
 
@@ -132,11 +132,11 @@ class Graph {
   }
 
   get canZoomIn() {
-    return this.latRange > minWidth;
+    return this.longRange > minWidth;
   }
 
   get canZoomOut() {
-    return this.latRange < this.maxWidth;
+    return this.longRange < this.maxWidth;
   }
 
   get centerLat() {
@@ -172,11 +172,11 @@ class Graph {
   }
 
   get latRange() {
-    return this.maxLongitude - this.minLongitude;
+    return this.maxLatitude - this.minLatitude;
   }
 
   get longRange() {
-    return this.maxLatitude - this.minLatitude;
+    return this.maxLongitude - this.minLongitude;
   }
 
   get maxWidth() {
@@ -245,9 +245,9 @@ class Graph {
   }
 
   zoomIn() {
-    const _zoomAmount = Math.min(zoomAmount, (this.latRange - minWidth) / 2);
-    const maxLatitude = this.maxLatitude - _zoomAmount;
-    const minLatitude = this.minLatitude + _zoomAmount;
+    const _zoomAmount = Math.min(zoomAmount, (this.longRange - minWidth) / 2);
+    const maxLatitude = this.maxLatitude - _zoomAmount * kLatScale;
+    const minLatitude = this.minLatitude + _zoomAmount * kLatScale;
     const maxLongitude = this.maxLongitude - _zoomAmount;
     const minLongitude = this.minLongitude + _zoomAmount;
     this.animateTo({ maxLatitude, minLatitude, maxLongitude, minLongitude });
@@ -257,8 +257,8 @@ class Graph {
     // Always make sure we zoom out zoomAmount * 2 so we maintain a square.
     // To do this, if we bump into the max or min, we increase the other side by the amount we'd go over.
     // If both sides go over, then we'll be capped at the max dimensions anyway.
-    let maxLatitude = (this.targetMaxLat ?? this.maxLatitude) + zoomAmount;
-    let minLatitude = (this.targetMinLat ?? this.minLatitude) - zoomAmount;
+    let maxLatitude = (this.targetMaxLat ?? this.maxLatitude) + zoomAmount * kLatScale;
+    let minLatitude = (this.targetMinLat ?? this.minLatitude) - zoomAmount * kLatScale;
     if (maxLatitude > this.latMax) {
       minLatitude -= maxLatitude - this.latMax;
       maxLatitude = this.latMax;

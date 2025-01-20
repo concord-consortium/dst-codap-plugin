@@ -6,7 +6,7 @@ import { Plane, Vector3 } from "three";
 import map from "../../assets/USA_location_map.svg.png";
 import { graph, graphMax, graphMin } from "../../models/graph";
 import {
-  backgroundLongRange, kBackgroundHeight, kBackgroundLatMid, kBackgroundLongMid, kBackgroundWidth
+  kBackgroundLongRange, kBackgroundHeight, kBackgroundLatMid, kBackgroundLongMid, kBackgroundWidth
 } from "../../utilities/constants";
 import { halfPi } from "../../utilities/trig-utils";
 
@@ -19,7 +19,7 @@ export const MapPlane = observer(function MapPlane({ zPosition }: IMapPlaneProps
   useFrame((_state, delta) => graph.animate(delta * 1000));
 
   const texture = useTexture(map);
-  const scale = backgroundLongRange / graph.latRange;
+  const scale = kBackgroundLongRange / graph.longRange;
   const x = graph.latitudeInGraphSpace(kBackgroundLatMid);
   const z = graph.longitudeInGraphSpace(kBackgroundLongMid);
 
