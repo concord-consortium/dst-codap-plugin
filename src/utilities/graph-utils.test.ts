@@ -1,4 +1,4 @@
-import { IItem } from "../models/item";
+import { ICase } from "../models/codap-data";
 import { convertLat, convertLong, convertDate, dataRanges, graphMax, graphMin, projectPoint } from "./graph-utils";
 
 describe("graph-utils", () => {
@@ -26,8 +26,8 @@ describe("graph-utils", () => {
 
   describe("convertDate", () => {
     it("should convert date to graph coordinates", () => {
-      const item: IItem = { Day: 4, Month: 1, Year: 2020 };
-      expect(convertDate(item)).toBeCloseTo(-5);
+      const aCase: ICase = { id: 1, Day: 4, Month: 1, Year: 2020 };
+      expect(convertDate(aCase)).toBeCloseTo(-5);
     });
   });
 

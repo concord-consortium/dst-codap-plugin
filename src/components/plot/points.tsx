@@ -1,32 +1,25 @@
 import { observer } from "mobx-react-lite";
-import * as THREE from "three";
 import React from "react";
-import { Outlines } from "@react-three/drei";
-import { items } from "../../models/item";
-import { convertDate, convertLat, convertLong } from "../../utilities/graph-utils";
+import { codapData } from "../../models/codap-data";
+import { convertDate } from "../../utilities/graph-utils";
+import { Point } from "./point";
 
 export const Points = observer(function Points() {
-  /* eslint-disable react/no-unknown-property */
   return (
     <group>
-      {items.map((item, i) => {
-        const dotColor = "#925987";
-        const dotSize = 0.1;
-        const outlineColor = "#FFFFFF";
-        const outlineWidth = 2;
-
-        // Determine the position of the point in graph space.
-        const position = new THREE.Vector3(convertLat(item.Latitude), convertDate(item), convertLong(item.Longitude));
-
+      {codapData.cases.map((aCase, i) => {
+        const { id, Latitude, Longitude } = aCase;
         return (
-          <mesh key={`point-${i}`} position={position}>
-            <sphereGeometry args={[dotSize, 16, 16]} />
-            <meshStandardMaterial color={dotColor} />
-            <Outlines color={outlineColor} thickness={outlineWidth} />
-          </mesh>
+          <Point
+            key={`point-${id}`}
+            id={id}
+            isSelected={codapData.isSelected(id)}
+            Latitude={Latitude ?? 0}
+            Longitude={Longitude ?? 0}
+            y={convertDate(aCase)}
+          />
         );
       })}
     </group>
   );
-  /* eslint-enable react/no-unknown-property */
 });

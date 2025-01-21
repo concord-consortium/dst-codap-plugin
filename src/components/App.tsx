@@ -1,23 +1,14 @@
 import { ChakraProvider, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
-import { initializePlugin } from "@concord-consortium/codap-plugin-api";
 import React, { useEffect } from "react";
-import { getData } from "../utilities/codap-utils";
-import {
-  kAboutTabLabel, kGraphTabLabel, kInitialDimensions, kPluginName, kVersion
-} from "../utilities/constants";
+import { initializeDST } from "../utilities/codap-utils";
+import { kAboutTabLabel, kGraphTabLabel } from "../utilities/constants";
 import { AboutTab } from "./about-tab";
 import "./App.css";
 import { GraphTab } from "./graph-tab";
 
 export const App = () => {
   useEffect(() => {
-    initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions})
-      .catch(reason => {
-        // This will happen if not embedded in CODAP
-        console.warn("Not embedded in CODAP");
-      });
-
-    getData();
+    initializeDST();
   }, []);
 
   return (
