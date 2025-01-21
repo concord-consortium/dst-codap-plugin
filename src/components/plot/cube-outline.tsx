@@ -72,8 +72,8 @@ export const CubeOutline = observer(function CubeOutline() {
         <SpaceAxis
           startPoint={new Vector3(xMin, spaceY, xAxisZ)}
           endPoint={new Vector3(xMax, spaceY, xAxisZ)}
-          minValue={graph.latMin}
-          maxValue={graph.latMax}
+          minValue={graph.minLatitude}
+          maxValue={graph.maxLatitude}
           tickDirection={xDirection}
         />
       )}
@@ -89,8 +89,8 @@ export const CubeOutline = observer(function CubeOutline() {
         <SpaceAxis
           startPoint={new Vector3(zAxisX, spaceY, zMin)}
           endPoint={new Vector3(zAxisX, spaceY, zMax)}
-          minValue={graph.longMin}
-          maxValue={graph.longMax}
+          minValue={graph.minLongitude}
+          maxValue={graph.maxLongitude}
           tickDirection={zDirection}
         />
       )}
