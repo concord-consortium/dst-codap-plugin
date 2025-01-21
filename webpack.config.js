@@ -56,6 +56,10 @@ module.exports = (env, argv) => {
           exclude: path.join(__dirname, 'node_modules'),
         } : {},
         {
+          test: /\.json5$/,
+          loader: 'json5-loader'
+        },
+        {
           test: /\.(sa|sc|le|c)ss$/i,
           use: [
             devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
