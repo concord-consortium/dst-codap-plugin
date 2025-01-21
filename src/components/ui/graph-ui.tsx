@@ -4,6 +4,7 @@ import LegendIcon from "../../assets/icons/display-hide-legend-icon.svg";
 import MapControlsIcon from "../../assets/icons/display-hide-map-controls-icon.svg";
 import HomeIcon from "../../assets/icons/home-icon.svg";
 import FitAllIcon from "../../assets/icons/fit-all-icon.svg";
+import MapResetIcon from "../../assets/icons/map-reset-icon.svg";
 import MapZoomInIcon from "../../assets/icons/map-zoom-in-icon.svg";
 import MapZoomOutIcon from "../../assets/icons/map-zoom-out-icon.svg";
 import MarqueeIcon from "../../assets/icons/marquee-select-icon.svg";
@@ -72,18 +73,27 @@ export const GraphUI = observer(function GraphUI() {
           testId="button-legend"
         />
       </UIButtonContainer>
-      <UIButtonContainer className="xy-container">
+      <UIButtonContainer className="map-controls-toggle-container">
         <UIButton
           active={ui.displayMapControls}
           className="top bottom"
           Icon={MapControlsIcon}
           onClick={() => ui.setDisplayMapControls(!ui.displayMapControls)}
-          testId="button-xy-controls"
+          testId="button-map-controls"
         />
       </UIButtonContainer>
       {ui.displayMapControls && (
         <>
-          <UIButtonContainer className="map-controls horizontal">
+          <UIButtonContainer className="map-reset-container">
+            <UIButton
+              className="top bottom"
+              disabled={!graph.canReset}
+              Icon={MapResetIcon}
+              onClick={() => graph.reset()}
+              testId="button-map-reset"
+            />
+          </UIButtonContainer>
+          <UIButtonContainer className="map-controls-container horizontal">
             <UIButton
               className="horizontal left"
               disabled={!graph.canZoomIn}

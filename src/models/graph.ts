@@ -1,5 +1,7 @@
 import { makeAutoObservable } from "mobx";
-import { kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin, kLatScale } from "../utilities/constants";
+import {
+  kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin, kLatScale
+} from "../utilities/constants";
 import { halfPi } from "../utilities/trig-utils";
 import { getDate, ICase } from "./codap-data";
 
@@ -24,6 +26,11 @@ class Graph {
   minLatitude = kBackgroundLatMin; // The current min latitude of the graph
   maxLongitude = kBackgroundLongMax; // The current max longitude of the graph
   minLongitude = kBackgroundLongMin; // The current min longitude of the graph
+
+  homeMaxLatitude = kBackgroundLatMax;
+  homeMinLatitude = kBackgroundLatMin;
+  homeMaxLongitude = kBackgroundLongMax;
+  homeMinLongitude = kBackgroundLongMin;
 
   animationPercentage: Maybe<number>;
   startMaxLat: Maybe<number>;
@@ -131,6 +138,11 @@ class Graph {
     return this.maxLatitude < this.latMax;
   }
 
+  get canReset() {
+    return this.maxLatitude !== this.homeMaxLatitude || this.minLatitude !== this.homeMinLatitude ||
+      this.maxLongitude !== this.homeMaxLongitude || this.minLongitude !== this.homeMinLongitude;
+  }
+
   get canZoomIn() {
     return this.longRange > minWidth;
   }
@@ -221,6 +233,15 @@ class Graph {
     const __amount = amount ?? this.latRange / 4;
     const _amount = Math.min(Math.abs(__amount), this.latMax - this.maxLatitude);
     this.animateTo({ maxLatitude: this.maxLatitude + _amount, minLatitude: this.minLatitude + _amount });
+  }
+
+  reset() {
+    this.animateTo({
+      maxLatitude: this.homeMaxLatitude,
+      minLatitude: this.homeMinLatitude,
+      maxLongitude: this.homeMaxLongitude,
+      minLongitude: this.homeMinLongitude
+    });
   }
 
   setDateRange(min: number, max: number) {
