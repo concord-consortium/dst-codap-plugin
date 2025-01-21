@@ -9,7 +9,7 @@ class UI {
 
   mode: modeType = "pointer";
   displayLegend = true;
-  displayXYControls = false;
+  displayMapControls = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -23,8 +23,8 @@ class UI {
     this.displayLegend = display;
   }
 
-  setDisplayXYControls(display: boolean) {
-    this.displayXYControls = display;
+  setDisplayMapControls(display: boolean) {
+    this.displayMapControls = display;
   }
 
   setMode(mode: modeType) {

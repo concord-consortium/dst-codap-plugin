@@ -1,9 +1,11 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
 import LegendIcon from "../assets/icons/display-hide-legend-icon.svg";
-import XYIcon from "../assets/icons/display-hide-xy-controls-icon.svg";
+import MapControlsIcon from "../assets/icons/display-hide-map-controls-icon.svg";
 import HomeIcon from "../assets/icons/home-icon.svg";
 import FitAllIcon from "../assets/icons/fit-all-icon.svg";
+import MapZoomInIcon from "../assets/icons/map-zoom-in-icon.svg";
+import MapZoomOutIcon from "../assets/icons/map-zoom-out-icon.svg";
 import MarqueeIcon from "../assets/icons/marquee-select-icon.svg";
 import MinusIcon from "../assets/icons/minus.svg";
 import PlusIcon from "../assets/icons/plus.svg";
@@ -75,53 +77,57 @@ export const GraphTab = observer(function GraphTab() {
       </UIButtonContainer>
       <UIButtonContainer className="xy-container">
         <UIButton
-          active={ui.displayXYControls}
+          active={ui.displayMapControls}
           className="top bottom"
-          Icon={XYIcon}
-          onClick={() => ui.setDisplayXYControls(!ui.displayXYControls)}
+          Icon={MapControlsIcon}
+          onClick={() => ui.setDisplayMapControls(!ui.displayMapControls)}
           testId="button-xy-controls"
         />
       </UIButtonContainer>
-      <UIButtonContainer className="map-controls horizontal">
-        <UIButton
-          className="horizontal left"
-          disabled={!graph.canZoomIn}
-          Icon={PlusIcon}
-          onClick={() => graph.zoomIn()}
-          testId="button-map-zoom-in"
-        />
-        <UIButton
-          className="horizontal right"
-          disabled={!graph.canZoomOut}
-          Icon={MinusIcon}
-          onClick={() => graph.zoomOut()}
-          testId="button-map-zoom-out"
-        />
-      </UIButtonContainer>
-      <ArrowButton
-        className="map-arrow"
-        direction="left"
-        disabled={!graph.canPanLeft}
-        onClick={() => graph.panLeft()}
-      />
-      <ArrowButton
-        className="map-arrow"
-        direction="right"
-        disabled={!graph.canPanRight}
-        onClick={() => graph.panRight()}
-      />
-      <ArrowButton
-        className="map-arrow"
-        direction="up"
-        disabled={!graph.canPanUp}
-        onClick={() => graph.panUp()}
-      />
-      <ArrowButton
-        className="map-arrow"
-        direction="down"
-        disabled={!graph.canPanDown}
-        onClick={() => graph.panDown()}
-      />
+      {ui.displayMapControls && (
+        <>
+          <UIButtonContainer className="map-controls horizontal">
+            <UIButton
+              className="horizontal left"
+              disabled={!graph.canZoomIn}
+              Icon={MapZoomInIcon}
+              onClick={() => graph.zoomIn()}
+              testId="button-map-zoom-in"
+            />
+            <UIButton
+              className="horizontal right"
+              disabled={!graph.canZoomOut}
+              Icon={MapZoomOutIcon}
+              onClick={() => graph.zoomOut()}
+              testId="button-map-zoom-out"
+            />
+          </UIButtonContainer>
+          <ArrowButton
+            className="map-arrow"
+            direction="left"
+            disabled={!graph.canPanLeft}
+            onClick={() => graph.panLeft()}
+          />
+          <ArrowButton
+            className="map-arrow"
+            direction="right"
+            disabled={!graph.canPanRight}
+            onClick={() => graph.panRight()}
+          />
+          <ArrowButton
+            className="map-arrow"
+            direction="up"
+            disabled={!graph.canPanUp}
+            onClick={() => graph.panUp()}
+          />
+          <ArrowButton
+            className="map-arrow"
+            direction="down"
+            disabled={!graph.canPanDown}
+            onClick={() => graph.panDown()}
+          />
+        </>
+      )}
     </div>
   );
 });
