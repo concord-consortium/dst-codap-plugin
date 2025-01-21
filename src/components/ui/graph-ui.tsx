@@ -4,6 +4,7 @@ import LegendIcon from "../../assets/icons/display-hide-legend-icon.svg";
 import MapControlsIcon from "../../assets/icons/display-hide-map-controls-icon.svg";
 import HomeIcon from "../../assets/icons/home-icon.svg";
 import FitAllIcon from "../../assets/icons/fit-all-icon.svg";
+import MapPanIcon from "../../assets/icons/map-pan-icon.svg";
 import MapResetIcon from "../../assets/icons/map-reset-icon.svg";
 import MapZoomInIcon from "../../assets/icons/map-zoom-in-icon.svg";
 import MapZoomOutIcon from "../../assets/icons/map-zoom-out-icon.svg";
@@ -14,10 +15,11 @@ import PointIcon from "../../assets/icons/point-selection.svg";
 import { dstCamera } from "../../models/camera";
 import { graph } from "../../models/graph";
 import { ui } from "../../models/ui";
-import { ArrowButton } from "./arrow-button";
+// import { ArrowButton } from "./arrow-button";
 import { NavigationControls } from "./navigation-controls/navigation-controls";
 import { UIButton } from "./ui-button";
 import { UIButtonContainer } from "./ui-button-container";
+import { UISplitButton } from "./ui-split-button";
 
 export const GraphUI = observer(function GraphUI() {
   return (
@@ -102,14 +104,39 @@ export const GraphUI = observer(function GraphUI() {
               testId="button-map-zoom-in"
             />
             <UIButton
-              className="horizontal right"
+              className="horizontal"
               disabled={!graph.canZoomOut}
               Icon={MapZoomOutIcon}
               onClick={() => graph.zoomOut()}
               testId="button-map-zoom-out"
             />
+            <UISplitButton
+              className="horizontal"
+              className1="up"
+              disabled1={!graph.canPanUp}
+              disabled2={!graph.canPanDown}
+              Icon1={MapPanIcon}
+              Icon2={MapPanIcon}
+              onClick1={() => graph.panUp()}
+              onClick2={() => graph.panDown()}
+              testId1="button-pan-up"
+              testId2="button-pan-down"
+            />
+            <UISplitButton
+              className="horizontal horizontal-split right"
+              className1="left"
+              className2="right"
+              disabled1={!graph.canPanLeft}
+              disabled2={!graph.canPanRight}
+              Icon1={MapPanIcon}
+              Icon2={MapPanIcon}
+              onClick1={() => graph.panLeft()}
+              onClick2={() => graph.panRight()}
+              testId1="button-pan-left"
+              testId2="button-pan-right"
+            />
           </UIButtonContainer>
-          <ArrowButton
+          {/* <ArrowButton
             className="map-arrow"
             direction="left"
             disabled={!graph.canPanLeft}
@@ -132,7 +159,7 @@ export const GraphUI = observer(function GraphUI() {
             direction="down"
             disabled={!graph.canPanDown}
             onClick={() => graph.panDown()}
-          />
+          /> */}
         </>
       )}
     </>

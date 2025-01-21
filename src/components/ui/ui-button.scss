@@ -43,11 +43,13 @@
     border-top-right-radius: 3px;
   }
 
-  &:hover {
-    background-color: #dceff2;
+  &.single-button {
+    &:hover {
+      background-color: #dceff2;
 
-    &.nohover {
-      background-color: #b9dfe5;
+      &.nohover {
+        background-color: #b9dfe5;
+      }
     }
   }
 
