@@ -8,7 +8,7 @@
   width: 566px;
 
   &.pointer-mode {
-    cursor: grab;
+    cursor: pointer;
 
     &:active {
       cursor: grabbing;
