@@ -4,6 +4,7 @@ import { Frustum, Matrix4, Vector2, Vector3 } from "three";
 import { codapData } from "../../models/codap-data";
 import { graph } from "../../models/graph";
 import { ui } from "../../models/ui";
+import { dstSelectCases } from "../../utilities/codap-utils";
 import "./marquee-overlay.scss";
 
 interface IMarqueeOverlayProps {
@@ -26,7 +27,7 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef, cont
     }
   };
 
-  const handlePointerMove: PointerEventHandler<HTMLDivElement> = event => {
+  const updateMarquee = (event: React.PointerEvent<HTMLDivElement>) => {
     if (ui.mode === "marquee" && marqueeStartPoint && cameraRef.current && ref.current) {
       const adjustedX = adjustClientX(event.clientX);
       const adjustedY = adjustClientY(event.clientY);
@@ -62,10 +63,16 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef, cont
       }).map((aCase) => aCase.id));
 
       codapData.replaceSelectedCases(Array.from(selectingPoints));
+      dstSelectCases(Array.from(selectingPoints));
     }
   };
 
+  const handlePointerMove: PointerEventHandler<HTMLDivElement> = event => {
+    updateMarquee(event);
+  };
+
   const handlePointerUp: PointerEventHandler<HTMLDivElement> = event => {
+    updateMarquee(event);
     setMarqueeStartPoint(undefined);
     setMarqueeEndPoint(undefined);
   };
