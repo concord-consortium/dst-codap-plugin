@@ -8,19 +8,28 @@ import { DSTOrbitControls } from "../dst-orbit-controls";
 import { CubeOutline } from "./cube-outline";
 import { DSTCamera } from "./dst-camera";
 import { MapPlane } from "./map-plane";
+import { MarqueeOverlay } from "./marquee-overlay";
 import { PlaneControls } from "./plane-controls";
 import { Points } from "./points";
 import "./scatter-plot.scss";
 
 export const ScatterPlot = observer(function ScatterPlot() {
+  const ref = useRef<HTMLDivElement>(null);
   const cameraRef = useRef<any>(null);
   const [zPosition, setZPosition] = useState(-5);
   const controlName = "scatter-plot-controls";
 
+  const handlePointerDown = () => {
+    if (ui.mode === "pointer") {
+      ui.setActiveControls(controlName);
+    }
+  };
+
   return (
     <div
       className="w-full h-full relative scatter-plot"
-      onPointerDown={() => ui.setActiveControls(controlName)}
+      onPointerDown={handlePointerDown}
+      ref={ref}
     >
       <Canvas gl={{ localClippingEnabled: true }}>
         <CubeOutline />
@@ -39,6 +48,7 @@ export const ScatterPlot = observer(function ScatterPlot() {
         <MapPlane zPosition={zPosition} />
       </Canvas>
       <PlaneControls zPosition={zPosition} onZPositionChange={setZPosition} />
+      {ui.mode === "marquee" && <MarqueeOverlay cameraRef={cameraRef} containerRef={ref} />}
     </div>
   );
 });

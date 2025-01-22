@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Outlines } from "@react-three/drei";
 import { ThreeEvent, useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
+import { ui } from "../../models/ui";
 import { dstAddCaseToSelection, dstRemoveCaseFromSelection, dstSelectCases } from "../../utilities/codap-utils";
 
 interface IPointProps {
@@ -36,26 +37,32 @@ export function Point({ id, isSelected, visible, x, y, z }: IPointProps) {
   const position = new Vector3(x, y, z);
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
-    event.stopPropagation();
-    if (event.shiftKey) {
-      if (isSelected) {
-        dstRemoveCaseFromSelection(id);
+    if (ui.mode === "pointer") {
+      event.stopPropagation();
+      if (event.shiftKey) {
+        if (isSelected) {
+          dstRemoveCaseFromSelection(id);
+        } else {
+          dstAddCaseToSelection(id);
+        }
       } else {
-        dstAddCaseToSelection(id);
+        dstSelectCases([id]);
       }
-    } else {
-      dstSelectCases([id]);
     }
   };
 
   const handlePointerEnter = (event: ThreeEvent<PointerEvent>) => {
-    event.stopPropagation();
-    setPointerOver(true);
+    if (ui.mode === "pointer") {
+      event.stopPropagation();
+      setPointerOver(true);
+    }
   };
 
   const handlePointerLeave = (event: ThreeEvent<PointerEvent>) => {
-    event.stopPropagation();
-    setPointerOver(false);
+    if (ui.mode === "pointer") {
+      event.stopPropagation();
+      setPointerOver(false);
+    }
   };
 
   /* eslint-disable react/no-unknown-property */
