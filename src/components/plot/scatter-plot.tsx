@@ -1,4 +1,5 @@
 /* eslint-disable react/no-unknown-property */
+import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import React, { useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
@@ -18,6 +19,7 @@ export const ScatterPlot = observer(function ScatterPlot() {
   const cameraRef = useRef<any>(null);
   const [zPosition, setZPosition] = useState(-5);
   const controlName = "scatter-plot-controls";
+  const enableOrbitControls = ui.mode === "pointer";
 
   const handlePointerDown = () => {
     if (ui.mode === "pointer") {
@@ -27,7 +29,7 @@ export const ScatterPlot = observer(function ScatterPlot() {
 
   return (
     <div
-      className="w-full h-full relative scatter-plot"
+      className={clsx("w-full h-full relative scatter-plot", { "pointer-mode": enableOrbitControls })}
       onPointerDown={handlePointerDown}
       ref={ref}
     >
@@ -38,7 +40,7 @@ export const ScatterPlot = observer(function ScatterPlot() {
         />
         <DSTOrbitControls
           cameraRef={cameraRef}
-          enabled={ui.mode === "pointer"}
+          enabled={enableOrbitControls}
           maxZoom={zoomMax}
           minZoom={zoomMin}
           name={controlName}
