@@ -4,6 +4,7 @@ import {
 } from "@concord-consortium/codap-plugin-api";
 import { codapData, getDate, ICase } from "../models/codap-data";
 import { graph } from "../models/graph";
+import { ui } from "../models/ui";
 import { kInitialDimensions, kPluginName, kVersion } from "./constants";
 
 import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
@@ -69,6 +70,9 @@ export async function getData() {
 }
 
 export async function updateSelection() {
+  // If the user is selecting using a marquee, ignore updates from codap.
+  if (ui.activeMarquee) return;
+
   try {
     const selectionListResult = await getSelectionList(dataContextName);
     if (selectionListResult.success) {

@@ -7,6 +7,8 @@ import { ui } from "../../models/ui";
 import { dstSelectCases } from "../../utilities/codap-utils";
 import "./marquee-overlay.scss";
 
+let throttleUpdate = false;
+
 interface IMarqueeOverlayProps {
   cameraRef: React.MutableRefObject<any>;
   containerRef: React.RefObject<HTMLDivElement>;
@@ -24,10 +26,11 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef, cont
   const handlePointerDown: PointerEventHandler<HTMLDivElement> = event => {
     if (ui.mode === "marquee" && containerRef.current) {
       setMarqueeStartPoint(new Vector2(adjustClientX(event.clientX), adjustClientY(event.clientY)));
+      ui.setActiveMarquee(true);
     }
   };
 
-  const updateMarquee = (event: React.PointerEvent<HTMLDivElement>) => {
+  const updateMarquee = (event: React.PointerEvent<HTMLDivElement>, forceUpdate = false) => {
     if (ui.mode === "marquee" && marqueeStartPoint && cameraRef.current && ref.current) {
       const adjustedX = adjustClientX(event.clientX);
       const adjustedY = adjustClientY(event.clientY);
@@ -63,7 +66,11 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef, cont
       }).map((aCase) => aCase.id));
 
       codapData.replaceSelectedCases(Array.from(selectingPoints));
-      dstSelectCases(Array.from(selectingPoints));
+      if (!throttleUpdate || forceUpdate) {
+        throttleUpdate = true;
+        dstSelectCases(Array.from(selectingPoints));
+        setTimeout(() => throttleUpdate = false, 250);
+      }
     }
   };
 
@@ -72,9 +79,10 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef, cont
   };
 
   const handlePointerUp: PointerEventHandler<HTMLDivElement> = event => {
-    updateMarquee(event);
+    updateMarquee(event, true);
     setMarqueeStartPoint(undefined);
     setMarqueeEndPoint(undefined);
+    ui.setActiveMarquee(false);
   };
 
   const marqueeStyle = marqueeStartPoint && marqueeEndPoint ? {
