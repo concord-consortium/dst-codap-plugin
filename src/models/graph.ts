@@ -1,6 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import {
-  kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin, kLatScale
+  kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin, kHomeMaxLatitude, kHomeMaxLongitude,
+  kHomeMinLatitude, kHomeMinLongitude, kLatScale
 } from "../utilities/constants";
 import { halfPi } from "../utilities/trig-utils";
 import { getDate, ICase } from "./codap-data";
@@ -22,15 +23,15 @@ class Graph {
   longMin = kBackgroundLongMin; // The absolute min longitude
   longMax = kBackgroundLongMax; // The absolute max longitude
 
-  maxLatitude = kBackgroundLatMax; // The current max latitude of the graph
-  minLatitude = kBackgroundLatMin; // The current min latitude of the graph
-  maxLongitude = kBackgroundLongMax; // The current max longitude of the graph
-  minLongitude = kBackgroundLongMin; // The current min longitude of the graph
+  maxLatitude = kHomeMaxLatitude; // The current max latitude of the graph
+  minLatitude = kHomeMinLatitude; // The current min latitude of the graph
+  maxLongitude = kHomeMaxLongitude; // The current max longitude of the graph
+  minLongitude = kHomeMinLongitude; // The current min longitude of the graph
 
-  homeMaxLatitude = kBackgroundLatMax;
-  homeMinLatitude = kBackgroundLatMin;
-  homeMaxLongitude = kBackgroundLongMax;
-  homeMinLongitude = kBackgroundLongMin;
+  homeMaxLatitude = kHomeMaxLatitude;
+  homeMinLatitude = kHomeMinLatitude;
+  homeMaxLongitude = kHomeMaxLongitude;
+  homeMinLongitude = kHomeMinLongitude;
 
   animationPercentage: Maybe<number>;
   startMaxLat: Maybe<number>;
