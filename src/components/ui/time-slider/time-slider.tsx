@@ -4,6 +4,7 @@ import { formatDateString } from "../../../utilities/date-utils";
 import { labelHeight, labelOffsets, timeLineTop } from "./time-slider-contsants";
 import { TimeLine } from "./time-line";
 import "./time-slider.scss";
+import { DateRangeSliderThumb } from "./date-range-slider-thumb";
 
 const labelBaseTop = timeLineTop - labelHeight / 2;
 
@@ -28,6 +29,8 @@ export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITi
           </div>
         );
       })}
+      <DateRangeSliderThumb datePercentage={0} />
+      <DateRangeSliderThumb datePercentage={1} />
     </div>
   );
 });

@@ -1,0 +1,18 @@
+.date-range-slider-thumb {
+  cursor: pointer;
+  left: 26px;
+  position: absolute;
+  
+  .date-range-slider-thumb-center {
+    fill: white;
+    fill-opacity: .8;
+
+    &:hover {
+      fill: #eef8f9;
+    }
+
+    &:active {
+      fill: rgba(185, 223, 229, 0.8);
+    }
+  }
+}
