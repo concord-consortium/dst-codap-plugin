@@ -1,3 +1,4 @@
+import { kHomeMaxLatitude, kHomeMaxLongitude, kHomeMinLatitude, kHomeMinLongitude } from "../utilities/constants";
 import { ICase } from "./codap-data";
 import { graph, graphMax, graphMin } from "./graph";
 
@@ -6,10 +7,10 @@ const interval = setInterval(() => graph.animate(33), 33);
 
 describe("graph", () => {
   beforeEach(() => {
-    graph.setMaxLatitude(graph.maxLatitude - 1);
-    graph.setMinLatitude(graph.minLatitude + 1);
-    graph.setMaxLongitude(graph.maxLongitude - 1);
-    graph.setMinLongitude(graph.minLongitude + 1);
+    graph.setMaxLatitude(kHomeMaxLatitude);
+    graph.setMinLatitude(kHomeMinLatitude);
+    graph.setMaxLongitude(kHomeMaxLongitude);
+    graph.setMinLongitude(kHomeMinLongitude);
   });
 
   afterAll(() => clearInterval(interval));
@@ -132,11 +133,15 @@ describe("graph", () => {
 
   describe("reset", () => {
     it("should reset to home coordinates", (done) => {
-      expect(graph.canZoomOut).toBe(true);
-      expect(graph.canPanDown).toBe(true);
-      expect(graph.canPanUp).toBe(true);
-      expect(graph.canPanLeft).toBe(true);
-      expect(graph.canPanRight).toBe(true);
+      graph.setMaxLatitude(graph.latMax);
+      graph.setMinLatitude(graph.latMin);
+      graph.setMaxLongitude(graph.longMax);
+      graph.setMinLongitude(graph.longMin);
+      expect(graph.canZoomOut).toBe(false);
+      expect(graph.canPanDown).toBe(false);
+      expect(graph.canPanUp).toBe(false);
+      expect(graph.canPanLeft).toBe(false);
+      expect(graph.canPanRight).toBe(false);
       expect(graph.canReset).toBe(true);
       graph.reset();
 
@@ -145,11 +150,11 @@ describe("graph", () => {
         expect(graph.minLatitude).toBe(graph.homeMinLatitude);
         expect(graph.maxLongitude).toBe(graph.homeMaxLongitude);
         expect(graph.minLongitude).toBe(graph.homeMinLongitude);
-        expect(graph.canZoomOut).toBe(false);
-        expect(graph.canPanDown).toBe(false);
-        expect(graph.canPanUp).toBe(false);
-        expect(graph.canPanLeft).toBe(false);
-        expect(graph.canPanRight).toBe(false);
+        expect(graph.canZoomOut).toBe(true);
+        expect(graph.canPanDown).toBe(true);
+        expect(graph.canPanUp).toBe(true);
+        expect(graph.canPanLeft).toBe(true);
+        expect(graph.canPanRight).toBe(true);
         expect(graph.canReset).toBe(false);
         done();
       }, 250);
