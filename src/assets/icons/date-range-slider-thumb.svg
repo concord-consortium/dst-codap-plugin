@@ -1,0 +1,18 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <filter x="-29.2%" y="-20.8%" width="158.3%" height="158.3%" filterUnits="objectBoundingBox" id="tiavl4yg7a">
+            <feOffset dy="2" in="SourceAlpha" result="shadowOffsetOuter1"/>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"/>
+            <feComposite in="shadowBlurOuter1" in2="SourceAlpha" operator="out" result="shadowBlurOuter1"/>
+            <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" in="shadowBlurOuter1"/>
+        </filter>
+        <path d="M1 0a1 1 0 0 1 .446.106l22.001 11a1 1 0 0 1 0 1.788l-22 11A1 1 0 0 1 0 23V1a1 1 0 0 1 1-1z" id="h27s267v4b"/>
+    </defs>
+    <g fill-rule="nonzero" fill="none">
+        <g transform="translate(4 2)">
+            <use fill="#000" filter="url(#tiavl4yg7a)" xlink:href="#h27s267v4b"/>
+            <use fill-opacity=".8" fill="#FFF" xlink:href="#h27s267v4b"/>
+        </g>
+        <path d="M5 2a1 1 0 0 1 .446.106l22.001 11a1 1 0 0 1 0 1.788l-22 11A1 1 0 0 1 4 25V3a1 1 0 0 1 1-1zm.5 1.808V24.19L25.881 14 5.5 3.808z" fill="#177991"/>
+    </g>
+</svg>
