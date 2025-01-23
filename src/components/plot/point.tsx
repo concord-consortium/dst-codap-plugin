@@ -2,20 +2,24 @@ import React, { useState } from "react";
 import { Outlines } from "@react-three/drei";
 import { ThreeEvent, useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
+import { observer } from "mobx-react-lite";
 import { convertLat, convertLong } from "../../utilities/graph-utils";
 import { dstAddCaseToSelection, dstRemoveCaseFromSelection, dstSelectCases } from "../../utilities/codap-utils";
+import { dstContainer } from "../../models/dst-container";
+import { codapData } from "../../models/codap-data";
 
 interface IPointProps {
-  id: number;
-  isSelected: boolean;
+  id: string;
   Latitude: number;
   Longitude: number;
   y: number;
 }
-export function Point({ id, isSelected, Latitude, Longitude, y }: IPointProps) {
+export const Point = observer(function Point({ id, Latitude, Longitude, y }: IPointProps) {
   const [isPointerOver, setPointerOver] = useState(false);
-  const dotColor = "#925987";
+  const dataConfig = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
+  const dotColor = dataConfig.getLegendColorForCase(id);
   const basePointSize = 0.12;
+  const isSelected = codapData.isSelected(id);
   const selectedExtra = isSelected ? .02 : 0;
   const hoverMultiplier = isPointerOver ? 1.5 : 1;
   const targetPointSize = (basePointSize + selectedExtra) * hoverMultiplier;
@@ -72,4 +76,4 @@ export function Point({ id, isSelected, Latitude, Longitude, y }: IPointProps) {
     </mesh>
   );
   /* eslint-enable react/no-unknown-property */
-}
+});

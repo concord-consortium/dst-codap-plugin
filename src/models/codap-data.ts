@@ -3,7 +3,7 @@ import { makeAutoObservable, observable } from "mobx";
 export interface ICase {
   date?: string;
   Day?: number;
-  id: number;
+  __id__: string;
   Latitude?: number;
   Longitude?: number;
   Month?: number;
@@ -11,18 +11,18 @@ export interface ICase {
 }
 
 class CodapData {
-  caseMap = observable.map<number, ICase>();
-  selectedCaseIds = observable.set<number>();
+  caseMap = observable.map<string, ICase>();
+  selectedCaseIds = observable.set<string>();
 
   constructor() {
     makeAutoObservable(this);
   }
 
   addCase(aCase: ICase) {
-    this.caseMap.set(aCase.id, aCase);
+    this.caseMap.set(aCase.__id__, aCase);
   }
 
-  addCaseToSelection(id?: number) {
+  addCaseToSelection(id?: string) {
     if (id != null) this.selectedCaseIds.add(id);
   }
 
@@ -34,22 +34,22 @@ class CodapData {
     return Array.from(this.caseMap.values());
   }
 
-  isSelected(id: number) {
+  isSelected(id: string) {
     return this.selectedCaseIds.has(id);
   }
 
-  removeCaseFromSelection(id?: number) {
+  removeCaseFromSelection(id?: string) {
     if (id != null) this.selectedCaseIds.delete(id);
   }
 
   replaceCases(newCases: ICase[]) {
     this.caseMap.clear();
     newCases.forEach(aCase => {
-      this.caseMap.set(aCase.id, aCase);
+      this.caseMap.set(aCase.__id__, aCase);
     });
   }
 
-  replaceSelectedCases(newSelectedCaseIds: number[]) {
+  replaceSelectedCases(newSelectedCaseIds: string[]) {
     this.selectedCaseIds.replace(newSelectedCaseIds);
   }
 }

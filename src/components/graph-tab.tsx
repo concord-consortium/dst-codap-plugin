@@ -14,6 +14,7 @@ import { ScatterPlot } from "./plot/scatter-plot";
 import { NavigationControls } from "./ui/navigation-controls/navigation-controls";
 import { UIButton } from "./ui/ui-button";
 import { UIButtonContainer } from "./ui/ui-button-container";
+import { DstLegend } from "./dst-legend";
 import "./graph-tab.scss";
 
 export const GraphTab = observer(function GraphTab() {
@@ -22,7 +23,7 @@ export const GraphTab = observer(function GraphTab() {
   const [displayXYControls, setDisplayXYControls] = useState(false);
 
   return (
-    <div className="graph-tab">
+    <div className="graph-tab portal-parent">
       <ScatterPlot mode={mode} />
       <NavigationControls />
       <UIButtonContainer className="zoom-container">
@@ -84,6 +85,7 @@ export const GraphTab = observer(function GraphTab() {
           testId="button-xy-controls"
         />
       </UIButtonContainer>
+      <DstLegend/>
     </div>
   );
 });
