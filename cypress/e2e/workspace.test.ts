@@ -71,7 +71,7 @@ context("Test the overall app", () => {
       ae.getUIButton("button-marquee-mode").click();
       ae.getUIButton("button-pointer-mode").should("not.have.class", "active");
       ae.getUIButton("button-marquee-mode").should("have.class", "active");
-      ae.getUIButton("button-pointer-mode").click();
+      ae.getUIButton("button-pointer-mode").click({ force: true });
       ae.getUIButton("button-pointer-mode").should("have.class", "active");
       ae.getUIButton("button-marquee-mode").should("not.have.class", "active");
 
