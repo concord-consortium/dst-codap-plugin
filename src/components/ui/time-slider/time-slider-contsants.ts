@@ -8,4 +8,4 @@ export const labelOffsets = [0, ...tickOffsets, timeLineHeight];
 
 export const labelHeight = 18;
 
-export const dateRangeSliderThumbHeight = 24;
+export const dateRangeSliderThumbOffset = -14;

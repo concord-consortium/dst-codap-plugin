@@ -1,18 +1,53 @@
-.date-range-slider-thumb {
-  cursor: pointer;
-  left: 26px;
+.date-range-slider-thumb-container {
+  left: -41px;
   position: absolute;
-  
-  .date-range-slider-thumb-center {
-    fill: white;
-    fill-opacity: .8;
 
-    &:hover {
-      fill: #eef8f9;
+  .date-range-slider-thumb-label {
+    background-color: white;
+    border: 1px solid #177991;
+    border-bottom-left-radius: 10px;
+    border-top-left-radius: 10px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.25);
+    font-weight: 500;
+    height: 20px;
+    left: 0;
+    padding-right: 4px;
+    position: absolute;
+    text-align: right;
+    top: 4px;
+    visibility: hidden;
+    width: 72px;
+
+    &.hover {
+      opacity: .4;
+      visibility: visible;
     }
 
-    &:active {
-      fill: rgba(185, 223, 229, 0.8);
+    &.active {
+      visibility: visible;
+    }
+  }
+
+  .date-range-slider-thumb {
+    cursor: pointer;
+    left: 67px;
+    position: absolute;
+  
+    .date-range-slider-thumb-center {
+      fill: white;
+      fill-opacity: .8;
+    }
+
+    &.hover {
+      .date-range-slider-thumb-center {
+        fill: #eef8f9;
+      }
+    }
+
+    &.active {
+      .date-range-slider-thumb-center {
+        fill: rgba(185, 223, 229, 0.8);
+      }
     }
   }
 }
