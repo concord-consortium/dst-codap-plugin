@@ -15,11 +15,12 @@ import PointIcon from "../../assets/icons/point-selection.svg";
 import { dstCamera } from "../../models/camera";
 import { graph } from "../../models/graph";
 import { ui } from "../../models/ui";
-// import { ArrowButton } from "./arrow-button";
+import { ArrowButton } from "./arrow-button";
 import { NavigationControls } from "./navigation-controls/navigation-controls";
 import { UIButton } from "./ui-button";
 import { UIButtonContainer } from "./ui-button-container";
 import { UISplitButton } from "./ui-split-button";
+import "./graph-ui.scss";
 
 export const GraphUI = observer(function GraphUI() {
   return (
@@ -136,32 +137,35 @@ export const GraphUI = observer(function GraphUI() {
               testId2="button-pan-right"
             />
           </UIButtonContainer>
-          {/* <ArrowButton
-            className="map-arrow"
-            direction="left"
-            disabled={!graph.canPanLeft}
-            onClick={() => graph.panLeft()}
-          />
-          <ArrowButton
-            className="map-arrow"
-            direction="right"
-            disabled={!graph.canPanRight}
-            onClick={() => graph.panRight()}
-          />
-          <ArrowButton
-            className="map-arrow"
-            direction="up"
-            disabled={!graph.canPanUp}
-            onClick={() => graph.panUp()}
-          />
-          <ArrowButton
-            className="map-arrow"
-            direction="down"
-            disabled={!graph.canPanDown}
-            onClick={() => graph.panDown()}
-          /> */}
         </>
       )}
+      <div className="map-arrow-container" style={{ rotate: `${-dstCamera.rotation * 180 / Math.PI}deg` }}>
+        <MapControlsIcon className="center-map" />
+        <ArrowButton
+          className="map-arrow"
+          direction="left"
+          disabled={!graph.canPanLeft}
+          onClick={() => graph.panLeft()}
+        />
+        <ArrowButton
+          className="map-arrow"
+          direction="right"
+          disabled={!graph.canPanRight}
+          onClick={() => graph.panRight()}
+        />
+        <ArrowButton
+          className="map-arrow"
+          direction="up"
+          disabled={!graph.canPanUp}
+          onClick={() => graph.panUp()}
+        />
+        <ArrowButton
+          className="map-arrow"
+          direction="down"
+          disabled={!graph.canPanDown}
+          onClick={() => graph.panDown()}
+        />
+      </div>
     </>
   );
 });
