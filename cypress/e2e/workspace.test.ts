@@ -83,11 +83,11 @@ context("Test the overall app", () => {
       ae.getUIButton("button-legend").should("have.class", "active");
 
       // XY Controls button
-      ae.getUIButton("button-xy-controls").should("not.have.class", "active");
-      ae.getUIButton("button-xy-controls").click();
-      ae.getUIButton("button-xy-controls").should("have.class", "active");
-      ae.getUIButton("button-xy-controls").click();
-      ae.getUIButton("button-xy-controls").should("not.have.class", "active");
+      ae.getUIButton("button-map-controls").should("not.have.class", "active");
+      ae.getUIButton("button-map-controls").click();
+      ae.getUIButton("button-map-controls").should("have.class", "active");
+      ae.getUIButton("button-map-controls").click();
+      ae.getUIButton("button-map-controls").should("not.have.class", "active");
     });
   });
 });
