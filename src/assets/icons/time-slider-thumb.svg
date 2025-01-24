@@ -11,7 +11,7 @@
     <g fill-rule="nonzero" fill="none">
         <g transform="translate(4 2)">
             <use fill="#000" filter="url(#48pzgz5z9a)" xlink:href="#qer9p8rxwb"/>
-            <use fill-opacity=".8" fill="#FFF" xlink:href="#qer9p8rxwb"/>
+            <use class="slider-thumb-center" xlink:href="#qer9p8rxwb"/>
         </g>
         <path d="M20 2c8.837 0 16 7.163 16 16s-7.163 16-16 16S4 26.837 4 18 11.163 2 20 2zm0 1.5C11.992 3.5 5.5 9.992 5.5 18S11.992 32.5 20 32.5 34.5 26.008 34.5 18 28.008 3.5 20 3.5z" fill="#177991"/>
     </g>

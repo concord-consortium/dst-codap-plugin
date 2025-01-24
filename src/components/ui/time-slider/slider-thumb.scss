@@ -9,6 +9,10 @@
     left: -71px;
   }
 
+  &.time-slider-thumb-container {
+    left: 42px;
+  }
+
   .slider-thumb-label {
     background-color: white;
     border: 1px solid #177991;
@@ -16,7 +20,6 @@
     font-weight: 500;
     height: 20px;
     position: absolute;
-    top: 4px;
     visibility: hidden;
     width: 72px;
 
@@ -26,13 +29,16 @@
       left: 0;
       padding-right: 4px;
       text-align: right;
+      top: 4px;
     }
 
     &.right-rounded {
       border-bottom-right-radius: 10px;
       border-top-right-radius: 10px;
-      padding-left: 4px;
+      left: 32px;
+      padding-left: 8px;
       text-align: left;
+      top: 8px;
     }
 
     &.hover {
