@@ -13,6 +13,32 @@
     left: 42px;
   }
 
+  &.left-rounded {
+    .slider-thumb-label {
+      border-bottom-left-radius: 10px;
+      border-top-left-radius: 10px;
+      left: 0;
+      padding-right: 4px;
+      text-align: right;
+      top: 4px;
+    }
+
+    .slider-thumb {
+      left: 67px;
+    }
+  }
+
+  &.right-rounded {
+    .slider-thumb-label {
+      border-bottom-right-radius: 10px;
+      border-top-right-radius: 10px;
+      left: 32px;
+      padding-left: 8px;
+      text-align: left;
+      top: 8px;
+    }
+  }
+
   .slider-thumb-label {
     background-color: white;
     border: 1px solid #177991;
@@ -22,24 +48,6 @@
     position: absolute;
     visibility: hidden;
     width: 72px;
-
-    &.left-rounded {
-      border-bottom-left-radius: 10px;
-      border-top-left-radius: 10px;
-      left: 0;
-      padding-right: 4px;
-      text-align: right;
-      top: 4px;
-    }
-
-    &.right-rounded {
-      border-bottom-right-radius: 10px;
-      border-top-right-radius: 10px;
-      left: 32px;
-      padding-left: 8px;
-      text-align: left;
-      top: 8px;
-    }
 
     &.hover {
       opacity: .4;
@@ -54,10 +62,6 @@
   .slider-thumb {
     cursor: pointer;
     position: absolute;
-
-    &.left-rounded-slider-thumb {
-      left: 67px;
-    }
   
     .slider-thumb-center {
       fill: white;

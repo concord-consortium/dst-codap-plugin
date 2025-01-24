@@ -58,15 +58,13 @@ export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITi
         );
       })}
       <SliderThumb
-        containerClassName="map-slider-thumb-container"
+        className="map-slider-thumb-container left-rounded"
         label={labelFromPercentage(mapPercent)}
-        labelClassName="left-rounded"
         maxPercent={upperRangePercent}
         minPercent={lowerRangePercent}
         percent={mapPercent}
         setPercent={setMapPercent}
         topOffset={mapSliderThumbOffset}
-        thumbClassName="left-rounded-slider-thumb"
         ThumbIcon={MapSlider}
       />
       <DateRangeSliderThumb
@@ -84,9 +82,8 @@ export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITi
         setPercent={setLowerRangePercent}
       />
       <SliderThumb
-        containerClassName="time-slider-thumb-container"
+        className="time-slider-thumb-container right-rounded"
         label={labelFromPercentage(timePercent)}
-        labelClassName="right-rounded"
         maxPercent={upperRangePercent}
         minPercent={lowerRangePercent}
         percent={timePercent}

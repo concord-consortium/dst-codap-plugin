@@ -4,20 +4,17 @@ import { timeLineHeight, timeLineTop } from "./time-slider-contsants";
 import "./slider-thumb.scss";
 
 interface ISliderThumbProps {
-  containerClassName?: string;
+  className?: string;
   label: string;
-  labelClassName?: string;
   minPercent: number;
   maxPercent: number;
   percent: number;
   setPercent: (value: number) => void;
   topOffset?: number;
-  thumbClassName?: string;
   ThumbIcon: React.FC<React.SVGProps<SVGSVGElement>>;
 }
 export function SliderThumb({
-  containerClassName, label, labelClassName, minPercent, maxPercent, percent, setPercent, topOffset, thumbClassName,
-  ThumbIcon
+  className, label, minPercent, maxPercent, percent, setPercent, topOffset, ThumbIcon
 }: ISliderThumbProps) {
   const [hovering, setHovering] = useState(false);
   const [pointerDown, setPointerDown] = useState(false);
@@ -55,11 +52,11 @@ export function SliderThumb({
   const handlePointerOver = () => setHovering(true);
 
   const extraClass = pointerDown ? "active" : hovering ? "hover" : "";
-  const labelClass = clsx("slider-thumb-label", labelClassName, extraClass);
-  const thumbClass = clsx("slider-thumb", thumbClassName, extraClass);
+  const labelClass = clsx("slider-thumb-label", extraClass);
+  const thumbClass = clsx("slider-thumb", extraClass);
 
   return (
-    <div className={clsx("slider-thumb-container", containerClassName)} style={style}>
+    <div className={clsx("slider-thumb-container", className)} style={style}>
       <div className={labelClass}>{label}</div>
       <div
         className={thumbClass}

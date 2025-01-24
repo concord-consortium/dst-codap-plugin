@@ -15,15 +15,13 @@ export function DateRangeSliderThumb({
 }: IDateRangeSliderThumbProps) {
   return (
     <SliderThumb
-      containerClassName="date-range-slider-thumb-container"
+      className="date-range-slider-thumb-container left-rounded"
       label={label}
-      labelClassName="left-rounded"
       maxPercent={maxPercent}
       minPercent={minPercent}
       percent={percent}
       setPercent={setPercent}
       topOffset={dateRangeSliderThumbOffset}
-      thumbClassName="left-rounded-slider-thumb"
       ThumbIcon={DateRangeSliderThumbIcon}
     />
   );
