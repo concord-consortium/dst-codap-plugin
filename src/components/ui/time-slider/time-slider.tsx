@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MapSlider from "../../../assets/icons/map-slider.svg";
 import TimeSliderThumb from "../../../assets/icons/time-slider-thumb.svg";
 import { formatDateString } from "../../../utilities/date-utils";
@@ -23,6 +23,11 @@ export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITi
   const [mapPercent, setMapPercent] = useState(0);
   const [timePercent, setTimePercent] = useState(1);
 
+  useEffect(() => {
+    setMapPercent(value => Math.min(upperRangePercent, Math.max(lowerRangePercent, value)));
+    setTimePercent(value => Math.min(upperRangePercent, Math.max(lowerRangePercent, value)));
+  }, [upperRangePercent, lowerRangePercent]);
+
   const labelFromPercentage = (percentage: number) => {
     const dateValue = dateMin + (dateMax - dateMin) * percentage;
     return formatDateString(new Date(dateValue));
@@ -38,7 +43,12 @@ export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITi
         tickClassName="middle-tick"
         upperClip={(1 - lowerRangePercent) * 100}
       />
-      <TimeLine className="front-line" lowerClip={60} tickClassName="front-tick" upperClip={40} />
+      <TimeLine
+        className="front-line"
+        lowerClip={(1 - timePercent) * 100}
+        tickClassName="front-tick"
+        upperClip={(1 - lowerRangePercent) * 100}
+      />
       {labelOffsets.map((offset, i) => {
         const percentage = (labelOffsets.length - 1 - i) / (labelOffsets.length - 1);
         return (
