@@ -1,10 +1,12 @@
 import { observer } from "mobx-react-lite";
 import React, { useState } from "react";
+import MapSlider from "../../../assets/icons/map-slider.svg";
 import { formatDateString } from "../../../utilities/date-utils";
-import { labelHeight, labelOffsets, timeLineTop } from "./time-slider-contsants";
+import { DateRangeSliderThumb } from "./date-range-slider-thumb";
+import { SliderThumb } from "./slider-thumb";
+import { labelHeight, labelOffsets, mapSliderThumbOffset, timeLineTop } from "./time-slider-contsants";
 import { TimeLine } from "./time-line";
 import "./time-slider.scss";
-import { DateRangeSliderThumb } from "./date-range-slider-thumb";
 
 const labelBaseTop = timeLineTop - labelHeight / 2;
 
@@ -15,6 +17,7 @@ interface ITimeSliderProps {
 export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITimeSliderProps) {
   const [upperRangePercent, setUpperRangePercent] = useState(1);
   const [lowerRangePercent, setLowerRangePercent] = useState(0);
+  const [mapPercent, setMapPercent] = useState(0);
 
   const labelFromPercentage = (percentage: number) => {
     const dateValue = dateMin + (dateMax - dateMin) * percentage;
@@ -40,6 +43,18 @@ export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITi
           </div>
         );
       })}
+      <SliderThumb
+        containerClassName="map-slider-thumb-container"
+        label={labelFromPercentage(mapPercent)}
+        labelClassName="left-rounded"
+        maxPercent={upperRangePercent}
+        minPercent={lowerRangePercent}
+        percent={mapPercent}
+        setPercent={setMapPercent}
+        topOffset={mapSliderThumbOffset}
+        thumbClassName="left-rounded-slider-thumb"
+        ThumbIcon={MapSlider}
+      />
       <DateRangeSliderThumb
         label={labelFromPercentage(upperRangePercent)}
         minPercent={lowerRangePercent}
