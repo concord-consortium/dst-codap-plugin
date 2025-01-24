@@ -5,10 +5,10 @@ import TimeSliderThumb from "../../../assets/icons/time-slider-thumb.svg";
 import { formatDateString } from "../../../utilities/date-utils";
 import { DateRangeSliderThumb } from "./date-range-slider-thumb";
 import { SliderThumb } from "./slider-thumb";
+import { TimeLine } from "./time-line";
 import {
   labelHeight, labelOffsets, mapSliderThumbOffset, timeLineTop, timeSliderThumbOffset
 } from "./time-slider-contsants";
-import { TimeLine } from "./time-line";
 import "./time-slider.scss";
 
 const labelBaseTop = timeLineTop - labelHeight / 2;
