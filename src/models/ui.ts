@@ -12,7 +12,6 @@ class UI {
 
   mode: modeType = "pointer";
   displayLegend = true;
-  displayMapControls = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -28,10 +27,6 @@ class UI {
 
   setDisplayLegend(display: boolean) {
     this.displayLegend = display;
-  }
-
-  setDisplayMapControls(display: boolean) {
-    this.displayMapControls = display;
   }
 
   setMode(mode: modeType) {

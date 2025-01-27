@@ -4,7 +4,6 @@ import { observer } from "mobx-react-lite";
 import React, { useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { EffectComposer, HueSaturation } from "@react-three/postprocessing";
-import { zoomMax, zoomMin } from "../../models/camera";
 import { ui } from "../../models/ui";
 import { DSTOrbitControls } from "../dst-orbit-controls";
 import { CubeOutline } from "./cube-outline";
@@ -42,8 +41,6 @@ export const ScatterPlot = observer(function ScatterPlot() {
         <DSTOrbitControls
           cameraRef={cameraRef}
           enabled={enableOrbitControls}
-          maxZoom={zoomMax}
-          minZoom={zoomMin}
           name={controlName}
         />
         <ambientLight intensity={2.75} />

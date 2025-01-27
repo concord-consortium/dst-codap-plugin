@@ -6,13 +6,10 @@ import { ui } from "../models/ui";
 interface IDSTOrbitControlsProps {
   cameraRef: React.MutableRefObject<any>;
   enabled?: boolean;
-  enableZoom?: boolean;
-  maxZoom?: number;
-  minZoom?: number;
   name: string;
 }
 export function DSTOrbitControls({
-  cameraRef, enabled = true, enableZoom = true, maxZoom, minZoom, name
+  cameraRef, enabled = true, name
 }: IDSTOrbitControlsProps) {
 
   const handleChange = () => {
@@ -26,9 +23,7 @@ export function DSTOrbitControls({
     <OrbitControls
       enabled={enabled}
       enableDamping={false}
-      enableZoom={enableZoom}
-      maxZoom={maxZoom}
-      minZoom={minZoom}
+      enableZoom={false}
       onChange={handleChange}
     />
   );

@@ -6,34 +6,4 @@
   &.horizontal {
     flex-direction: row;
   }
-
-  &.zoom-container {
-    left: 15px;
-    top: 149px;
-  }
-
-  &.mode-container {
-    left: 15px;
-    top: 286px;
-  }
-
-  &.legend-container {
-    left: 15px;
-    top: 361px;
-  }
-
-  &.map-controls-toggle-container {
-    left: 62px;
-    top: 361px;
-  }
-
-  &.map-reset-container {
-    left: 62px;
-    top: 317px;
-  }
-
-  &.map-controls-container {
-    left: 109px;
-    top: 361px;
-  }
 }

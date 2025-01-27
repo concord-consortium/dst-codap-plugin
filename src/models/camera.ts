@@ -11,7 +11,7 @@ import { halfPi, normalizeRadian2Pi, normalizeRadianMinusPi, quarterPi, twoPi } 
 export const defaultDistance = 40;
 export const defaultRotation = quarterPi;
 export const defaultPivot = quarterPi;
-export const defaultZoom = 20;
+export const defaultZoom = 18;
 export const { x: defaultCameraX, y: defaultCameraY, z: defaultCameraZ } =
   getPositionFromCameraFormat(defaultDistance, defaultPivot, defaultRotation);
 

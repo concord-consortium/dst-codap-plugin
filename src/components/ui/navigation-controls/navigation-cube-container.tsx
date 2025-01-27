@@ -29,7 +29,6 @@ export const NavigationCubeContainer = observer(function NavigationCubeContainer
         />
         <DSTOrbitControls
           cameraRef={cameraRef}
-          enableZoom={false}
           name={controlName}
         />
         <ambientLight intensity={4} />

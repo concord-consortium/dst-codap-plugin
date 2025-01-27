@@ -3,14 +3,11 @@ import React from "react";
 import LegendIcon from "../../assets/icons/display-hide-legend-icon.svg";
 import MapControlsIcon from "../../assets/icons/display-hide-map-controls-icon.svg";
 import HomeIcon from "../../assets/icons/home-icon.svg";
-import FitAllIcon from "../../assets/icons/fit-all-icon.svg";
-import MapPanIcon from "../../assets/icons/map-pan-icon.svg";
+// import MapPanIcon from "../../assets/icons/map-pan-icon.svg";
 import MapResetIcon from "../../assets/icons/map-reset-icon.svg";
 import MapZoomInIcon from "../../assets/icons/map-zoom-in-icon.svg";
 import MapZoomOutIcon from "../../assets/icons/map-zoom-out-icon.svg";
 import MarqueeIcon from "../../assets/icons/marquee-select-icon.svg";
-import MinusIcon from "../../assets/icons/minus.svg";
-import PlusIcon from "../../assets/icons/plus.svg";
 import PointIcon from "../../assets/icons/point-selection.svg";
 import { dstCamera } from "../../models/camera";
 import { graph } from "../../models/graph";
@@ -19,52 +16,44 @@ import { ArrowButton } from "./arrow-button";
 import { NavigationControls } from "./navigation-controls/navigation-controls";
 import { UIButton } from "./ui-button";
 import { UIButtonContainer } from "./ui-button-container";
-import { UISplitButton } from "./ui-split-button";
 import "./graph-ui.scss";
 
 export const GraphUI = observer(function GraphUI() {
   return (
     <>
       <NavigationControls />
-      <UIButtonContainer className="zoom-container">
+      <UIButtonContainer className="home-container">
         <UIButton
-          className="top"
+          className="top bottom"
           disabled={dstCamera.isHome}
           Icon={HomeIcon}
           onClick={() => dstCamera.resetHome()}
           testId="button-home"
         />
-        <UIButton disabled={true} Icon={FitAllIcon} testId="button-fit-all" />
+      </UIButtonContainer>
+      <UIButtonContainer className="map-zoom-container">
         <UIButton
-          disabled={!dstCamera.canZoomIn}
-          Icon={PlusIcon}
-          onClick={() => dstCamera.zoomIn()}
-          testId="button-zoom-in"
+          className="top"
+          disabled={!graph.canZoomIn}
+          Icon={MapZoomInIcon}
+          onClick={() => graph.zoomIn()}
+          testId="button-map-zoom-in"
         />
         <UIButton
           className="bottom"
-          disabled={!dstCamera.canZoomOut}
-          Icon={MinusIcon}
-          onClick={() => dstCamera.zoomOut()}
-          testId="button-zoom-out"
+          disabled={!graph.canZoomOut}
+          Icon={MapZoomOutIcon}
+          onClick={() => graph.zoomOut()}
+          testId="button-map-zoom-out"
         />
       </UIButtonContainer>
-      <UIButtonContainer className="mode-container">
+      <UIButtonContainer className="map-reset-container">
         <UIButton
-          active={ui.mode === "pointer"}
-          className="top"
-          Icon={PointIcon}
-          onClick={() => ui.setMode("pointer")}
-          noActiveHover={true}
-          testId="button-pointer-mode"
-        />
-        <UIButton
-          active={ui.mode === "marquee"}
-          className="bottom"
-          Icon={MarqueeIcon}
-          onClick={() => ui.setMode("marquee")}
-          noActiveHover={true}
-          testId="button-marquee-mode"
+          className="top bottom"
+          disabled={!graph.canReset}
+          Icon={MapResetIcon}
+          onClick={() => graph.reset()}
+          testId="button-map-reset"
         />
       </UIButtonContainer>
       <UIButtonContainer className="legend-container">
@@ -76,69 +65,24 @@ export const GraphUI = observer(function GraphUI() {
           testId="button-legend"
         />
       </UIButtonContainer>
-      <UIButtonContainer className="map-controls-toggle-container">
+      <UIButtonContainer className="mode-container horizontal">
         <UIButton
-          active={ui.displayMapControls}
-          className="top bottom"
-          Icon={MapControlsIcon}
-          onClick={() => ui.setDisplayMapControls(!ui.displayMapControls)}
-          testId="button-map-controls"
+          active={ui.mode === "pointer"}
+          className="horizontal left"
+          Icon={PointIcon}
+          onClick={() => ui.setMode("pointer")}
+          noActiveHover={true}
+          testId="button-pointer-mode"
+        />
+        <UIButton
+          active={ui.mode === "marquee"}
+          className="horizontal right"
+          Icon={MarqueeIcon}
+          onClick={() => ui.setMode("marquee")}
+          noActiveHover={true}
+          testId="button-marquee-mode"
         />
       </UIButtonContainer>
-      {ui.displayMapControls && (
-        <>
-          <UIButtonContainer className="map-reset-container">
-            <UIButton
-              className="top bottom"
-              disabled={!graph.canReset}
-              Icon={MapResetIcon}
-              onClick={() => graph.reset()}
-              testId="button-map-reset"
-            />
-          </UIButtonContainer>
-          <UIButtonContainer className="map-controls-container horizontal">
-            <UIButton
-              className="horizontal left"
-              disabled={!graph.canZoomIn}
-              Icon={MapZoomInIcon}
-              onClick={() => graph.zoomIn()}
-              testId="button-map-zoom-in"
-            />
-            <UIButton
-              className="horizontal"
-              disabled={!graph.canZoomOut}
-              Icon={MapZoomOutIcon}
-              onClick={() => graph.zoomOut()}
-              testId="button-map-zoom-out"
-            />
-            <UISplitButton
-              className="horizontal"
-              className1="up"
-              disabled1={!graph.canPanUp}
-              disabled2={!graph.canPanDown}
-              Icon1={MapPanIcon}
-              Icon2={MapPanIcon}
-              onClick1={() => graph.panUp()}
-              onClick2={() => graph.panDown()}
-              testId1="button-pan-up"
-              testId2="button-pan-down"
-            />
-            <UISplitButton
-              className="horizontal horizontal-split right"
-              className1="left"
-              className2="right"
-              disabled1={!graph.canPanLeft}
-              disabled2={!graph.canPanRight}
-              Icon1={MapPanIcon}
-              Icon2={MapPanIcon}
-              onClick1={() => graph.panLeft()}
-              onClick2={() => graph.panRight()}
-              testId1="button-pan-left"
-              testId2="button-pan-right"
-            />
-          </UIButtonContainer>
-        </>
-      )}
       <div className="map-arrow-container" style={{ rotate: `${-dstCamera.rotation * 180 / Math.PI}deg` }}>
         <MapControlsIcon className="center-map" />
         <ArrowButton

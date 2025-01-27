@@ -6,7 +6,6 @@ describe("UI Model", () => {
     expect(ui.activeMarquee).toBe(false);
     expect(ui.mode).toBe("pointer");
     expect(ui.displayLegend).toBe(true);
-    expect(ui.displayMapControls).toBe(false);
   });
 
   it("should set active controls", () => {
@@ -22,11 +21,6 @@ describe("UI Model", () => {
   it("should set display legend", () => {
     ui.setDisplayLegend(false);
     expect(ui.displayLegend).toBe(false);
-  });
-
-  it("should set display map controls", () => {
-    ui.setDisplayMapControls(true);
-    expect(ui.displayMapControls).toBe(true);
   });
 
   it("should set mode", () => {
