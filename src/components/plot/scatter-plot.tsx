@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import React, { useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
+import { EffectComposer, HueSaturation } from "@react-three/postprocessing";
 import { zoomMax, zoomMin } from "../../models/camera";
 import { ui } from "../../models/ui";
 import { DSTOrbitControls } from "../dst-orbit-controls";
@@ -45,9 +46,12 @@ export const ScatterPlot = observer(function ScatterPlot() {
           minZoom={zoomMin}
           name={controlName}
         />
-        <ambientLight intensity={1.5} />
+        <ambientLight intensity={2.75} />
         <Points />
         <MapPlane zPosition={zPosition} />
+        <EffectComposer>
+          <HueSaturation saturation={0.15} />
+        </EffectComposer>
       </Canvas>
       <PlaneControls zPosition={zPosition} onZPositionChange={setZPosition} />
       {ui.mode === "marquee" && <MarqueeOverlay cameraRef={cameraRef} containerRef={ref} />}
