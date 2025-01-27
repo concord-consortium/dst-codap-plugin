@@ -1,8 +1,8 @@
-USA_location_map.svg.png
+SpaceCubeMap.png
 
-Equirectangular projection, N/S stretching 120 %. Geographic limits of the map:
+Geographic limits of the map:
 
-N: 49.8° N
-S: 24.2° N
-W: 125.5° W
-E: 66.5° W
+N: 63.5° N
+S: 9.6° N
+W: 130° W
+E: 62° W

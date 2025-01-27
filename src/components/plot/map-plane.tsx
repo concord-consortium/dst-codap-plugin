@@ -3,8 +3,7 @@ import React, { useMemo } from "react";
 import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { Plane, Vector3 } from "three";
-// import map from "../../assets/USA_location_map.svg.png";
-import map from "../../assets/maptest_3840.png";
+import map from "../../assets/SpaceCubeMap.png";
 import { graph, graphMax, graphMin } from "../../models/graph";
 import {
   kBackgroundLongRange, kBackgroundHeight, kBackgroundLatMid, kBackgroundLongMid, kBackgroundWidth
