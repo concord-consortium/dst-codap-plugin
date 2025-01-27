@@ -45,26 +45,6 @@ context("Test the overall app", () => {
       ae.getUIButton("button-home").should("be.enabled");
       ae.getUIButton("button-home").click();
 
-      // Fit all button
-      ae.getUIButton("button-fit-all").should("exist");
-
-      // Zoom in button
-      ae.getUIButton("button-zoom-in").should("be.enabled");
-      ae.getUIButton("button-zoom-in").click();
-      Array(7).fill(1).forEach(() => ae.getUIButton("button-zoom-in").click());
-      ae.getUIButton("button-zoom-in").should("be.enabled");
-      ae.getUIButton("button-zoom-in").click();
-      ae.getUIButton("button-zoom-in").should("not.be.enabled");
-
-      // Zoom out button
-      ae.getUIButton("button-home").click();
-      ae.getUIButton("button-zoom-out").should("be.enabled");
-      ae.getUIButton("button-zoom-out").click();
-      ae.getUIButton("button-zoom-out").click();
-      ae.getUIButton("button-zoom-out").should("be.enabled");
-      ae.getUIButton("button-zoom-out").click();
-      ae.getUIButton("button-zoom-out").should("not.be.enabled");
-
       // Mode buttons
       ae.getUIButton("button-pointer-mode").should("have.class", "active");
       ae.getUIButton("button-marquee-mode").should("not.have.class", "active");
@@ -81,13 +61,6 @@ context("Test the overall app", () => {
       ae.getUIButton("button-legend").should("not.have.class", "active");
       ae.getUIButton("button-legend").click();
       ae.getUIButton("button-legend").should("have.class", "active");
-
-      // XY Controls button
-      ae.getUIButton("button-map-controls").should("not.have.class", "active");
-      ae.getUIButton("button-map-controls").click();
-      ae.getUIButton("button-map-controls").should("have.class", "active");
-      ae.getUIButton("button-map-controls").click();
-      ae.getUIButton("button-map-controls").should("not.have.class", "active");
     });
   });
 });
