@@ -50,7 +50,7 @@ export const ScatterPlot = observer(function ScatterPlot() {
         <Points />
         <MapPlane zPosition={zPosition} />
         <EffectComposer>
-          <HueSaturation saturation={0.15} />
+          <HueSaturation saturation={0.05} />
         </EffectComposer>
       </Canvas>
       <PlaneControls zPosition={zPosition} onZPositionChange={setZPosition} />
