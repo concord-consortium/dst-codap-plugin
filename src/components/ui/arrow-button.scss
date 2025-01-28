@@ -8,6 +8,20 @@
     height: 16px;
     width: 32px;
 
+    &:disabled {
+      .map-pan-arrow {
+        opacity: .4;
+      }
+
+      &:hover {
+        background-color: white;
+      }
+
+      &:active {
+        background-color: white;
+      }
+    }
+
     &:hover {
       background-color: #dceff2;
     }
