@@ -3,7 +3,7 @@ import React from "react";
 import LegendIcon from "../../assets/icons/display-hide-legend-icon.svg";
 import MapControlsIcon from "../../assets/icons/display-hide-map-controls-icon.svg";
 import HomeIcon from "../../assets/icons/home-icon.svg";
-// import MapPanIcon from "../../assets/icons/map-pan-icon.svg";
+import MapPanArrowIcon from "../../assets/icons/map-pan-arrow-icon.svg";
 import MapResetIcon from "../../assets/icons/map-reset-icon.svg";
 import MapZoomInIcon from "../../assets/icons/map-zoom-in-icon.svg";
 import MapZoomOutIcon from "../../assets/icons/map-zoom-out-icon.svg";
@@ -84,29 +84,35 @@ export const GraphUI = observer(function GraphUI() {
         />
       </UIButtonContainer>
       <div className="map-arrow-container" style={{ rotate: `${-dstCamera.rotation * 180 / Math.PI}deg` }}>
-        <MapControlsIcon className="center-map" />
+        <div className="center-map-container">
+          <MapControlsIcon className="center-map" />
+        </div>
         <ArrowButton
           className="map-arrow"
           direction="left"
           disabled={!graph.canPanLeft}
+          Icon={MapPanArrowIcon}
           onClick={() => graph.panLeft()}
         />
         <ArrowButton
           className="map-arrow"
           direction="right"
           disabled={!graph.canPanRight}
+          Icon={MapPanArrowIcon}
           onClick={() => graph.panRight()}
         />
         <ArrowButton
           className="map-arrow"
           direction="up"
           disabled={!graph.canPanUp}
+          Icon={MapPanArrowIcon}
           onClick={() => graph.panUp()}
         />
         <ArrowButton
           className="map-arrow"
           direction="down"
           disabled={!graph.canPanDown}
+          Icon={MapPanArrowIcon}
           onClick={() => graph.panDown()}
         />
       </div>

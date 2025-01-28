@@ -1,14 +1,20 @@
 .map-arrow-container {
-  height: 50px;
-  left: 30px;
+  height: 62px;
+  left: 32px;
   position: absolute;
-  top: 280px;
-  width: 50px;
+  top: 276px;
+  width: 62px;
 
-  .center-map {
-    left: 12.5px;
+  .center-map-container {
+    align-items: center;
+    background-color: white;
+    display: flex;
+    height: 30px;
+    justify-content: center;
+    left: 16px;
     position: absolute;
-    top: 12.5px;
+    top: 16px;
+    width: 30px;
   }
 }
 

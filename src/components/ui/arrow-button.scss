@@ -2,10 +2,58 @@
   border: none;
   position: absolute;
 
+  &.map-arrow {
+    background-color: white;
+    border: 1px solid #177991;
+    height: 16px;
+    width: 32px;
+
+    &:hover {
+      background-color: #dceff2;
+    }
+
+    &:active {
+      background-color: #b9dfe5;
+    }
+
+    svg {
+      position: absolute;
+    }
+  }
+
+  &.navigation-cube-arrow {
+    &:disabled {
+      svg {
+        opacity: .25;
+
+        &:hover {
+          opacity: .25;
+        }
+      }
+    }
+
+    &:hover {
+      svg {
+        opacity: .75;
+      }
+    }
+
+    svg {
+      opacity: .5;
+    }
+  }
+
   &.down {
     &.map-arrow {
-      left: 13px;
-      bottom: -5px;
+      border-bottom-left-radius: 3px;
+      border-bottom-right-radius: 3px;
+      bottom: 0px;
+      left: 15px;
+
+      svg {
+        left: -1px;
+        top: -1px;
+      }
     }
 
     &.navigation-cube-arrow {
@@ -20,8 +68,17 @@
 
   &.left {
     &.map-arrow {
-      left: -5px;
-      top: 13px;
+      border-bottom-left-radius: 3px;
+      border-top-left-radius: 3px;
+      height: 32px;
+      left: 0px;
+      top: 15px;
+      width: 16px;
+
+      svg {
+        left: -9px;
+        top: 7px;
+      }
     }
 
     &.navigation-cube-arrow {
@@ -36,8 +93,17 @@
 
   &.right {
     &.map-arrow {
-      right: -5px;
-      top: 13px;
+      border-bottom-right-radius: 3px;
+      border-top-right-radius: 3px;
+      height: 32px;
+      left: 46px;
+      top: 15px;
+      width: 16px;
+
+      svg {
+        left: -9px;
+        top: 7px;
+      }
     }
 
     &.navigation-cube-arrow {
@@ -52,33 +118,20 @@
 
   &.up {
     &.map-arrow {
-      left: 13px;
-      top: -5px;
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+      left: 15px;
+      top: 0px;
+
+      svg {
+        left: -1px;
+        top: -1px;
+      }
     }
 
     &.navigation-cube-arrow {
       left: 41px;
       top: 0;
     }
-  }
-
-  &:disabled {
-    svg {
-      opacity: .25;
-
-      &:hover {
-        opacity: .25;
-      }
-    }
-  }
-
-  &:hover {
-    svg {
-      opacity: .75;
-    }
-  }
-
-  svg {
-    opacity: .5;
   }
 }
