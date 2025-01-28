@@ -12,7 +12,7 @@ interface IUIButtonProps {
   testId?: string;
 }
 export function UIButton({ active, className, disabled, Icon, onClick, noActiveHover, testId }: IUIButtonProps) {
-  const classes = clsx("ui-button single-button", className, { active, nohover: noActiveHover && active });
+  const classes = clsx("ui-button", className, { active, nohover: noActiveHover && active });
   return (
     <button className={classes} data-testid={testId} disabled={disabled} onClick={() => onClick?.()}>
       {Icon && <Icon />}
