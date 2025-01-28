@@ -14,16 +14,16 @@ context("Test the overall app", () => {
     });
 
     it("ui renders and functions", () => {
-      // Up button
+      // Down button
       ae.getNavigationArrow("down").should("be.enabled");
       ae.getNavigationArrow("down").click();
       ae.getNavigationArrow("down").should("be.enabled");
-      ae.getNavigationArrow("down").click();
+      Array(3).fill(1).forEach(() => ae.getNavigationArrow("down").click());
       ae.getNavigationArrow("down").should("be.enabled");
       ae.getNavigationArrow("down").click();
       ae.getNavigationArrow("down").should("not.be.enabled");
 
-      // Down button
+      // Up button
       ae.getNavigationArrow("up").should("be.enabled");
       ae.getNavigationArrow("up").click();
       ae.getNavigationArrow("down").should("be.enabled");
