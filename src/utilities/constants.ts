@@ -1,8 +1,8 @@
 export const kPluginName = "Space-Time Cube";
 export const kVersion = "0.0.1";
 export const kInitialDimensions = {
-  width: 780,
-  height: 600
+  width: 685,
+  height: 542
 };
 
 export const kGraphTabLabel = "3D Graph";
