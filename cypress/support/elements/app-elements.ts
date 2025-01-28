@@ -1,3 +1,4 @@
+type directionType = "up" | "down" | "left" | "right";
 export const AppElements = {
   getApp() {
     return cy.get(".App");
@@ -8,7 +9,10 @@ export const AppElements = {
   getUIButton(testId: string) {
     return this.getApp().get(`[data-testid="${testId}"`);
   },
-  getNavigationArrow(direction: "up" | "down" | "left" | "right") {
+  getNavigationArrow(direction: directionType) {
     return this.getApp().get(`.navigation-cube-arrow.${direction}`);
+  },
+  getMapPanButton(direction: directionType) {
+    return this.getApp().get(`.map-arrow.${direction}`);
   }
 };

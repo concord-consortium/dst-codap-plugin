@@ -145,11 +145,13 @@ class Graph {
   }
 
   get canZoomIn() {
-    return this.longRange > minWidth;
+    const longRange = this.targetLongRange ?? this.longRange;
+    return longRange > minWidth;
   }
 
   get canZoomOut() {
-    return this.longRange < this.maxWidth;
+    const longRange = this.targetLongRange ?? this.longRange;
+    return longRange < this.maxWidth;
   }
 
   get centerLat() {
@@ -194,6 +196,10 @@ class Graph {
 
   get maxWidth() {
     return this.longMax - this.longMin;
+  }
+
+  get targetLongRange() {
+    if (this.targetMaxLong != null && this.targetMinLong != null) return this.targetMaxLong - this.targetMinLong;
   }
 
   latitudeInGraphSpace(_lat?: number) {
@@ -268,10 +274,10 @@ class Graph {
 
   zoomIn() {
     const _zoomAmount = Math.min(zoomAmount, (this.longRange - minWidth) / 2);
-    const maxLatitude = this.maxLatitude - _zoomAmount * kLatScale;
-    const minLatitude = this.minLatitude + _zoomAmount * kLatScale;
-    const maxLongitude = this.maxLongitude - _zoomAmount;
-    const minLongitude = this.minLongitude + _zoomAmount;
+    const maxLatitude = (this.targetMaxLat ?? this.maxLatitude) - _zoomAmount * kLatScale;
+    const minLatitude = (this.targetMinLat ?? this.minLatitude) + _zoomAmount * kLatScale;
+    const maxLongitude = (this.targetMaxLong ?? this.maxLongitude) - _zoomAmount;
+    const minLongitude = (this.targetMinLong ?? this.minLongitude) + _zoomAmount;
     this.animateTo({ maxLatitude, minLatitude, maxLongitude, minLongitude });
   }
 

@@ -45,6 +45,48 @@ context("Test the overall app", () => {
       ae.getUIButton("button-home").should("be.enabled");
       ae.getUIButton("button-home").click();
 
+      // Map zoom out button
+      ae.getUIButton("button-map-zoom-out").should("be.enabled");
+      ae.getUIButton("button-map-zoom-out").click({ force: true }).click({ force: true });
+      ae.getUIButton("button-map-zoom-out").should("not.be.enabled");
+
+      // Map zoom in button
+      ae.getUIButton("button-map-zoom-in").should("be.enabled");
+      Array(13).fill(1).forEach(() => ae.getUIButton("button-map-zoom-in").click());
+      ae.getUIButton("button-map-zoom-in").should("not.be.enabled");
+
+      // Map reset button
+      ae.getUIButton("button-map-reset").should("be.enabled");
+      ae.getUIButton("button-map-reset").click();
+      ae.getUIButton("button-map-reset").should("not.be.enabled");
+
+      // Map pan down button
+      ae.getMapPanButton("down").should("be.enabled");
+      ae.getMapPanButton("down").click();
+      ae.getMapPanButton("down").should("not.be.enabled");
+
+      // Map pan left button
+      ae.getMapPanButton("left").should("be.enabled");
+      ae.getMapPanButton("left").click();
+      ae.getMapPanButton("left").should("not.be.enabled");
+
+      // Map pan right button
+      ae.getMapPanButton("right").should("be.enabled");
+      ae.getMapPanButton("right").click();
+      ae.getMapPanButton("right").should("not.be.enabled");
+
+      // Map pan up button
+      ae.getMapPanButton("up").should("be.enabled");
+      ae.getMapPanButton("up").click();
+      ae.getMapPanButton("up").should("not.be.enabled");
+
+      // Legend button
+      ae.getUIButton("button-legend").should("have.class", "active");
+      ae.getUIButton("button-legend").click();
+      ae.getUIButton("button-legend").should("not.have.class", "active");
+      ae.getUIButton("button-legend").click();
+      ae.getUIButton("button-legend").should("have.class", "active");
+
       // Mode buttons
       ae.getUIButton("button-pointer-mode").should("have.class", "active");
       ae.getUIButton("button-marquee-mode").should("not.have.class", "active");
@@ -54,13 +96,6 @@ context("Test the overall app", () => {
       ae.getUIButton("button-pointer-mode").click({ force: true });
       ae.getUIButton("button-pointer-mode").should("have.class", "active");
       ae.getUIButton("button-marquee-mode").should("not.have.class", "active");
-
-      // Legend button
-      ae.getUIButton("button-legend").should("have.class", "active");
-      ae.getUIButton("button-legend").click();
-      ae.getUIButton("button-legend").should("not.have.class", "active");
-      ae.getUIButton("button-legend").click();
-      ae.getUIButton("button-legend").should("have.class", "active");
     });
   });
 });
