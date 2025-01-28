@@ -24,7 +24,7 @@ export const FlatPoints = observer(function FlatPoints() {
 
         // Determine the position of the point in graph space.
         const convertedLat = graph.convertLat(item.Latitude);
-        const convertedDate = graph.convertDate(item);
+        const convertedDate = graph.convertCaseDate(item);
         const convertedLong = graph.convertLong(item.Longitude);
         const position = new THREE.Vector3(convertedLat, convertedDate, convertedLong);
 

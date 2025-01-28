@@ -16,7 +16,7 @@ export const Points = observer(function Points() {
             isSelected={codapData.isSelected(id)}
             visible={graph.caseIsVisible(aCase)}
             x={graph.latitudeInGraphSpace(Latitude)}
-            y={graph.convertDate(aCase)}
+            y={graph.convertCaseDate(aCase)}
             z={graph.longitudeInGraphSpace(Longitude)}
           />
         );

@@ -53,7 +53,7 @@ describe("graph", () => {
   describe("convertDate", () => {
     it("should convert date to graph coordinates", () => {
       const aCase: ICase = { id: 1, Day: 4, Month: 1, Year: 2020 };
-      expect(graph.convertDate(aCase)).toBeCloseTo(-5);
+      expect(graph.convertCaseDate(aCase)).toBeCloseTo(-5);
     });
   });
 

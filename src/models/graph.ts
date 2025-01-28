@@ -23,6 +23,7 @@ class Graph {
   longMin = kBackgroundLongMin; // The absolute min longitude
   longMax = kBackgroundLongMax; // The absolute max longitude
 
+  mapDate = 1578124800000;
   maxLatitude = kHomeMaxLatitude; // The current max latitude of the graph
   minLatitude = kHomeMinLatitude; // The current min latitude of the graph
   maxLongitude = kHomeMaxLongitude; // The current max longitude of the graph
@@ -106,6 +107,16 @@ class Graph {
     return aCase.Latitude >= this.minLatitude && aCase.Latitude <= this.maxLatitude &&
       aCase.Longitude >= this.minLongitude && aCase.Longitude <= this.maxLongitude;
   }
+  
+  convertCaseDate(aCase: ICase) {
+    const _date = getDate(aCase);
+    const date = isFinite(_date) ? _date : this.defaultDate;
+    return this.convertDate(date);
+  }
+
+  convertDate(date: number) {
+    return ((date - this.dateMin) / this.dateRange) * graphRange + graphMin;
+  }
 
   convertLat(_lat?: number) {
     const lat = _lat ?? this.defaultLat;
@@ -115,12 +126,6 @@ class Graph {
   convertLong(_long?: number) {
     const long = _long ?? this.defaultLong;
     return ((long - this.minLongitude) / this.longRange) * graphRange + graphMin;
-  }
-  
-  convertDate(aCase: ICase) {
-    const _date = getDate(aCase);
-    const date = isFinite(_date) ? _date : this.defaultDate;
-    return ((date - this.dateMin) / this.dateRange) * graphRange + graphMin;
   }
 
   get canPanDown() {
@@ -192,6 +197,10 @@ class Graph {
 
   get longRange() {
     return this.maxLongitude - this.minLongitude;
+  }
+
+  get mapPosition() {
+    return this.convertDate(this.mapDate);
   }
 
   get maxWidth() {
