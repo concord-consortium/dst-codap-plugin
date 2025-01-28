@@ -22,24 +22,46 @@
   }
 
   &.navigation-cube-arrow {
+    .arrow-center {
+      opacity: 1;
+    }
+
+    .arrow-outline {
+      opacity: 0;
+    }
+
     &:disabled {
-      svg {
-        opacity: .25;
+      .arrow-center {
+        opacity: .4;
 
         &:hover {
-          opacity: .25;
+          opacity: .4;
+        }
+      }
+
+      &:hover {
+        .arrow-outline {
+          opacity: 0;
+        }
+      }
+
+      &:active {
+        .arrow-outline {
+          opacity: 0;
         }
       }
     }
 
     &:hover {
-      svg {
-        opacity: .75;
+      .arrow-outline {
+        opacity: .5
       }
     }
 
-    svg {
-      opacity: .5;
+    &:active {
+      .arrow-outline {
+        opacity: 1;
+      }
     }
   }
 
