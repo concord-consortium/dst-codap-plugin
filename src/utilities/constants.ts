@@ -16,7 +16,7 @@ export const kAboutTabLabel = "About";
 // const baseBackgroundLatMax = 49.8;
 // const baseBackgroundLatMin = 24.2;
 
-// These constants work for maptest_3840.png
+// These constants work for SpaceCubeMap.png
 export const kBackgroundHeight = 3840;
 export const kBackgroundWidth = 3840;
 export const kBackgroundLongMax = -62;
