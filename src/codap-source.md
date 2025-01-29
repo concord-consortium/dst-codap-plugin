@@ -6,4 +6,6 @@ If you need to change these `src/codap` files, those changes should be made in t
 
 If at all possible we shouldn't make custom versions of the files in `src/codap` doing so makes it much hard to keep things up-to-date with CODAP. If we do have to do that then we should explore some git based syncing approaches so it is easier to merge the upstream files.
 
+The CODAP jest test files have not been brought over, and the whole `src/codap` folder is ignored by Codecov.
+
 There are several parts of the CODAP codebase that were brought over just because it was easier to do that instead of refactoring CODAP so those parts can be skipped. The `seperation-todo.md` file documents some of this.
