@@ -23,7 +23,7 @@
   As in CODAP v2, attributes can be grouped into collections. Within collections, cases with
   identical values are grouped into pseudo-cases which represent multiple child cases. For
   historical reasons, in v2 the collections and their cases were primary, and the flat "items"
-  were constructed by combining the contents of the cases in each collection. In contract, v3
+  were constructed by combining the contents of the cases in each collection. In contrast, v3
   represents the flat cases by default and builds the collection-grouped pseudo-cases on the
   fly when necessary. Thus, "case" in v3 corresponds to "item" in v2, and "pseudo-case" in v3
   corresponds to "case" in v2.
