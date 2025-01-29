@@ -6,4 +6,9 @@
   &.horizontal {
     flex-direction: row;
   }
+
+  &.play-container {
+    left: 56px;
+    top: 315px;
+  }
 }
