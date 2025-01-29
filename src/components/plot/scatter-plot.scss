@@ -1,9 +1,26 @@
-.scatter-plot {
+.scatter-plot-container {
   background-color: #f9f9f9;
   border: 1px solid #e3e3e3;
-  height: 372px;
-  left: 73px;
+  display: flex;
+  height: 354px;
+  justify-content: flex-end;
+  left: 62.5px;
   position: absolute;
   top: 10px;
-  width: 566px;
+  width: 470px;
+
+  .scatter-plot {
+    height: 346px;
+    padding-bottom: 8px;
+    position: relative;
+    width: 356px;
+
+    &.pointer-mode {
+      cursor: pointer;
+
+      &:active {
+        cursor: grabbing;
+      }
+    }
+  }
 }

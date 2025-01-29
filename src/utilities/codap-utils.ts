@@ -3,8 +3,9 @@ import {
   getSelectionList, initializePlugin, selectCases
 } from "@concord-consortium/codap-plugin-api";
 import { codapData, getDate, ICase } from "../models/codap-data";
+import { graph } from "../models/graph";
+import { ui } from "../models/ui";
 import { kInitialDimensions, kPluginName, kVersion } from "./constants";
-import { dataRanges } from "./graph-utils";
 
 import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
 
@@ -53,7 +54,7 @@ export async function getData() {
 
     // Update data ranges
     const dates = cases.map(aCase => getDate(aCase)).filter((time: number) => isFinite(time));
-    dataRanges.setDateRange(Math.min(...dates), Math.max(...dates));
+    graph.setDateRange(Math.min(...dates), Math.max(...dates));
     // const lats = is.map((item: any) => item.Latitude);
     // dataRanges.latMin = Math.min(...lats);
     // dataRanges.latMax = Math.max(...lats);
@@ -69,6 +70,9 @@ export async function getData() {
 }
 
 export async function updateSelection() {
+  // If the user is selecting using a marquee, ignore updates from codap.
+  if (ui.activeMarquee) return;
+
   try {
     const selectionListResult = await getSelectionList(dataContextName);
     if (selectionListResult.success) {

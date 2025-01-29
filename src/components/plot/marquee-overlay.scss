@@ -1,0 +1,14 @@
+.marquee-overlay {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+
+  .marquee {
+    background-color: rgba(0, 0, 0, 0.1);
+    border: 1px dashed #000;
+    pointer-events: none;
+    position: absolute;
+  }
+}
