@@ -55,7 +55,7 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef }: IM
             ndcPoint.y >= Math.min(startPoint.y, endPoint.y) &&
             ndcPoint.y <= Math.max(startPoint.y, endPoint.y);
         }
-      }).map((aCase) => aCase.id));
+      }).map((aCase) => aCase.__id__));
 
       codapData.replaceSelectedCases(Array.from(selectingPoints));
       if (!throttleUpdate || forceUpdate) {

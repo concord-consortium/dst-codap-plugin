@@ -10,6 +10,7 @@ import { codapData } from "../../models/codap-data";
 
 interface IPointProps {
   id: string;
+  isSelected: boolean;
   visible?: boolean;
   x: number;
   y: number;
