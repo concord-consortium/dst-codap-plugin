@@ -18,4 +18,14 @@
     left: 83px;
     position: absolute;
   }
+
+  .play-button-label {
+    display: flex;
+    font-weight: 600;
+    justify-content: center;
+    left: 51px;
+    position: absolute;
+    top: 350px;
+    width: 42px;
+  }
 }
