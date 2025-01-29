@@ -53,7 +53,6 @@ export async function getData() {
       dataContextResult = await getDataContext(dataContextName);
     }
 
-    console.log("dataContextResult", dataContextResult);
     updateDataSetAttributes(dataContextResult.values);
 
     const casesResult = await getCaseByFormulaSearch(dataContextName, collectionName, "true");
@@ -131,8 +130,6 @@ export function updateDataSetAttributes(dataContext: DIDataContext) {
   const v3AttrMap = new Map<number, IAttribute>;
 
   const { name, title, collections, setAsideItems } = dataContext;
-
-  console.log("updateDataSetAttributes", collections);
 
   if (!collections?.length) {
     // There is nothing to update    
