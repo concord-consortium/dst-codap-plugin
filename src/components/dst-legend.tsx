@@ -48,7 +48,10 @@ export const DstLegend = observer(function DstLegend() {
           <BaseDataDisplayModelContext.Provider value={dstContainer.dataDisplayModel}>
             <MultiLegend divElt={null} 
               onDropAttribute={function (place: GraphPlace, dataSet: IDataSet, attrId: string): void {
-                console.log("onDropAttribute");
+                // TODO: handle mis-matched dataSet
+                const configuration = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
+                if (place !== "legend") return;
+                configuration.setAttribute(place, {attributeID: attrId});              
               } }    
             />
           </BaseDataDisplayModelContext.Provider>
