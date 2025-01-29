@@ -11,20 +11,19 @@ let throttleUpdate = false;
 
 interface IMarqueeOverlayProps {
   cameraRef: React.MutableRefObject<any>;
-  containerRef: React.RefObject<HTMLDivElement>;
 }
-export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef, containerRef }: IMarqueeOverlayProps) {
+export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef }: IMarqueeOverlayProps) {
   const [marqueeStartPoint, setMarqueeStartPoint] = useState<Maybe<Vector2>>();
   const [marqueeEndPoint, setMarqueeEndPoint] = useState<Maybe<Vector2>>();
   const ref = useRef<HTMLDivElement>(null);
 
-  const adjustClientX = (clientX: number) => containerRef.current
-    ? clientX - containerRef.current.offsetLeft : clientX;
-  const adjustClientY = (clientY: number) => containerRef.current
-    ? clientY - containerRef.current.offsetTop - 28 : clientY;
+  // TODO I couldn't figure out how to programmatically determine these offsets, but they're based on the position
+  // of the containing elements.
+  const adjustClientX = (clientX: number) => clientX - 174;
+  const adjustClientY = (clientY: number) => clientY - 40;
   
   const handlePointerDown: PointerEventHandler<HTMLDivElement> = event => {
-    if (ui.mode === "marquee" && containerRef.current) {
+    if (ui.mode === "marquee") {
       setMarqueeStartPoint(new Vector2(adjustClientX(event.clientX), adjustClientY(event.clientY)));
       ui.setActiveMarquee(true);
     }

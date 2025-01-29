@@ -15,7 +15,6 @@ import { Points } from "./points";
 import "./scatter-plot.scss";
 
 export const ScatterPlot = observer(function ScatterPlot() {
-  const ref = useRef<HTMLDivElement>(null);
   const cameraRef = useRef<any>(null);
   const controlName = "scatter-plot-controls";
   const enableOrbitControls = ui.mode === "pointer";
@@ -26,13 +25,10 @@ export const ScatterPlot = observer(function ScatterPlot() {
     }
   };
 
+  const plotClassName = clsx("w-full h-full relative scatter-plot", { "pointer-mode": enableOrbitControls });
   return (
     <div className="scatter-plot-container">
-      <div
-        className={clsx("w-full h-full relative scatter-plot", { "pointer-mode": enableOrbitControls })}
-        onPointerDown={handlePointerDown}
-        ref={ref}
-      >
+      <div className={plotClassName} onPointerDown={handlePointerDown}>
         <Canvas gl={{ localClippingEnabled: true }}>
           <CubeOutline />
           <DSTCamera
@@ -50,7 +46,7 @@ export const ScatterPlot = observer(function ScatterPlot() {
             <HueSaturation saturation={0.05} />
           </EffectComposer>
         </Canvas>
-        {ui.mode === "marquee" && <MarqueeOverlay cameraRef={cameraRef} containerRef={ref} />}
+        {ui.mode === "marquee" && <MarqueeOverlay cameraRef={cameraRef} />}
       </div>
     </div>
   );
