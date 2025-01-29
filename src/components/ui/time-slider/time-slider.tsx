@@ -37,8 +37,10 @@ export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITi
   }, [upperRangePercent, lowerRangePercent]);
 
   useEffect(() => {
+    // We bail if there is already a timeout waiting to run, which can happen if the user changes upperRangePercent.
     if (animating && !animationTimeout) {
       animationTimeout = setTimeout(() => {
+        // Clear the timeout so the next time this useEffect runs we can set a new timeout.
         animationTimeout = 0;
         const now = Date.now();
         const delta = (now - lastFrameTime) / 1000;
