@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import React, { PointerEventHandler, useRef, useState } from "react";
-import { Frustum, Matrix4, Vector2, Vector3 } from "three";
+import { Vector2, Vector3 } from "three";
 import { codapData } from "../../models/codap-data";
 import { graph } from "../../models/graph";
 import { ui } from "../../models/ui";
@@ -44,13 +44,6 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef, cont
         (adjustedX / ref.current.clientWidth) * 2 - 1,
         -(adjustedY / ref.current.clientHeight) * 2 + 1
       );
-
-      const frustrum = new Frustum();
-      const tempMatrix = new Matrix4();
-      cameraRef.current.updateProjectionMatrix();
-      cameraRef.current.updateMatrixWorld();
-      tempMatrix.multiplyMatrices(cameraRef.current.projectionMatrix, cameraRef.current.matrixWorldInverse);
-      frustrum.setFromProjectionMatrix(tempMatrix);
 
       const selectingPoints = new Set(codapData.cases.filter((aCase) => {
         if (graph.caseIsVisible(aCase)) {
