@@ -1,0 +1,173 @@
+.arrow-button {
+  border: none;
+  position: absolute;
+
+  &.map-arrow {
+    background-color: white;
+    border: 1px solid #177991;
+    height: 16px;
+    width: 32px;
+
+    &:disabled {
+      .map-pan-arrow {
+        opacity: .4;
+      }
+
+      &:hover {
+        background-color: white;
+      }
+
+      &:active {
+        background-color: white;
+      }
+    }
+
+    &:hover {
+      background-color: #dceff2;
+    }
+
+    &:active {
+      background-color: #b9dfe5;
+    }
+
+    svg {
+      position: absolute;
+    }
+  }
+
+  &.navigation-cube-arrow {
+    .arrow-center {
+      opacity: 1;
+    }
+
+    .arrow-outline {
+      opacity: 0;
+    }
+
+    &:disabled {
+      .arrow-center {
+        opacity: .4;
+
+        &:hover {
+          opacity: .4;
+        }
+      }
+
+      &:hover {
+        .arrow-outline {
+          opacity: 0;
+        }
+      }
+
+      &:active {
+        .arrow-outline {
+          opacity: 0;
+        }
+      }
+    }
+
+    &:hover {
+      .arrow-outline {
+        opacity: .5
+      }
+    }
+
+    &:active {
+      .arrow-outline {
+        opacity: 1;
+      }
+    }
+  }
+
+  &.down {
+    &.map-arrow {
+      border-bottom-left-radius: 3px;
+      border-bottom-right-radius: 3px;
+      bottom: 0px;
+      left: 15px;
+
+      svg {
+        left: -1px;
+        top: -1px;
+      }
+    }
+
+    &.navigation-cube-arrow {
+      left: 41px;
+      top: 88px;
+    }
+
+    svg {
+      rotate: 180deg;
+    }
+  }
+
+  &.left {
+    &.map-arrow {
+      border-bottom-left-radius: 3px;
+      border-top-left-radius: 3px;
+      height: 32px;
+      left: 0px;
+      top: 15px;
+      width: 16px;
+
+      svg {
+        left: -9px;
+        top: 7px;
+      }
+    }
+
+    &.navigation-cube-arrow {
+      left: 0;
+      top: 43px;
+    }
+
+    svg {
+      rotate: 270deg;
+    }
+  }
+
+  &.right {
+    &.map-arrow {
+      border-bottom-right-radius: 3px;
+      border-top-right-radius: 3px;
+      height: 32px;
+      left: 46px;
+      top: 15px;
+      width: 16px;
+
+      svg {
+        left: -9px;
+        top: 7px;
+      }
+    }
+
+    &.navigation-cube-arrow {
+      left: 82px;
+      top: 43px;
+    }
+
+    svg {
+      rotate: 90deg;
+    }
+  }
+
+  &.up {
+    &.map-arrow {
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+      left: 15px;
+      top: 0px;
+
+      svg {
+        left: -1px;
+        top: -1px;
+      }
+    }
+
+    &.navigation-cube-arrow {
+      left: 41px;
+      top: 0;
+    }
+  }
+}

@@ -14,66 +14,71 @@ context("Test the overall app", () => {
     });
 
     it("ui renders and functions", () => {
-      // Up button
-      ae.getUIButton("button-down").should("be.enabled");
-      ae.getUIButton("button-down").click();
-      ae.getUIButton("button-down").should("be.enabled");
-      ae.getUIButton("button-down").click();
-      ae.getUIButton("button-down").should("be.enabled");
-      ae.getUIButton("button-down").click();
-      ae.getUIButton("button-down").should("not.be.enabled");
-
       // Down button
-      ae.getUIButton("button-up").should("be.enabled");
-      ae.getUIButton("button-up").click();
-      ae.getUIButton("button-down").should("be.enabled");
-      Array(10).fill(1).forEach(() => ae.getUIButton("button-up").click());
-      ae.getUIButton("button-up").should("be.enabled");
-      ae.getUIButton("button-up").click();
+      ae.getNavigationArrow("down").should("be.enabled");
+      ae.getNavigationArrow("down").click();
+      ae.getNavigationArrow("down").should("be.enabled");
+      Array(3).fill(1).forEach(() => ae.getNavigationArrow("down").click());
+      ae.getNavigationArrow("down").should("be.enabled");
+      ae.getNavigationArrow("down").click();
+      ae.getNavigationArrow("down").should("not.be.enabled");
+
+      // Up button
+      ae.getNavigationArrow("up").should("be.enabled");
+      ae.getNavigationArrow("up").click();
+      ae.getNavigationArrow("down").should("be.enabled");
+      Array(10).fill(1).forEach(() => ae.getNavigationArrow("up").click());
+      ae.getNavigationArrow("up").should("be.enabled");
+      ae.getNavigationArrow("up").click();
       // This is always failing on github for some unknown reason. It works fine locally.
       // ae.getUIButton("button-up").should("not.be.enabled");
 
       // Left button
-      ae.getUIButton("button-left").should("be.enabled");
-      ae.getUIButton("button-left").click();
+      ae.getNavigationArrow("left").should("be.enabled");
+      ae.getNavigationArrow("left").click();
 
       // Right button
-      ae.getUIButton("button-right").should("be.enabled");
-      ae.getUIButton("button-right").click();
+      ae.getNavigationArrow("right").should("be.enabled");
+      ae.getNavigationArrow("right").click();
 
       // Home button
       ae.getUIButton("button-home").should("be.enabled");
       ae.getUIButton("button-home").click();
 
-      // Fit all button
-      ae.getUIButton("button-fit-all").should("exist");
+      // Map zoom out button
+      ae.getUIButton("button-map-zoom-out").should("be.enabled");
+      ae.getUIButton("button-map-zoom-out").click({ force: true }).click({ force: true });
+      ae.getUIButton("button-map-zoom-out").should("not.be.enabled");
 
-      // Zoom in button
-      ae.getUIButton("button-zoom-in").should("be.enabled");
-      ae.getUIButton("button-zoom-in").click();
-      Array(7).fill(1).forEach(() => ae.getUIButton("button-zoom-in").click());
-      ae.getUIButton("button-zoom-in").should("be.enabled");
-      ae.getUIButton("button-zoom-in").click();
-      ae.getUIButton("button-zoom-in").should("not.be.enabled");
+      // Map zoom in button
+      ae.getUIButton("button-map-zoom-in").should("be.enabled");
+      Array(13).fill(1).forEach(() => ae.getUIButton("button-map-zoom-in").click());
+      ae.getUIButton("button-map-zoom-in").should("not.be.enabled");
 
-      // Zoom out button
-      ae.getUIButton("button-home").click();
-      ae.getUIButton("button-zoom-out").should("be.enabled");
-      ae.getUIButton("button-zoom-out").click();
-      ae.getUIButton("button-zoom-out").click();
-      ae.getUIButton("button-zoom-out").should("be.enabled");
-      ae.getUIButton("button-zoom-out").click();
-      ae.getUIButton("button-zoom-out").should("not.be.enabled");
+      // Map reset button
+      ae.getUIButton("button-map-reset").should("be.enabled");
+      ae.getUIButton("button-map-reset").click();
+      ae.getUIButton("button-map-reset").should("not.be.enabled");
 
-      // Mode buttons
-      ae.getUIButton("button-pointer-mode").should("have.class", "active");
-      ae.getUIButton("button-marquee-mode").should("not.have.class", "active");
-      ae.getUIButton("button-marquee-mode").click();
-      ae.getUIButton("button-pointer-mode").should("not.have.class", "active");
-      ae.getUIButton("button-marquee-mode").should("have.class", "active");
-      ae.getUIButton("button-pointer-mode").click();
-      ae.getUIButton("button-pointer-mode").should("have.class", "active");
-      ae.getUIButton("button-marquee-mode").should("not.have.class", "active");
+      // Map pan down button
+      ae.getMapPanButton("down").should("be.enabled");
+      ae.getMapPanButton("down").click();
+      ae.getMapPanButton("down").should("not.be.enabled");
+
+      // Map pan left button
+      ae.getMapPanButton("left").should("be.enabled");
+      ae.getMapPanButton("left").click();
+      ae.getMapPanButton("left").should("not.be.enabled");
+
+      // Map pan right button
+      ae.getMapPanButton("right").should("be.enabled");
+      ae.getMapPanButton("right").click();
+      ae.getMapPanButton("right").should("not.be.enabled");
+
+      // Map pan up button
+      ae.getMapPanButton("up").should("be.enabled");
+      ae.getMapPanButton("up").click();
+      ae.getMapPanButton("up").should("not.be.enabled");
 
       // Legend button
       ae.getUIButton("button-legend").should("have.class", "active");
@@ -82,12 +87,15 @@ context("Test the overall app", () => {
       ae.getUIButton("button-legend").click();
       ae.getUIButton("button-legend").should("have.class", "active");
 
-      // XY Controls button
-      ae.getUIButton("button-xy-controls").should("not.have.class", "active");
-      ae.getUIButton("button-xy-controls").click();
-      ae.getUIButton("button-xy-controls").should("have.class", "active");
-      ae.getUIButton("button-xy-controls").click();
-      ae.getUIButton("button-xy-controls").should("not.have.class", "active");
+      // Mode buttons
+      ae.getUIButton("button-pointer-mode").should("have.class", "active");
+      ae.getUIButton("button-marquee-mode").should("not.have.class", "active");
+      ae.getUIButton("button-marquee-mode").click();
+      ae.getUIButton("button-pointer-mode").should("not.have.class", "active");
+      ae.getUIButton("button-marquee-mode").should("have.class", "active");
+      ae.getUIButton("button-pointer-mode").click({ force: true });
+      ae.getUIButton("button-pointer-mode").should("have.class", "active");
+      ae.getUIButton("button-marquee-mode").should("not.have.class", "active");
     });
   });
 });

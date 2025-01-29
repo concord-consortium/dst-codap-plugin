@@ -1,0 +1,19 @@
+.map-arrow-container {
+  height: 62px;
+  left: 32px;
+  position: absolute;
+  top: 276px;
+  width: 62px;
+
+  .center-map-container {
+    align-items: center;
+    background-color: white;
+    display: flex;
+    height: 30px;
+    justify-content: center;
+    left: 16px;
+    position: absolute;
+    top: 16px;
+    width: 30px;
+  }
+}

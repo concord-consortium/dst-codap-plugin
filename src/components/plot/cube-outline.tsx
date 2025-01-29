@@ -2,9 +2,9 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { Vector3 } from "three";
 import { dstCamera } from "../../models/camera";
-import { PlotLine } from "./plot-line";
-import { dataRanges } from "../../utilities/graph-utils";
+import { graph } from "../../models/graph";
 import { halfPi } from "../../utilities/trig-utils";
+import { PlotLine } from "./plot-line";
 import { SpaceAxis } from "./space-axis";
 import { TimeAxis } from "./time-axis";
 
@@ -72,8 +72,8 @@ export const CubeOutline = observer(function CubeOutline() {
         <SpaceAxis
           startPoint={new Vector3(xMin, spaceY, xAxisZ)}
           endPoint={new Vector3(xMax, spaceY, xAxisZ)}
-          minValue={dataRanges.latMin}
-          maxValue={dataRanges.latMax}
+          minValue={graph.minLatitude}
+          maxValue={graph.maxLatitude}
           tickDirection={xDirection}
         />
       )}
@@ -81,16 +81,16 @@ export const CubeOutline = observer(function CubeOutline() {
         <TimeAxis
           startPoint={new Vector3(yAxisX, yMin, yAxisZ)}
           endPoint={new Vector3(yAxisX, yMax, yAxisZ)}
-          minValue={dataRanges.dateMin}
-          maxValue={dataRanges.dateMax}
+          minValue={graph.dateMin}
+          maxValue={graph.dateMax}
         />
       )}
       {displayZAxis && (
         <SpaceAxis
           startPoint={new Vector3(zAxisX, spaceY, zMin)}
           endPoint={new Vector3(zAxisX, spaceY, zMax)}
-          minValue={dataRanges.longMin}
-          maxValue={dataRanges.longMax}
+          minValue={graph.minLongitude}
+          maxValue={graph.maxLongitude}
           tickDirection={zDirection}
         />
       )}
