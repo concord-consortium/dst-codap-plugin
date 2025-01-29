@@ -12,6 +12,7 @@ import { graph } from "../../models/graph";
 import { ui } from "../../models/ui";
 import { MapPanControls } from "./map-pan-controls";
 import { NavigationControls } from "./navigation-controls/navigation-controls";
+import { TimeSlider } from "./time-slider/time-slider";
 import { UIButton } from "./ui-button";
 import { UIButtonContainer } from "./ui-button-container";
 import "./graph-ui.scss";
@@ -82,6 +83,7 @@ export const GraphUI = observer(function GraphUI() {
           testId="button-marquee-mode"
         />
       </UIButtonContainer>
+      <TimeSlider dateMax={graph.dateMax} dateMin={graph.dateMin} />
     </>
   );
 });
