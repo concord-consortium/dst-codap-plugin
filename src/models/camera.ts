@@ -1,7 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import { Euler } from "three";
 import { getCameraFormatFromPosition, getPositionFromCameraFormat } from "../utilities/camera-utils";
-import { halfPi, normalizeRadian2Pi, normalizeRadianMinusPi, quarterPi, twoPi } from "../utilities/trig-utils";
+import { halfPi, normalizeRadian2Pi, normalizeRadianMinusPi, twoPi } from "../utilities/trig-utils";
 
 // const defaultCameraX = -10;
 // const defaultCameraY = 14;
@@ -9,9 +9,9 @@ import { halfPi, normalizeRadian2Pi, normalizeRadianMinusPi, quarterPi, twoPi } 
 // const { distance: defaultDistance, pivot: defaultPivot, rotation: defaultRotation} =
 //   getCameraFormatFromPosition(defaultCameraX, defaultCameraY, defaultCameraZ);
 export const defaultDistance = 40;
-export const defaultRotation = quarterPi;
-export const defaultPivot = quarterPi;
-export const defaultZoom = 20;
+export const defaultRotation = .65;
+export const defaultPivot = .4;
+export const defaultZoom = 18;
 export const { x: defaultCameraX, y: defaultCameraY, z: defaultCameraZ } =
   getPositionFromCameraFormat(defaultDistance, defaultPivot, defaultRotation);
 

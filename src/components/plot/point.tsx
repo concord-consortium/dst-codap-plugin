@@ -3,18 +3,19 @@ import { Outlines } from "@react-three/drei";
 import { ThreeEvent, useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
 import { observer } from "mobx-react-lite";
-import { convertLat, convertLong } from "../../utilities/graph-utils";
+import { ui } from "../../models/ui";
 import { dstAddCaseToSelection, dstRemoveCaseFromSelection, dstSelectCases } from "../../utilities/codap-utils";
 import { dstContainer } from "../../models/dst-container";
 import { codapData } from "../../models/codap-data";
 
 interface IPointProps {
   id: string;
-  Latitude: number;
-  Longitude: number;
+  visible?: boolean;
+  x: number;
   y: number;
+  z: number;
 }
-export const Point = observer(function Point({ id, Latitude, Longitude, y }: IPointProps) {
+export const Point = observer(function Point({ id, visible, x, y, z }: IPointProps) {
   const [isPointerOver, setPointerOver] = useState(false);
   const dataConfig = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
   const dotColor = dataConfig.getLegendColorForCase(id);
@@ -37,29 +38,35 @@ export const Point = observer(function Point({ id, Latitude, Longitude, y }: IPo
   });
 
   // Determine the position of the point in graph space.
-  const position = new Vector3(convertLat(Latitude), y, convertLong(Longitude));
+  const position = new Vector3(x, y, z);
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
-    event.stopPropagation();
-    if (event.shiftKey) {
-      if (isSelected) {
-        dstRemoveCaseFromSelection(id);
+    if (ui.mode === "pointer") {
+      event.stopPropagation();
+      if (event.shiftKey) {
+        if (isSelected) {
+          dstRemoveCaseFromSelection(id);
+        } else {
+          dstAddCaseToSelection(id);
+        }
       } else {
-        dstAddCaseToSelection(id);
+        dstSelectCases([id]);
       }
-    } else {
-      dstSelectCases([id]);
     }
   };
 
   const handlePointerEnter = (event: ThreeEvent<PointerEvent>) => {
-    event.stopPropagation();
-    setPointerOver(true);
+    if (ui.mode === "pointer") {
+      event.stopPropagation();
+      setPointerOver(true);
+    }
   };
 
   const handlePointerLeave = (event: ThreeEvent<PointerEvent>) => {
-    event.stopPropagation();
-    setPointerOver(false);
+    if (ui.mode === "pointer") {
+      event.stopPropagation();
+      setPointerOver(false);
+    }
   };
 
   /* eslint-disable react/no-unknown-property */
@@ -69,6 +76,7 @@ export const Point = observer(function Point({ id, Latitude, Longitude, y }: IPo
       onClick={handleClick}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
+      visible={visible}
     >
       <sphereGeometry args={[pointSize, 16, 16]} />
       <meshStandardMaterial color={dotColor} />

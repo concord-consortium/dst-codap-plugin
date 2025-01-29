@@ -3,23 +3,17 @@
   flex-direction: column;
   position: absolute;
 
-  &.zoom-container {
-    left: 15px;
-    top: 149px;
+  &.horizontal {
+    flex-direction: row;
   }
 
-  &.mode-container {
-    left: 15px;
-    top: 286px;
+  &.play-container {
+    left: 56px;
+    top: 315px;
   }
 
-  &.legend-container {
-    left: 15px;
-    top: 361px;
-  }
-
-  &.xy-container {
-    left: 62px;
-    top: 361px;
+  &.play-container {
+    left: 56px;
+    top: 315px;
   }
 }
