@@ -1,0 +1,31 @@
+.time-slider-container {
+  color: #222222;
+  font-size: 12px;
+  left: 521px;
+  position: absolute;
+  top: 10px;
+  width: 160px;
+
+  .time-slider-title {
+    font-weight: 600;
+    left: 40px;
+    position: absolute;
+    top: 11px;
+  }
+
+  .time-label {
+    font-weight: 500;
+    left: 83px;
+    position: absolute;
+  }
+
+  .play-button-label {
+    display: flex;
+    font-weight: 600;
+    justify-content: center;
+    left: 51px;
+    position: absolute;
+    top: 350px;
+    width: 42px;
+  }
+}

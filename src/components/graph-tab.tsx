@@ -10,8 +10,10 @@ import PlusIcon from "../assets/icons/plus.svg";
 import PointIcon from "../assets/icons/point-selection.svg";
 import { dstCamera } from "../models/camera";
 import { modeType } from "../types/ui-types";
+import { dataRanges } from "../utilities/graph-utils";
 import { ScatterPlot } from "./plot/scatter-plot";
 import { NavigationControls } from "./ui/navigation-controls/navigation-controls";
+import { TimeSlider } from "./ui/time-slider/time-slider";
 import { UIButton } from "./ui/ui-button";
 import { UIButtonContainer } from "./ui/ui-button-container";
 import "./graph-tab.scss";
@@ -84,6 +86,7 @@ export const GraphTab = observer(function GraphTab() {
           testId="button-xy-controls"
         />
       </UIButtonContainer>
+      <TimeSlider dateMax={dataRanges.dateMax} dateMin={dataRanges.dateMin} />
     </div>
   );
 });

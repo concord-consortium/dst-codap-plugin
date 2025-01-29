@@ -1,0 +1,41 @@
+.time-line {
+  border-radius: 4px;
+  height: 240px;
+  left: 58px;
+  position: absolute;
+  top: 48px;
+  width: 8px;
+
+  &.back-line {
+    background-color: white;
+    border: 1px solid #b4c6ca;
+  }
+
+  &.middle-line {
+    background-color: #eef8f9;
+    border: 1px solid #406f7f;
+  }
+
+  &.front-line {
+    background-color: #accad4;
+    border: 1px solid #426f82;
+  }
+
+  .time-tick {
+    height: 1px;
+    position: absolute;
+    width: 100%;
+
+    &.back-tick {
+      background-color: #b4c6ca;
+    }
+
+    &.middle-tick {
+      background-color: #406f7f;
+    }
+
+    &.front-tick {
+      background-color: #426f82;
+    }
+  }
+}
