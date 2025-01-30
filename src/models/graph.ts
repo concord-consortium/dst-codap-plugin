@@ -3,7 +3,7 @@ import {
   kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin, kHomeMaxLatitude, kHomeMaxLongitude,
   kHomeMinLatitude, kHomeMinLongitude, kLatScale
 } from "../utilities/constants";
-import { datePercentInRange } from "../utilities/date-utils";
+import { formatDateString, datePercentInRange } from "../utilities/date-utils";
 import { halfPi } from "../utilities/trig-utils";
 import { getDate, ICase } from "./codap-data";
 
@@ -228,6 +228,11 @@ class Graph {
 
   get targetLongRange() {
     if (this.targetMaxLong != null && this.targetMinLong != null) return this.targetMaxLong - this.targetMinLong;
+  }
+
+  getDateStringFromPercent(percent: number) {
+    const dateValue = graph.dateMin + (graph.dateMax - graph.dateMin) * percent;
+    return formatDateString(new Date(dateValue));
   }
 
   latitudeInGraphSpace(_lat?: number) {

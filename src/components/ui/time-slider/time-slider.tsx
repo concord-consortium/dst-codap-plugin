@@ -5,7 +5,6 @@ import PauseIcon from "../../../assets/icons/pause-icon.svg";
 import PlayIcon from "../../../assets/icons/play-icon.svg";
 import TimeSliderThumb from "../../../assets/icons/time-slider-thumb.svg";
 import { graph } from "../../../models/graph";
-import { formatDateString } from "../../../utilities/date-utils";
 import { UIButton } from "../ui-button";
 import { UIButtonContainer } from "../ui-button-container";
 import { DateRangeSliderThumb } from "./date-range-slider-thumb";
@@ -25,11 +24,6 @@ interface ITimeSliderProps {
 export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITimeSliderProps) {
   const handlePlayButtonClick = () => graph.setAnimatingDate(!graph.animatingDate);
 
-  const labelFromPercentage = (percentage: number) => {
-    const dateValue = dateMin + (dateMax - dateMin) * percentage;
-    return formatDateString(new Date(dateValue));
-  };
-
   return (
     <div className="time-slider-container">
       <div className="time-slider-title">z: Time</div>
@@ -47,16 +41,15 @@ export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITi
         upperClip={(1 - graph.minDatePercent) * 100}
       />
       {labelOffsets.map((offset, i) => {
-        const percentage = (labelOffsets.length - 1 - i) / (labelOffsets.length - 1);
+        const percent = (labelOffsets.length - 1 - i) / (labelOffsets.length - 1);
         return (
           <div key={`label-${i}`} className="time-label" style={{ top: `${labelBaseTop + offset}px` }}>
-            {labelFromPercentage(percentage)}
+            {graph.getDateStringFromPercent(percent)}
           </div>
         );
       })}
       <SliderThumb
         className="map-slider-thumb-container left-rounded"
-        label={labelFromPercentage(graph.mapDatePercent)}
         maxPercent={graph.maxDatePercent}
         minPercent={graph.minDatePercent}
         percent={graph.mapDatePercent}
@@ -65,14 +58,12 @@ export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITi
         ThumbIcon={MapSlider}
       />
       <DateRangeSliderThumb
-        label={labelFromPercentage(graph.maxDatePercent)}
         minPercent={graph.minDatePercent}
         maxPercent={1}
         percent={graph.maxDatePercent}
         setPercent={percent => graph.setMaxDatePercent(percent)}
       />
       <DateRangeSliderThumb
-        label={labelFromPercentage(graph.minDatePercent)}
         minPercent={0}
         maxPercent={graph.maxDatePercent}
         percent={graph.minDatePercent}
@@ -80,7 +71,6 @@ export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITi
       />
       <SliderThumb
         className="time-slider-thumb-container right-rounded"
-        label={labelFromPercentage(graph.currentDatePercent)}
         maxPercent={graph.maxDatePercent}
         minPercent={graph.minDatePercent}
         percent={graph.currentDatePercent}
