@@ -139,8 +139,7 @@ class Graph {
   }
 
   convertDateToGraph(date: number) {
-    return ((this.convertDateToPercent(date) - this.minDatePercent) / (this.maxDatePercent - this.minDatePercent))
-      * graphRange + graphMin;
+    return this.convertPercentToGraph(this.convertDateToPercent(date));
   }
 
   convertDateToPercent(date: number) {
@@ -159,6 +158,10 @@ class Graph {
 
   convertPercentToDate(percent: number) {
     return this.absoluteMinDate + percent * this.absoluteDateRange;
+  }
+
+  convertPercentToGraph(percent: number) {
+    return (percent - this.minDatePercent) / (this.maxDatePercent - this.minDatePercent) * graphRange + graphMin;
   }
 
   get absoluteDateRange() {
@@ -241,7 +244,7 @@ class Graph {
   }
 
   get mapPosition() {
-    return graphMin + graphRange * this.mapDatePercent;
+    return this.convertPercentToGraph(this.mapDatePercent);
   }
 
   get maxDate() {
