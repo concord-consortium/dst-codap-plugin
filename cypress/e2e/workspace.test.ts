@@ -98,7 +98,7 @@ context("Test the overall app", () => {
       ae.getUIButton("button-marquee-mode").should("not.have.class", "active");
 
       // Play button
-      ae.getUIButton("play-button").should("not.be.enabled");
+      ae.getUIButton("button-play").should("not.be.enabled");
 
       // Time slider thumbs
       ae.getApp().get(".map-slider-thumb-container").should("exist");
