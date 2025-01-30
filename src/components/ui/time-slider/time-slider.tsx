@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import MapSlider from "../../../assets/icons/map-slider.svg";
@@ -87,7 +88,9 @@ export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITi
           testId="button-play"
         />
       </UIButtonContainer>
-      <div className="play-button-label">{graph.animatingDate ? "Pause" : "Play"}</div>
+      <div className={clsx("play-button-label", { disabled: !graph.canAnimateDate })}>
+        {graph.animatingDate ? "Pause" : "Play"}
+      </div>
     </div>
   );
 });
