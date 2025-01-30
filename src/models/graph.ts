@@ -17,6 +17,8 @@ const zoomAmount = 2.5;
 const animationDuration = 200;
 const dateAnimationRate = 0.1;
 
+export const kMinDatePercentRange = 0.01;
+
 class Graph {
   absoluteMinDate = 1578124800000;
   absoluteMaxDate = 1672358400000;

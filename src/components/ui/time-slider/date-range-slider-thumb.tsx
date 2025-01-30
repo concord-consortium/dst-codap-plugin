@@ -1,6 +1,6 @@
 import React from "react";
 import DateRangeSliderThumbIcon from "../../../assets/timeslider/date-range-slider-thumb.svg";
-import { graph } from "../../../models/graph";
+import { graph, kMinDatePercentRange } from "../../../models/graph";
 import { SliderThumb } from "./slider-thumb";
 import { dateRangeSliderThumbOffset } from "./time-slider-contsants";
 
@@ -29,7 +29,7 @@ export function DateRangeSliderThumb({
 export function MaxDateRangeSliderThumb() {
   return (
     <DateRangeSliderThumb
-      minPercent={graph.minDatePercent + 0.01}
+      minPercent={graph.minDatePercent + kMinDatePercentRange}
       maxPercent={1}
       percent={graph.maxDatePercent}
       setPercent={percent => graph.setMaxDatePercent(percent)}
@@ -41,7 +41,7 @@ export function MinDateRangeSliderThumb() {
   return (
     <DateRangeSliderThumb
       minPercent={0}
-      maxPercent={graph.maxDatePercent - 0.01}
+      maxPercent={graph.maxDatePercent - kMinDatePercentRange}
       percent={graph.minDatePercent}
       setPercent={percent => graph.setMinDatePercent(percent)}
     />
