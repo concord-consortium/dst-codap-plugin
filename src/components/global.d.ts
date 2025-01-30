@@ -11,8 +11,8 @@ declare module "*.csv";
 declare namespace process {
   const env: {
     NODE_ENV: string; // e.g. "development" or "production"
-    [index: string]: string
+    [index: string]: string;
   }
 }
 
-type Maybe<T> = T | undefined
+type Maybe<T> = T | undefined;

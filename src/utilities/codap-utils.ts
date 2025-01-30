@@ -165,14 +165,10 @@ export function updateDataSetAttributes(dataContext: DIDataContext) {
   const metadataSnapshot = getSnapshot(sharedCaseMetadata);
   applySnapshot(dstCaseMetadata, metadataSnapshot);
 
-  console.log({dataSetSnapshot, metadataSnapshot});
-  console.log({attrNameMap: dstDataset.attrNameMap});
   const colorAttribute = dstDataset.getAttributeByName("Magnitude (0-5)");
-  // const colorAttribute = dstDataset.getAttributeByName("Width of track (yards)");
   const latAttribute = dstDataset.getAttributeByName("Latitude");
   const longAttribute = dstDataset.getAttributeByName("Longitude");
   
-  console.log({colorAttribute, latAttribute, longAttribute});
   if (!colorAttribute || !latAttribute || !longAttribute) return;
 
   const configuration = dstContainer.dataDisplayModel.layers[0].dataConfiguration;

@@ -21,6 +21,13 @@ const historyServiceEnv: IHistoryServiceEnv = {
   }
 };
 
+// The initial model here is mostly a place holder. However some parts of it are
+// preserved when the real data is imported from CODAP.
+// - the dataDisplayModel is mostly preserved. Only the legend.attributeID is updated
+// - the dataset id from this initial dataset will replace the imported dataset id, 
+//   so this initial id is preserved.
+// - the metadata id from this initial metadata will replace the imported metadata id,
+//   so this initial id is preserved.
 export const dstContainer = DstContainer.create({
   dataDisplayModel: {
     layers: [
