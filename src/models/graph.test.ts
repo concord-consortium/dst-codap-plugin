@@ -39,8 +39,8 @@ describe("graph", () => {
 
   describe("graph space", () => {
     it("should convert to correct graph space", () => {
-      graph.setMaxLongitude(graph.longMax - 3);
-      graph.setMaxLatitude(graph.latMax - 3);
+      graph.setMaxLongitude(graph.absoluteMaxLongitude - 3);
+      graph.setMaxLatitude(graph.absoluteMaxLatitude - 3);
       expect(graph.latitudeInGraphSpace(graph.minLatitude)).toBeCloseTo(graphMin);
       expect(graph.latitudeInGraphSpace(graph.centerLat)).toBeCloseTo(0);
       expect(graph.latitudeInGraphSpace(graph.maxLatitude)).toBeCloseTo(graphMax);
@@ -53,7 +53,7 @@ describe("graph", () => {
   describe("convertDate", () => {
     it("should convert date to graph coordinates", () => {
       const aCase: ICase = { id: 1, Day: 4, Month: 1, Year: 2020 };
-      expect(graph.convertCaseDate(aCase)).toBeCloseTo(-5);
+      expect(graph.convertCaseDateToGraph(aCase)).toBeCloseTo(-5);
     });
   });
 
@@ -64,7 +64,7 @@ describe("graph", () => {
     });
 
     it("should return false if case is outside graph bounds", () => {
-      const aCase: ICase = { id: 1, Latitude: graph.latMax + 1, Longitude: graph.longMax + 1 };
+      const aCase: ICase = { id: 1, Latitude: graph.absoluteMaxLatitude + 1, Longitude: graph.absoluteMaxLongitude + 1 };
       expect(graph.caseIsVisible(aCase)).toBe(false);
     });
   });
@@ -133,10 +133,10 @@ describe("graph", () => {
 
   describe("reset", () => {
     it("should reset to home coordinates", (done) => {
-      graph.setMaxLatitude(graph.latMax);
-      graph.setMinLatitude(graph.latMin);
-      graph.setMaxLongitude(graph.longMax);
-      graph.setMinLongitude(graph.longMin);
+      graph.setMaxLatitude(graph.absoluteMaxLatitude);
+      graph.setMinLatitude(graph.absoluteMinLatitude);
+      graph.setMaxLongitude(graph.absoluteMaxLongitude);
+      graph.setMinLongitude(graph.absoluteMinLongitude);
       expect(graph.canZoomOut).toBe(false);
       expect(graph.canPanDown).toBe(false);
       expect(graph.canPanUp).toBe(false);

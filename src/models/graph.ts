@@ -18,8 +18,8 @@ const animationDuration = 200;
 const dateAnimationRate = 0.1;
 
 class Graph {
-  dateMin = 1578124800000;
-  dateMax = 1672358400000;
+  absoluteMinDate = 1578124800000;
+  absoluteMaxDate = 1672358400000;
 
   maxDatePercent = 1;
   minDatePercent = 0;
@@ -27,10 +27,10 @@ class Graph {
   currentDatePercent = 1;
   animatingDate = false;
 
-  latMin = kBackgroundLatMin; // The absolute min latitude
-  latMax = kBackgroundLatMax; // The absolute max latitude
-  longMin = kBackgroundLongMin; // The absolute min longitude
-  longMax = kBackgroundLongMax; // The absolute max longitude
+  absoluteMinLatitude = kBackgroundLatMin; // The absolute min latitude
+  absoluteMaxLatitude = kBackgroundLatMax; // The absolute max latitude
+  absoluteMinLongitude = kBackgroundLongMin; // The absolute min longitude
+  absoluteMaxLongitude = kBackgroundLongMax; // The absolute max longitude
 
   maxLatitude = kHomeMaxLatitude; // The current max latitude of the graph
   minLatitude = kHomeMinLatitude; // The current min latitude of the graph
@@ -119,18 +119,32 @@ class Graph {
   caseIsVisible(aCase: ICase) {
     if (aCase.Latitude == null || aCase.Longitude == null) return false;
 
+    const datePercent = this.convertCaseDateToPercent(aCase);
     return aCase.Latitude >= this.minLatitude && aCase.Latitude <= this.maxLatitude &&
-      aCase.Longitude >= this.minLongitude && aCase.Longitude <= this.maxLongitude;
-  }
-  
-  convertCaseDate(aCase: ICase) {
-    const _date = getDate(aCase);
-    const date = isFinite(_date) ? _date : this.defaultDate;
-    return this.convertDate(date);
+      aCase.Longitude >= this.minLongitude && aCase.Longitude <= this.maxLongitude &&
+      datePercent >= this.minDatePercent && datePercent <= this.currentDatePercent;
   }
 
-  convertDate(date: number) {
-    return ((date - this.dateMin) / this.dateRange) * graphRange + graphMin;
+  convertCaseDate(aCase: ICase) {
+    const date = getDate(aCase);
+    return isFinite(date) ? date : this.defaultDate;
+  }
+  
+  convertCaseDateToGraph(aCase: ICase) {
+    return this.convertDateToGraph(this.convertCaseDate(aCase));
+  }
+
+  convertCaseDateToPercent(aCase: ICase) {
+    return this.convertDateToPercent(this.convertCaseDate(aCase));
+  }
+
+  convertDateToGraph(date: number) {
+    return ((this.convertDateToPercent(date) - this.minDatePercent) / (this.maxDatePercent - this.minDatePercent))
+      * graphRange + graphMin;
+  }
+
+  convertDateToPercent(date: number) {
+    return (date - this.absoluteMinDate) / this.absoluteDateRange;
   }
 
   convertLat(_lat?: number) {
@@ -143,24 +157,32 @@ class Graph {
     return ((long - this.minLongitude) / this.longRange) * graphRange + graphMin;
   }
 
+  convertPercentToDate(percent: number) {
+    return this.absoluteMinDate + percent * this.absoluteDateRange;
+  }
+
+  get absoluteDateRange() {
+    return this.absoluteMaxDate - this.absoluteMinDate;
+  }
+
   get canAnimateDate() {
     return this.currentDatePercent < this.maxDatePercent;
   }
 
   get canPanDown() {
-    return this.minLatitude > this.latMin;
+    return this.minLatitude > this.absoluteMinLatitude;
   }
 
   get canPanLeft() {
-    return this.minLongitude > this.longMin;
+    return this.minLongitude > this.absoluteMinLongitude;
   }
 
   get canPanRight() {
-    return this.maxLongitude < this.longMax;
+    return this.maxLongitude < this.absoluteMaxLongitude;
   }
 
   get canPanUp() {
-    return this.maxLatitude < this.latMax;
+    return this.maxLatitude < this.absoluteMaxLatitude;
   }
 
   get canReset() {
@@ -195,11 +217,11 @@ class Graph {
   }
 
   get dateRange() {
-    return this.dateMax - this.dateMin;
+    return this.maxDate - this.minDate;
   }
 
   get defaultDate() {
-    return this.dateMin + this.dateRange / 2;
+    return this.minDate + this.dateRange / 2;
   }
 
   get defaultLat() {
@@ -222,8 +244,16 @@ class Graph {
     return graphMin + graphRange * this.mapDatePercent;
   }
 
+  get maxDate() {
+    return this.convertPercentToDate(this.maxDatePercent);
+  }
+
   get maxWidth() {
-    return this.longMax - this.longMin;
+    return this.absoluteMaxLongitude - this.absoluteMinLongitude;
+  }
+
+  get minDate() {
+    return this.convertPercentToDate(this.minDatePercent);
   }
 
   get targetLongRange() {
@@ -231,8 +261,7 @@ class Graph {
   }
 
   getDateStringFromPercent(percent: number) {
-    const dateValue = graph.dateMin + (graph.dateMax - graph.dateMin) * percent;
-    return formatDateString(new Date(dateValue));
+    return formatDateString(new Date(this.convertPercentToDate(percent)));
   }
 
   latitudeInGraphSpace(_lat?: number) {
@@ -247,7 +276,7 @@ class Graph {
     if (!this.canPanDown) return;
 
     const __amount = amount ?? this.latRange / 4;
-    const _amount = Math.min(Math.abs(__amount), this.minLatitude - this.latMin);
+    const _amount = Math.min(Math.abs(__amount), this.minLatitude - this.absoluteMinLatitude);
     this.animateTo({ maxLatitude: this.maxLatitude - _amount, minLatitude: this.minLatitude - _amount });
   }
 
@@ -255,7 +284,7 @@ class Graph {
     if (!this.canPanLeft) return;
 
     const __amount = amount ?? this.longRange / 4;
-    const _amount = Math.min(Math.abs(__amount), this.minLongitude - this.longMin);
+    const _amount = Math.min(Math.abs(__amount), this.minLongitude - this.absoluteMinLongitude);
     this.animateTo({ maxLongitude: this.maxLongitude - _amount, minLongitude: this.minLongitude - _amount });
   }
 
@@ -263,7 +292,7 @@ class Graph {
     if (!this.canPanRight) return;
 
     const __amount = amount ?? this.longRange / 4;
-    const _amount = Math.min(Math.abs(__amount), this.longMax - this.maxLongitude);
+    const _amount = Math.min(Math.abs(__amount), this.absoluteMaxLongitude - this.maxLongitude);
     this.animateTo({ maxLongitude: this.maxLongitude + _amount, minLongitude: this.minLongitude + _amount });
   }
 
@@ -271,7 +300,7 @@ class Graph {
     if (!this.canPanUp) return;
 
     const __amount = amount ?? this.latRange / 4;
-    const _amount = Math.min(Math.abs(__amount), this.latMax - this.maxLatitude);
+    const _amount = Math.min(Math.abs(__amount), this.absoluteMaxLatitude - this.maxLatitude);
     this.animateTo({ maxLatitude: this.maxLatitude + _amount, minLatitude: this.minLatitude + _amount });
   }
 
@@ -297,9 +326,9 @@ class Graph {
     this.currentDatePercent = datePercentInRange(date, this.minDatePercent, this.maxDatePercent);
   }
 
-  setDateRange(min: number, max: number) {
-    this.dateMin = min;
-    this.dateMax = max;
+  setAbsoluteDateRange(min: number, max: number) {
+    this.absoluteMinDate = min;
+    this.absoluteMaxDate = max;
   }
 
   setMapDatePercent(date: number) {
@@ -317,19 +346,19 @@ class Graph {
   }
   
   setMaxLatitude(lat: number) {
-    this.maxLatitude = Math.min(this.latMax, lat);
+    this.maxLatitude = Math.min(this.absoluteMaxLatitude, lat);
   }
 
   setMaxLongitude(long: number) {
-    this.maxLongitude = Math.min(this.longMax, long);
+    this.maxLongitude = Math.min(this.absoluteMaxLongitude, long);
   }
 
   setMinLatitude(lat: number) {
-    this.minLatitude = Math.max(this.latMin, lat);
+    this.minLatitude = Math.max(this.absoluteMinLatitude, lat);
   }
 
   setMinLongitude(long: number) {
-    this.minLongitude = Math.max(this.longMin, long);
+    this.minLongitude = Math.max(this.absoluteMinLongitude, long);
   }
 
   zoomIn() {
@@ -347,23 +376,23 @@ class Graph {
     // If both sides go over, then we'll be capped at the max dimensions anyway.
     let maxLatitude = (this.targetMaxLat ?? this.maxLatitude) + zoomAmount * kLatScale;
     let minLatitude = (this.targetMinLat ?? this.minLatitude) - zoomAmount * kLatScale;
-    if (maxLatitude > this.latMax) {
-      minLatitude -= maxLatitude - this.latMax;
-      maxLatitude = this.latMax;
+    if (maxLatitude > this.absoluteMaxLatitude) {
+      minLatitude -= maxLatitude - this.absoluteMaxLatitude;
+      maxLatitude = this.absoluteMaxLatitude;
     }
-    if (minLatitude < this.latMin) {
-      maxLatitude += this.latMin - minLatitude;
-      minLatitude = this.latMin;
+    if (minLatitude < this.absoluteMinLatitude) {
+      maxLatitude += this.absoluteMinLatitude - minLatitude;
+      minLatitude = this.absoluteMinLatitude;
     }
     let maxLongitude = (this.targetMaxLong ?? this.maxLongitude) + zoomAmount;
     let minLongitude = (this.targetMinLong ?? this.minLongitude) - zoomAmount;
-    if (maxLongitude > this.longMax) {
-      minLongitude -= maxLongitude - this.longMax;
-      maxLongitude = this.longMax;
+    if (maxLongitude > this.absoluteMaxLongitude) {
+      minLongitude -= maxLongitude - this.absoluteMaxLongitude;
+      maxLongitude = this.absoluteMaxLongitude;
     }
-    if (minLongitude < this.longMin) {
-      maxLongitude += this.longMin - minLongitude;
-      minLongitude = this.longMin;
+    if (minLongitude < this.absoluteMinLongitude) {
+      maxLongitude += this.absoluteMinLongitude - minLongitude;
+      minLongitude = this.absoluteMinLongitude;
     }
 
     this.animateTo({ maxLatitude, minLatitude, maxLongitude, minLongitude });
