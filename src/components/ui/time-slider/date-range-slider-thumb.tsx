@@ -29,7 +29,7 @@ export function DateRangeSliderThumb({
 export function MaxDateRangeSliderThumb() {
   return (
     <DateRangeSliderThumb
-      minPercent={graph.minDatePercent}
+      minPercent={graph.minDatePercent + 0.01}
       maxPercent={1}
       percent={graph.maxDatePercent}
       setPercent={percent => graph.setMaxDatePercent(percent)}
@@ -41,7 +41,7 @@ export function MinDateRangeSliderThumb() {
   return (
     <DateRangeSliderThumb
       minPercent={0}
-      maxPercent={graph.maxDatePercent}
+      maxPercent={graph.maxDatePercent - 0.01}
       percent={graph.minDatePercent}
       setPercent={percent => graph.setMinDatePercent(percent)}
     />
