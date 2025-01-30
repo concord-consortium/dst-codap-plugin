@@ -83,7 +83,7 @@ export const GraphUI = observer(function GraphUI() {
           testId="button-marquee-mode"
         />
       </UIButtonContainer>
-      <TimeSlider dateMax={graph.absoluteMaxDate} dateMin={graph.absoluteMinDate} />
+      <TimeSlider />
     </>
   );
 });

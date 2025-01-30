@@ -8,7 +8,7 @@ import TimeSliderThumb from "../../../assets/icons/time-slider-thumb.svg";
 import { graph } from "../../../models/graph";
 import { UIButton } from "../ui-button";
 import { UIButtonContainer } from "../ui-button-container";
-import { DateRangeSliderThumb } from "./date-range-slider-thumb";
+import { MaxDateRangeSliderThumb, MinDateRangeSliderThumb } from "./date-range-slider-thumb";
 import { SliderThumb } from "./slider-thumb";
 import { TimeLine } from "./time-line";
 import {
@@ -18,13 +18,11 @@ import "./time-slider.scss";
 
 const labelBaseTop = timeLineTop - labelHeight / 2;
 
-interface ITimeSliderProps {
-  dateMax: number;
-  dateMin: number;
-}
-export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITimeSliderProps) {
-  const handlePlayButtonClick = () => graph.setAnimatingDate(!graph.animatingDate);
-
+export const TimeSlider = observer(function TimeSlider() {
+  // When the max slider is near the bottom of the timeline, we render it above the min slider so the user can
+  // move it up.
+  const minMaxSlider = graph.maxDatePercent < .03;
+  
   return (
     <div className="time-slider-container">
       <div className="time-slider-title">z: Time</div>
@@ -58,18 +56,9 @@ export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITi
         topOffset={mapSliderThumbOffset}
         ThumbIcon={MapSlider}
       />
-      <DateRangeSliderThumb
-        minPercent={graph.minDatePercent}
-        maxPercent={1}
-        percent={graph.maxDatePercent}
-        setPercent={percent => graph.setMaxDatePercent(percent)}
-      />
-      <DateRangeSliderThumb
-        minPercent={0}
-        maxPercent={graph.maxDatePercent}
-        percent={graph.minDatePercent}
-        setPercent={percent => graph.setMinDatePercent(percent)}
-      />
+      {!minMaxSlider && <MaxDateRangeSliderThumb />}
+      <MinDateRangeSliderThumb />
+      {minMaxSlider && <MaxDateRangeSliderThumb />}
       <SliderThumb
         className="time-slider-thumb-container right-rounded"
         maxPercent={graph.maxDatePercent}
@@ -84,7 +73,7 @@ export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITi
           className="play-button top bottom"
           disabled={!graph.canAnimateDate}
           Icon={graph.animatingDate ? PauseIcon : PlayIcon}
-          onClick={handlePlayButtonClick}
+          onClick={() => graph.setAnimatingDate(!graph.animatingDate)}
           testId="button-play"
         />
       </UIButtonContainer>
