@@ -1,9 +1,10 @@
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import MapSlider from "../../../assets/icons/map-slider.svg";
 import PauseIcon from "../../../assets/icons/pause-icon.svg";
 import PlayIcon from "../../../assets/icons/play-icon.svg";
 import TimeSliderThumb from "../../../assets/icons/time-slider-thumb.svg";
+import { graph } from "../../../models/graph";
 import { formatDateString } from "../../../utilities/date-utils";
 import { UIButton } from "../ui-button";
 import { UIButtonContainer } from "../ui-button-container";
@@ -16,54 +17,13 @@ import {
 import "./time-slider.scss";
 
 const labelBaseTop = timeLineTop - labelHeight / 2;
-let lastFrameTime = Date.now();
-const animationRate = 0.1;
-let animationTimeout = 0;
 
 interface ITimeSliderProps {
   dateMax: number;
   dateMin: number;
 }
 export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITimeSliderProps) {
-  const [upperRangePercent, setUpperRangePercent] = useState(1);
-  const [lowerRangePercent, setLowerRangePercent] = useState(0);
-  const [mapPercent, setMapPercent] = useState(0);
-  const [timePercent, setTimePercent] = useState(1);
-  const [animating, setAnimating] = useState(false);
-
-  useEffect(() => {
-    setMapPercent(value => Math.min(upperRangePercent, Math.max(lowerRangePercent, value)));
-    setTimePercent(value => Math.min(upperRangePercent, Math.max(lowerRangePercent, value)));
-  }, [upperRangePercent, lowerRangePercent]);
-
-  useEffect(() => {
-    // We bail if there is already a timeout waiting to run, which can happen if the user changes upperRangePercent.
-    if (animating && !animationTimeout) {
-      animationTimeout = setTimeout(() => {
-        // Clear the timeout so the next time this useEffect runs we can set a new timeout.
-        animationTimeout = 0;
-        const now = Date.now();
-        const delta = (now - lastFrameTime) / 1000;
-        lastFrameTime = now;
-        const newMapPercent = Math.min(timePercent + animationRate * delta, upperRangePercent);
-        setTimePercent(newMapPercent);
-        if (newMapPercent >= upperRangePercent) {
-          setAnimating(false);
-        }
-      });
-    }
-  }, [animating, timePercent, upperRangePercent]);
-
-  const handlePlayButtonClick = () => {
-    if (animating) {
-      setAnimating(false);
-      clearTimeout(animationTimeout);
-      animationTimeout = 0;
-    } else {
-      setAnimating(true);
-      lastFrameTime = Date.now();
-    }
-  };
+  const handlePlayButtonClick = () => graph.setAnimatingDate(!graph.animatingDate);
 
   const labelFromPercentage = (percentage: number) => {
     const dateValue = dateMin + (dateMax - dateMin) * percentage;
@@ -76,15 +36,15 @@ export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITi
       <TimeLine className="back-line" tickClassName="back-tick" />
       <TimeLine
         className="middle-line"
-        lowerClip={(1 - upperRangePercent) * 100}
+        lowerClip={(1 - graph.maxDatePercent) * 100}
         tickClassName="middle-tick"
-        upperClip={(1 - lowerRangePercent) * 100}
+        upperClip={(1 - graph.minDatePercent) * 100}
       />
       <TimeLine
         className="front-line"
-        lowerClip={(1 - timePercent) * 100}
+        lowerClip={(1 - graph.currentDatePercent) * 100}
         tickClassName="front-tick"
-        upperClip={(1 - lowerRangePercent) * 100}
+        upperClip={(1 - graph.minDatePercent) * 100}
       />
       {labelOffsets.map((offset, i) => {
         const percentage = (labelOffsets.length - 1 - i) / (labelOffsets.length - 1);
@@ -96,48 +56,48 @@ export const TimeSlider = observer(function TimeSlider({ dateMax, dateMin }: ITi
       })}
       <SliderThumb
         className="map-slider-thumb-container left-rounded"
-        label={labelFromPercentage(mapPercent)}
-        maxPercent={upperRangePercent}
-        minPercent={lowerRangePercent}
-        percent={mapPercent}
-        setPercent={setMapPercent}
+        label={labelFromPercentage(graph.mapDatePercent)}
+        maxPercent={graph.maxDatePercent}
+        minPercent={graph.minDatePercent}
+        percent={graph.mapDatePercent}
+        setPercent={percent => graph.setMapDatePercent(percent)}
         topOffset={mapSliderThumbOffset}
         ThumbIcon={MapSlider}
       />
       <DateRangeSliderThumb
-        label={labelFromPercentage(upperRangePercent)}
-        minPercent={lowerRangePercent}
+        label={labelFromPercentage(graph.maxDatePercent)}
+        minPercent={graph.minDatePercent}
         maxPercent={1}
-        percent={upperRangePercent}
-        setPercent={setUpperRangePercent}
+        percent={graph.maxDatePercent}
+        setPercent={percent => graph.setMaxDatePercent(percent)}
       />
       <DateRangeSliderThumb
-        label={labelFromPercentage(lowerRangePercent)}
+        label={labelFromPercentage(graph.minDatePercent)}
         minPercent={0}
-        maxPercent={upperRangePercent}
-        percent={lowerRangePercent}
-        setPercent={setLowerRangePercent}
+        maxPercent={graph.maxDatePercent}
+        percent={graph.minDatePercent}
+        setPercent={percent => graph.setMinDatePercent(percent)}
       />
       <SliderThumb
         className="time-slider-thumb-container right-rounded"
-        label={labelFromPercentage(timePercent)}
-        maxPercent={upperRangePercent}
-        minPercent={lowerRangePercent}
-        percent={timePercent}
-        setPercent={setTimePercent}
+        label={labelFromPercentage(graph.currentDatePercent)}
+        maxPercent={graph.maxDatePercent}
+        minPercent={graph.minDatePercent}
+        percent={graph.currentDatePercent}
+        setPercent={percent => graph.setCurrentDatePercent(percent)}
         topOffset={timeSliderThumbOffset}
         ThumbIcon={TimeSliderThumb}
       />
       <UIButtonContainer className="play-container">
         <UIButton
           className="play-button top bottom"
-          disabled={timePercent >= upperRangePercent}
-          Icon={animating ? PauseIcon : PlayIcon}
+          disabled={!graph.canAnimateDate}
+          Icon={graph.animatingDate ? PauseIcon : PlayIcon}
           onClick={handlePlayButtonClick}
           testId="button-play"
         />
       </UIButtonContainer>
-      <div className="play-button-label">{animating ? "Pause" : "Play"}</div>
+      <div className="play-button-label">{graph.animatingDate ? "Pause" : "Play"}</div>
     </div>
   );
 });

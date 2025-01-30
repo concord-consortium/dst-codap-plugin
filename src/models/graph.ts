@@ -3,6 +3,7 @@ import {
   kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin, kHomeMaxLatitude, kHomeMaxLongitude,
   kHomeMinLatitude, kHomeMinLongitude, kLatScale
 } from "../utilities/constants";
+import { datePercentInRange } from "../utilities/date-utils";
 import { halfPi } from "../utilities/trig-utils";
 import { getDate, ICase } from "./codap-data";
 
@@ -14,16 +15,23 @@ const minWidth = 5;
 const zoomAmount = 2.5;
 
 const animationDuration = 200;
+const dateAnimationRate = 0.1;
 
 class Graph {
   dateMin = 1578124800000;
   dateMax = 1672358400000;
+
+  maxDatePercent = 1;
+  minDatePercent = 0;
+  mapDatePercent = 0;
+  currentDatePercent = 1;
+  animatingDate = false;
+
   latMin = kBackgroundLatMin; // The absolute min latitude
   latMax = kBackgroundLatMax; // The absolute max latitude
   longMin = kBackgroundLongMin; // The absolute min longitude
   longMax = kBackgroundLongMax; // The absolute max longitude
 
-  mapDate = 1578124800000;
   maxLatitude = kHomeMaxLatitude; // The current max latitude of the graph
   minLatitude = kHomeMinLatitude; // The current min latitude of the graph
   maxLongitude = kHomeMaxLongitude; // The current max longitude of the graph
@@ -52,34 +60,41 @@ class Graph {
   // Animate the graph towards its target values.
   // This is called every frame by the component.
   animate(dt: number) {
-    if (this.animationPercentage == null) return;
+    if (this.animationPercentage != null) {
+      this.animationPercentage = Math.min(this.animationPercentage + dt / animationDuration, 1);
+      const smoothPercentage = Math.sin((this.animationPercentage * 2 - 1) * halfPi) / 2 + .5;
+      if (this.targetMaxLat != null && this.startMaxLat != null) {
+        this.setMaxLatitude(this.startMaxLat + (this.targetMaxLat - this.startMaxLat) * smoothPercentage);
+      }
+      if (this.targetMinLat != null && this.startMinLat != null) {
+        this.setMinLatitude(this.startMinLat + (this.targetMinLat - this.startMinLat) * smoothPercentage);
+      }
+      if (this.targetMaxLong != null && this.startMaxLong != null) {
+        this.setMaxLongitude(this.startMaxLong + (this.targetMaxLong - this.startMaxLong) * smoothPercentage);
+      }
+      if (this.targetMinLong != null && this.startMinLong != null) {
+        this.setMinLongitude(this.startMinLong + (this.targetMinLong - this.startMinLong) * smoothPercentage);
+      }
 
-    this.animationPercentage = Math.min(this.animationPercentage + dt / animationDuration, 1);
-    const smoothPercentage = Math.sin((this.animationPercentage * 2 - 1) * halfPi) / 2 + .5;
-    if (this.targetMaxLat != null && this.startMaxLat != null) {
-      this.setMaxLatitude(this.startMaxLat + (this.targetMaxLat - this.startMaxLat) * smoothPercentage);
-    }
-    if (this.targetMinLat != null && this.startMinLat != null) {
-      this.setMinLatitude(this.startMinLat + (this.targetMinLat - this.startMinLat) * smoothPercentage);
-    }
-    if (this.targetMaxLong != null && this.startMaxLong != null) {
-      this.setMaxLongitude(this.startMaxLong + (this.targetMaxLong - this.startMaxLong) * smoothPercentage);
-    }
-    if (this.targetMinLong != null && this.startMinLong != null) {
-      this.setMinLongitude(this.startMinLong + (this.targetMinLong - this.startMinLong) * smoothPercentage);
+      // End the animation if we're done.
+      if (this.animationPercentage >= 1) {
+        this.animationPercentage = undefined;
+        this.startMaxLat = undefined;
+        this.startMinLat = undefined;
+        this.startMaxLong = undefined;
+        this.startMinLong = undefined;
+        this.targetMaxLat = undefined;
+        this.targetMinLat = undefined;
+        this.targetMaxLong = undefined;
+        this.targetMinLong = undefined;
+      }
     }
 
-    // End the animation if we're done.
-    if (this.animationPercentage >= 1) {
-      this.animationPercentage = undefined;
-      this.startMaxLat = undefined;
-      this.startMinLat = undefined;
-      this.startMaxLong = undefined;
-      this.startMinLong = undefined;
-      this.targetMaxLat = undefined;
-      this.targetMinLat = undefined;
-      this.targetMaxLong = undefined;
-      this.targetMinLong = undefined;
+    if (this.animatingDate) {
+      this.setCurrentDatePercent(this.currentDatePercent + dt / 1000 * dateAnimationRate);
+      if (this.currentDatePercent >= this.maxDatePercent) {
+        this.setAnimatingDate(false);
+      }
     }
   }
 
@@ -126,6 +141,10 @@ class Graph {
   convertLong(_long?: number) {
     const long = _long ?? this.defaultLong;
     return ((long - this.minLongitude) / this.longRange) * graphRange + graphMin;
+  }
+
+  get canAnimateDate() {
+    return this.currentDatePercent < this.maxDatePercent;
   }
 
   get canPanDown() {
@@ -200,7 +219,7 @@ class Graph {
   }
 
   get mapPosition() {
-    return this.convertDate(this.mapDate);
+    return graphMin + graphRange * this.mapDatePercent;
   }
 
   get maxWidth() {
@@ -260,9 +279,36 @@ class Graph {
     });
   }
 
+  restrictDates() {
+    this.setCurrentDatePercent(this.currentDatePercent);
+    this.setMapDatePercent(this.mapDatePercent);
+  }
+
+  setAnimatingDate(animating: boolean) {
+    this.animatingDate = animating;
+  }
+
+  setCurrentDatePercent(date: number) {
+    this.currentDatePercent = datePercentInRange(date, this.minDatePercent, this.maxDatePercent);
+  }
+
   setDateRange(min: number, max: number) {
     this.dateMin = min;
     this.dateMax = max;
+  }
+
+  setMapDatePercent(date: number) {
+    this.mapDatePercent = datePercentInRange(date, this.minDatePercent, this.maxDatePercent);
+  }
+
+  setMaxDatePercent(date: number) {
+    this.maxDatePercent = datePercentInRange(date);
+    this.restrictDates();
+  }
+
+  setMinDatePercent(date: number) {
+    this.minDatePercent = datePercentInRange(date);
+    this.restrictDates();
   }
   
   setMaxLatitude(lat: number) {
