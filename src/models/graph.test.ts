@@ -7,6 +7,10 @@ const interval = setInterval(() => graph.animate(33), 33);
 
 describe("graph", () => {
   beforeEach(() => {
+    graph.setMaxDatePercent(1);
+    graph.setMinDatePercent(0);
+    graph.setCurrentDatePercent(1);
+    graph.setMapDatePercent(0);
     graph.setMaxLatitude(kHomeMaxLatitude);
     graph.setMinLatitude(kHomeMinLatitude);
     graph.setMaxLongitude(kHomeMaxLongitude);
@@ -14,6 +18,40 @@ describe("graph", () => {
   });
 
   afterAll(() => clearInterval(interval));
+
+  describe("setDates", () => {
+    it("current and map dates follow min and max dates", () => {
+      expect(graph.currentDatePercent).toBeCloseTo(1);
+      graph.setMaxDatePercent(0.75);
+      expect(graph.maxDatePercent).toBeCloseTo(0.75);
+      expect(graph.currentDatePercent).toBeCloseTo(0.75);
+
+      expect(graph.mapDatePercent).toBeCloseTo(0);
+      graph.setMinDatePercent(0.25);
+      expect(graph.minDatePercent).toBeCloseTo(0.25);
+      expect(graph.mapDatePercent).toBeCloseTo(0.25);
+
+      expect(graph.mapPosition).toBeCloseTo(-5);
+      graph.setMapDatePercent(0.5);
+      expect(graph.mapPosition).toBeCloseTo(0);
+    });
+  });
+
+  describe("animate current date", () => {
+    it("should animate current date", (done) => {
+      expect(graph.canAnimateDate).toBe(false);
+      graph.setCurrentDatePercent(0.975);
+      expect(graph.canAnimateDate).toBe(true);
+      graph.setAnimatingDate(true);
+
+      setTimeout(() => {
+        expect(graph.currentDatePercent).toBeGreaterThan(0.9);
+        expect(graph.animatingDate).toBe(false);
+        expect(graph.canAnimateDate).toBe(false);
+        done();
+      }, 300);
+    });
+  });
 
   describe("convertLat", () => {
     it("should convert latitude to graph coordinates", () => {
@@ -50,7 +88,7 @@ describe("graph", () => {
     });
   });
 
-  describe("convertDate", () => {
+  describe("convertDateToGraph", () => {
     it("should convert date to graph coordinates", () => {
       const aCase: ICase = { __id__: "1", Day: 4, Month: 1, Year: 2020 };
       expect(graph.convertCaseDateToGraph(aCase)).toBeCloseTo(-5);
@@ -66,6 +104,19 @@ describe("graph", () => {
     it("should return false if case is outside graph bounds", () => {
       const aCase: ICase = { __id__: "1", Latitude: graph.absoluteMaxLatitude + 1, Longitude: graph.absoluteMaxLongitude + 1 };
       expect(graph.caseIsVisible(aCase)).toBe(false);
+    });
+
+    it("should return false if case is outside time range", () => {
+      const aCase: ICase = {
+        __id__: "1", Latitude: graph.absoluteMaxLatitude, Longitude: graph.absoluteMaxLongitude,
+        Year: 1980, Month: 1, Day: 1
+      };
+      expect(graph.caseIsVisible(aCase)).toBe(false);
+      const aCase2: ICase = {
+        __id__: "1", Latitude: graph.absoluteMaxLatitude, Longitude: graph.absoluteMaxLongitude,
+        Year: 2100, Month: 1, Day: 1
+      };
+      expect(graph.caseIsVisible(aCase2)).toBe(false);
     });
   });
 
