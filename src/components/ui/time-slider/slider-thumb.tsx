@@ -6,6 +6,7 @@ import "./slider-thumb.scss";
 
 interface ISliderThumbProps {
   className?: string;
+  LabelBackground?: React.FC<React.SVGProps<SVGSVGElement>>;
   minPercent: number;
   maxPercent: number;
   percent: number;
@@ -14,7 +15,7 @@ interface ISliderThumbProps {
   ThumbIcon: React.FC<React.SVGProps<SVGSVGElement>>;
 }
 export function SliderThumb({
-  className, minPercent, maxPercent, percent, setPercent, topOffset, ThumbIcon
+  className, LabelBackground, minPercent, maxPercent, percent, setPercent, topOffset, ThumbIcon
 }: ISliderThumbProps) {
   const [hovering, setHovering] = useState(false);
   const [pointerDown, setPointerDown] = useState(false);
@@ -57,7 +58,10 @@ export function SliderThumb({
 
   return (
     <div className={clsx("slider-thumb-container", className)} style={style}>
-      <div className={labelClass}>{graph.getDateStringFromPercent(percent)}</div>
+      <div className={labelClass}>
+        {LabelBackground && <LabelBackground className="label-background" />}
+        <div className="label-text">{graph.getDateStringFromPercent(percent)}</div>
+      </div>
       <div
         className={thumbClass}
         onPointerDown={handlePointerDown}

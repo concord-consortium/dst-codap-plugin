@@ -1,5 +1,5 @@
 import React from "react";
-import DateRangeSliderThumbIcon from "../../../assets/icons/date-range-slider-thumb.svg";
+import DateRangeSliderThumbIcon from "../../../assets/timeslider/date-range-slider-thumb.svg";
 import { graph } from "../../../models/graph";
 import { SliderThumb } from "./slider-thumb";
 import { dateRangeSliderThumbOffset } from "./time-slider-contsants";

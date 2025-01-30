@@ -11,16 +11,28 @@
 
   &.time-slider-thumb-container {
     left: 42px;
+
+    .slider-thumb-label {
+      .label-background {
+        left: -5px;
+        top: -3px;
+      }
+    }
   }
 
   &.left-rounded {
     .slider-thumb-label {
+      background-color: white;
+      border: 1px solid #177991;
+      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.25);
       border-bottom-left-radius: 10px;
       border-top-left-radius: 10px;
       left: 0;
-      padding-right: 4px;
-      text-align: right;
       top: 4px;
+
+      .label-text {
+        right: 4px;
+      }
     }
 
     .slider-thumb {
@@ -30,20 +42,13 @@
 
   &.right-rounded {
     .slider-thumb-label {
-      border-bottom-right-radius: 10px;
-      border-top-right-radius: 10px;
       left: 32px;
       padding-left: 8px;
-      text-align: left;
       top: 8px;
     }
   }
 
   .slider-thumb-label {
-    background-color: white;
-    border: 1px solid #177991;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.25);
-    font-weight: 500;
     height: 20px;
     position: absolute;
     visibility: hidden;
@@ -56,6 +61,15 @@
 
     &.active {
       visibility: visible;
+    }
+
+    .label-background {
+      position: absolute;
+    }
+
+    .label-text {
+      font-weight: 500;
+      position: absolute;
     }
   }
 

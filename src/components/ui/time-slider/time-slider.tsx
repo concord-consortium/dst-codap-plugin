@@ -1,10 +1,11 @@
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import React from "react";
-import MapSlider from "../../../assets/icons/map-slider.svg";
 import PauseIcon from "../../../assets/icons/pause-icon.svg";
 import PlayIcon from "../../../assets/icons/play-icon.svg";
-import TimeSliderThumb from "../../../assets/icons/time-slider-thumb.svg";
+import MapSlider from "../../../assets/timeslider/map-slider.svg";
+import TimeSliderDateContainer from "../../../assets/timeslider/time-slider-date-container.svg";
+import TimeSliderThumb from "../../../assets/timeslider/time-slider-thumb.svg";
 import { graph } from "../../../models/graph";
 import { UIButton } from "../ui-button";
 import { UIButtonContainer } from "../ui-button-container";
@@ -22,7 +23,7 @@ export const TimeSlider = observer(function TimeSlider() {
   // When the max slider is near the bottom of the timeline, we render it above the min slider so the user can
   // move it up.
   const minMaxSlider = graph.maxDatePercent < .03;
-  
+
   return (
     <div className="time-slider-container">
       <div className="time-slider-title">z: Time</div>
@@ -61,6 +62,7 @@ export const TimeSlider = observer(function TimeSlider() {
       {minMaxSlider && <MaxDateRangeSliderThumb />}
       <SliderThumb
         className="time-slider-thumb-container right-rounded"
+        LabelBackground={TimeSliderDateContainer}
         maxPercent={graph.maxDatePercent}
         minPercent={graph.minDatePercent}
         percent={graph.currentDatePercent}
