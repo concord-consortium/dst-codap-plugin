@@ -1,0 +1,3 @@
+Year,Month,Day,date,Time (CST),State,Magnitude (0-5),Injuries,Fatalities,Property Loss ($) [0=unk],Crop Loss ($) [0=unk],Latitude,Longitude,Length of track (miles),Width of track (yards)
+2020,10,10,10/10/20,4:01:00,AL,0,0,0,0,0,30.4803,-88.2508,0.08,25
+2020,10,10,10/10/20,5:40:00,WA,1,0,0,0,0,47.3688,-123.9473,0.5,30

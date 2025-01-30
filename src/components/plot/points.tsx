@@ -8,7 +8,7 @@ export const Points = observer(function Points() {
   return (
     <group>
       {codapData.cases.map((aCase, i) => {
-        const { id, Latitude, Longitude } = aCase;
+        const { __id__:id, Latitude, Longitude } = aCase;
         return (
           <Point
             key={`point-${id}`}

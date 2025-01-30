@@ -26,7 +26,7 @@ describe("graph-utils", () => {
 
   describe("convertDate", () => {
     it("should convert date to graph coordinates", () => {
-      const aCase: ICase = { id: 1, Day: 4, Month: 1, Year: 2020 };
+      const aCase: ICase = { __id__: "1", Day: 4, Month: 1, Year: 2020 };
       expect(convertDate(aCase)).toBeCloseTo(-5);
     });
   });

@@ -52,19 +52,19 @@ describe("graph", () => {
 
   describe("convertDate", () => {
     it("should convert date to graph coordinates", () => {
-      const aCase: ICase = { id: 1, Day: 4, Month: 1, Year: 2020 };
+      const aCase: ICase = { __id__: "1", Day: 4, Month: 1, Year: 2020 };
       expect(graph.convertCaseDateToGraph(aCase)).toBeCloseTo(-5);
     });
   });
 
   describe("caseIsVisible", () => {
     it("should return true if case is within graph bounds", () => {
-      const aCase: ICase = { id: 1, Latitude: graph.centerLat, Longitude: graph.centerLong };
+      const aCase: ICase = { __id__: "1", Latitude: graph.centerLat, Longitude: graph.centerLong };
       expect(graph.caseIsVisible(aCase)).toBe(true);
     });
 
     it("should return false if case is outside graph bounds", () => {
-      const aCase: ICase = { id: 1, Latitude: graph.absoluteMaxLatitude + 1, Longitude: graph.absoluteMaxLongitude + 1 };
+      const aCase: ICase = { __id__: "1", Latitude: graph.absoluteMaxLatitude + 1, Longitude: graph.absoluteMaxLongitude + 1 };
       expect(graph.caseIsVisible(aCase)).toBe(false);
     });
   });
