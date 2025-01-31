@@ -120,12 +120,12 @@ export async function dstSelectCases(caseIds: string[]) {
 
 export async function dstAddCaseToSelection(caseId: string) {
   dstDataSet().selectCases([caseId]);
-  return await selectCases(dataContextName, Array.from(codapData.selectedCaseIds));
+  return await selectCases(dataContextName, Array.from(dstDataSet().selection));
 }
 
 export async function dstRemoveCaseFromSelection(caseId: string) {
   dstDataSet().selectCases([caseId], false);
-  return await selectCases(dataContextName, Array.from(codapData.selectedCaseIds));
+  return await selectCases(dataContextName, Array.from(dstDataSet().selection));
 }
 
 export function updateDataSetAttributes(dataContext: DIDataContext) {

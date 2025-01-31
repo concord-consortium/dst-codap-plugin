@@ -4,7 +4,7 @@ import { Vector2, Vector3 } from "three";
 import { codapData } from "../../models/codap-data";
 import { graph } from "../../models/graph";
 import { ui } from "../../models/ui";
-import { dstSelectCases } from "../../utilities/codap-utils";
+import { dstDataSet, dstSelectCases } from "../../utilities/codap-utils";
 import "./marquee-overlay.scss";
 
 let throttleUpdate = false;
@@ -57,7 +57,7 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef }: IM
         }
       }).map((aCase) => aCase.__id__));
 
-      codapData.replaceSelectedCases(Array.from(selectingPoints));
+      dstDataSet().setSelectedCases(Array.from(selectingPoints));
       if (!throttleUpdate || forceUpdate) {
         throttleUpdate = true;
         dstSelectCases(Array.from(selectingPoints));
