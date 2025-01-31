@@ -101,8 +101,7 @@ export async function updateSelection() {
   try {
     const selectionListResult = await getSelectionList(dataContextName);
     if (selectionListResult.success) {
-      codapData.clearSelectedCases();
-      codapData.replaceSelectedCases(selectionListResult.values.map((aCase: any) => toV3CaseId(aCase.caseID)));
+      dstDataSet().setSelectedCases(selectionListResult.values.map((aCase: any) => toV3CaseId(aCase.caseID)));
     }
   } catch (error) {
     // This will happen if not embedded in CODAP
@@ -110,18 +109,22 @@ export async function updateSelection() {
   }
 }
 
+export function dstDataSet() {
+  return dstContainer.dataSet;
+}
+
 export async function dstSelectCases(caseIds: string[]) {
-  codapData.replaceSelectedCases(caseIds);
+  dstDataSet().setSelectedCases(caseIds);
   return await selectCases(dataContextName, caseIds);
 }
 
 export async function dstAddCaseToSelection(caseId: string) {
-  codapData.addCaseToSelection(caseId);
+  dstDataSet().selectCases([caseId]);
   return await selectCases(dataContextName, Array.from(codapData.selectedCaseIds));
 }
 
 export async function dstRemoveCaseFromSelection(caseId: string) {
-  codapData.removeCaseFromSelection(caseId);
+  dstDataSet().selectCases([caseId], false);
   return await selectCases(dataContextName, Array.from(codapData.selectedCaseIds));
 }
 

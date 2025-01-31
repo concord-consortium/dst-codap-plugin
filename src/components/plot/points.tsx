@@ -13,7 +13,6 @@ export const Points = observer(function Points() {
           <Point
             key={`point-${id}`}
             id={id}
-            isSelected={codapData.isSelected(id)}
             visible={graph.caseIsVisible(aCase)}
             x={graph.latitudeInGraphSpace(Latitude)}
             y={graph.convertCaseDate(aCase)}

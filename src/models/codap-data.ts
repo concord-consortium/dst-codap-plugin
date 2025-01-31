@@ -12,7 +12,6 @@ export interface ICase {
 
 class CodapData {
   caseMap = observable.map<string, ICase>();
-  selectedCaseIds = observable.set<string>();
 
   constructor() {
     makeAutoObservable(this);
@@ -22,24 +21,8 @@ class CodapData {
     this.caseMap.set(aCase.__id__, aCase);
   }
 
-  addCaseToSelection(id?: string) {
-    if (id != null) this.selectedCaseIds.add(id);
-  }
-
-  clearSelectedCases() {
-    this.selectedCaseIds.clear();
-  }
-
   get cases(): ICase[] {
     return Array.from(this.caseMap.values());
-  }
-
-  isSelected(id: string) {
-    return this.selectedCaseIds.has(id);
-  }
-
-  removeCaseFromSelection(id?: string) {
-    if (id != null) this.selectedCaseIds.delete(id);
   }
 
   replaceCases(newCases: ICase[]) {
@@ -47,10 +30,6 @@ class CodapData {
     newCases.forEach(aCase => {
       this.caseMap.set(aCase.__id__, aCase);
     });
-  }
-
-  replaceSelectedCases(newSelectedCaseIds: string[]) {
-    this.selectedCaseIds.replace(newSelectedCaseIds);
   }
 }
 

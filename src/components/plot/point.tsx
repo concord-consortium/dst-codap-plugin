@@ -4,13 +4,11 @@ import { ThreeEvent, useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
 import { observer } from "mobx-react-lite";
 import { ui } from "../../models/ui";
-import { dstAddCaseToSelection, dstRemoveCaseFromSelection, dstSelectCases } from "../../utilities/codap-utils";
+import { dstAddCaseToSelection, dstDataSet, dstRemoveCaseFromSelection, dstSelectCases } from "../../utilities/codap-utils";
 import { dstContainer } from "../../models/dst-container";
-import { codapData } from "../../models/codap-data";
 
 interface IPointProps {
   id: string;
-  isSelected: boolean;
   visible?: boolean;
   x: number;
   y: number;
@@ -21,7 +19,7 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   const dataConfig = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
   const dotColor = dataConfig.getLegendColorForCase(id);
   const basePointSize = 0.12;
-  const isSelected = codapData.isSelected(id);
+  const isSelected = dstDataSet().isCaseSelected(id);
   const selectedExtra = isSelected ? .02 : 0;
   const hoverMultiplier = isPointerOver ? 1.5 : 1;
   const targetPointSize = (basePointSize + selectedExtra) * hoverMultiplier;
