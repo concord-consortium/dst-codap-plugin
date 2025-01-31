@@ -8,6 +8,7 @@ import { DIDataContext, DIGetCaseResult } from "../codap/data-interactive/data-i
 import { IAttribute } from "../codap/models/data/attribute";
 import { CodapV2DataSetImporter } from "../codap/v2/codap-v2-data-set-importer";
 import { toV3CaseId } from "../codap/utilities/codap-utils";
+import { IValueType } from "../codap/models/data/attribute-types";
 import { ICaseCreation } from "../codap/models/data/data-set-types";
 
 import { codapData, getDate, ICase } from "../models/codap-data";
@@ -111,6 +112,31 @@ export async function updateSelection() {
 
 export function dstDataSet() {
   return dstContainer.dataSet;
+}
+
+export function dstCaseIds() {
+  return dstDataSet().getCollectionByName(collectionName)?.caseIds ?? [];
+}
+
+export function dstAttributeValue(attributeName: string, caseId: string) {
+  const attributeId = dstDataSet().getAttributeByName(attributeName)?.id;
+  return attributeId && dstDataSet().getValue(caseId, attributeId);
+}
+
+export function dstAttributeNumericValue(attributeName: string, caseId: string) {
+  return codapNumberValue(dstAttributeValue(attributeName, caseId));
+}
+
+export function caseDate(caseId: string) {
+  // We need at least a year. To make things simple we just use 2000 for now
+  const year = dstAttributeNumericValue("Year", caseId) || 2000;
+  const month = (dstAttributeNumericValue("Month", caseId) || 1) - 1;
+  const day = dstAttributeNumericValue("Day", caseId) || 1;
+  return Date.UTC(year, month, day);
+}
+
+export function codapNumberValue(value: IValueType) {
+  return value ? +value : undefined;
 }
 
 export async function dstSelectCases(caseIds: string[]) {

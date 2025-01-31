@@ -1,10 +1,11 @@
 import { makeAutoObservable } from "mobx";
+import { caseDate } from "../utilities/codap-utils";
 import {
   kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin, kHomeMaxLatitude, kHomeMaxLongitude,
   kHomeMinLatitude, kHomeMinLongitude, kLatScale
 } from "../utilities/constants";
 import { halfPi } from "../utilities/trig-utils";
-import { getDate, ICase } from "./codap-data";
+import { ICase } from "./codap-data";
 
 export const graphMin = -5;
 export const graphMax = 5;
@@ -108,8 +109,8 @@ class Graph {
       aCase.Longitude >= this.minLongitude && aCase.Longitude <= this.maxLongitude;
   }
   
-  convertCaseDate(aCase: ICase) {
-    const _date = getDate(aCase);
+  convertCaseDate(caseId: string) {
+    const _date = caseDate(caseId);
     const date = isFinite(_date) ? _date : this.defaultDate;
     return this.convertDate(date);
   }

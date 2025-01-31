@@ -1,22 +1,23 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { codapData } from "../../models/codap-data";
 import { graph } from "../../models/graph";
+import { codapNumberValue, dstCases } from "../../utilities/codap-utils";
 import { Point } from "./point";
 
 export const Points = observer(function Points() {
   return (
     <group>
-      {codapData.cases.map((aCase, i) => {
-        const { __id__:id, Latitude, Longitude } = aCase;
+      {dstCases().map((aCase, i) => {
+        const { __id__, Latitude, Longitude } = aCase;
+        if (i % 100 === 0) console.log(`--- aCase`, aCase, Latitude, codapNumberValue(Latitude));
         return (
           <Point
-            key={`point-${id}`}
-            id={id}
+            key={`point-${__id__}`}
+            id={__id__}
             visible={graph.caseIsVisible(aCase)}
-            x={graph.latitudeInGraphSpace(Latitude)}
+            x={graph.latitudeInGraphSpace(codapNumberValue(Latitude))}
             y={graph.convertCaseDate(aCase)}
-            z={graph.longitudeInGraphSpace(Longitude)}
+            z={graph.longitudeInGraphSpace(codapNumberValue(Longitude))}
           />
         );
       })}

@@ -1,10 +1,9 @@
 import { observer } from "mobx-react-lite";
 import React, { PointerEventHandler, useRef, useState } from "react";
 import { Vector2, Vector3 } from "three";
-import { codapData } from "../../models/codap-data";
 import { graph } from "../../models/graph";
 import { ui } from "../../models/ui";
-import { dstDataSet, dstSelectCases } from "../../utilities/codap-utils";
+import { codapNumberValue, dstCases, dstDataSet, dstSelectCases } from "../../utilities/codap-utils";
 import "./marquee-overlay.scss";
 
 let throttleUpdate = false;
@@ -44,11 +43,11 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef }: IM
         -(adjustedY / ref.current.clientHeight) * 2 + 1
       );
 
-      const selectingPoints = new Set(codapData.cases.filter((aCase) => {
+      const selectingPoints = new Set(dstCases().filter((aCase) => {
         if (graph.caseIsVisible(aCase)) {
-          const x = graph.latitudeInGraphSpace(aCase.Latitude);
+          const x = graph.latitudeInGraphSpace(codapNumberValue(aCase.Latitude));
           const y = graph.convertCaseDate(aCase);
-          const z = graph.longitudeInGraphSpace(aCase.Longitude);
+          const z = graph.longitudeInGraphSpace(codapNumberValue(aCase.Longitude));
           const ndcPoint = new Vector3(x, y, z).project(cameraRef.current);
           return ndcPoint.x >= Math.min(startPoint.x, endPoint.x) &&
             ndcPoint.x <= Math.max(startPoint.x, endPoint.x) &&
