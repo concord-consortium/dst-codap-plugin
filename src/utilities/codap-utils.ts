@@ -156,9 +156,8 @@ export function updateDataSetAttributes(dataContext: DIDataContext) {
 }
 
 export function setDSTCases(cases: ICaseCreation[]) {
-  // When the updateDataSetAttributes was called above all of cases were cleared out,
-  // so we can just add them back in here
   const dstDataset = dstContainer.dataSet;
+  dstDataset.removeCases(dstDataset.itemIds);
   dstDataset.addCases(cases, {canonicalize: true});
   const configuration = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
   

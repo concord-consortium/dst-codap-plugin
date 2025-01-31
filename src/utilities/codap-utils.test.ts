@@ -1,5 +1,6 @@
 import { createDataContextFromURL, getCaseByFormulaSearch, getDataContext } from "@concord-consortium/codap-plugin-api";
 import { codapData } from "../models/codap-data";
+import testDataContext from "../test/test-data-set.json";
 import { getData } from "./codap-utils";
 
 jest.mock("@concord-consortium/codap-plugin-api");
@@ -34,7 +35,8 @@ describe("codap utilities", () => {
     });
 
     it("handles no existing data", async () => {
-      mockedGetDataContext.mockReturnValue(Promise.resolve({success: false, values: ""}));
+      mockedGetDataContext.mockReturnValueOnce(Promise.resolve({success: false, values: ""}))
+        .mockReturnValue(Promise.resolve({ success: true, values: testDataContext }));
       mockedCreateDataContextFromURL.mockReturnValue(Promise.resolve({success: true, values: ""}));
       mockedGetCaseByFormulaSearch.mockReturnValue(Promise.resolve({
         success: true, 
@@ -70,10 +72,7 @@ describe("codap utilities", () => {
     });
 
     it("handles existing data", async () => {
-      mockedGetDataContext.mockReturnValue(Promise.resolve({
-        success: true, 
-        values: ""
-      }));
+      mockedGetDataContext.mockReturnValue(Promise.resolve({ success: true, values: testDataContext }));
       mockedGetCaseByFormulaSearch.mockReturnValue(Promise.resolve({
         success: true, 
         values: [
