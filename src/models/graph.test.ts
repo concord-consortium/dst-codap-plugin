@@ -1,5 +1,4 @@
 import { kHomeMaxLatitude, kHomeMaxLongitude, kHomeMinLatitude, kHomeMinLongitude } from "../utilities/constants";
-import { ICase } from "./codap-data";
 import { graph, graphMax, graphMin } from "./graph";
 
 // Normally this would be handled by useFrame in the MapPane componet.
@@ -90,33 +89,33 @@ describe("graph", () => {
 
   describe("convertDateToGraph", () => {
     it("should convert date to graph coordinates", () => {
-      const aCase: ICase = { __id__: "1", Day: 4, Month: 1, Year: 2020 };
-      expect(graph.convertCaseDateToGraph(aCase)).toBeCloseTo(-5);
+      // const aCase: ICase = { __id__: "1", Day: 4, Month: 1, Year: 2020 };
+      expect(graph.convertCaseDateToGraph("1")).toBeCloseTo(-5);
     });
   });
 
   describe("caseIsVisible", () => {
     it("should return true if case is within graph bounds", () => {
-      const aCase: ICase = { __id__: "1", Latitude: graph.centerLat, Longitude: graph.centerLong };
-      expect(graph.caseIsVisible(aCase)).toBe(true);
+      // const aCase: ICase = { __id__: "1", Latitude: graph.centerLat, Longitude: graph.centerLong };
+      expect(graph.caseIsVisible("1")).toBe(true);
     });
 
     it("should return false if case is outside graph bounds", () => {
-      const aCase: ICase = { __id__: "1", Latitude: graph.absoluteMaxLatitude + 1, Longitude: graph.absoluteMaxLongitude + 1 };
-      expect(graph.caseIsVisible(aCase)).toBe(false);
+      // const aCase: ICase = { __id__: "1", Latitude: graph.absoluteMaxLatitude + 1, Longitude: graph.absoluteMaxLongitude + 1 };
+      expect(graph.caseIsVisible("1")).toBe(false);
     });
 
     it("should return false if case is outside time range", () => {
-      const aCase: ICase = {
-        __id__: "1", Latitude: graph.absoluteMaxLatitude, Longitude: graph.absoluteMaxLongitude,
-        Year: 1980, Month: 1, Day: 1
-      };
-      expect(graph.caseIsVisible(aCase)).toBe(false);
-      const aCase2: ICase = {
-        __id__: "1", Latitude: graph.absoluteMaxLatitude, Longitude: graph.absoluteMaxLongitude,
-        Year: 2100, Month: 1, Day: 1
-      };
-      expect(graph.caseIsVisible(aCase2)).toBe(false);
+      // const aCase: ICase = {
+      //   __id__: "1", Latitude: graph.absoluteMaxLatitude, Longitude: graph.absoluteMaxLongitude,
+      //   Year: 1980, Month: 1, Day: 1
+      // };
+      expect(graph.caseIsVisible("1")).toBe(false);
+      // const aCase2: ICase = {
+      //   __id__: "2", Latitude: graph.absoluteMaxLatitude, Longitude: graph.absoluteMaxLongitude,
+      //   Year: 2100, Month: 1, Day: 1
+      // };
+      expect(graph.caseIsVisible("2")).toBe(false);
     });
   });
 

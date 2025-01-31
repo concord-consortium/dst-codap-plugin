@@ -12,7 +12,6 @@ import { IValueType } from "../codap/models/data/attribute-types";
 import { ICaseCreation } from "../codap/models/data/data-set-types";
 
 import { codapData, getDate, ICase } from "../models/codap-data";
-import { graph } from "../models/graph";
 import { ui } from "../models/ui";
 import { kInitialDimensions, kPluginName, kVersion } from "./constants";
 import { DstContainer, dstContainer } from "../models/dst-container";
@@ -69,9 +68,7 @@ export async function getData() {
 
     // Update date range
     const dates = cases.map(aCase => getDate(aCase)).filter((time: number) => isFinite(time));
-    graph.setAbsoluteDateRange(Math.min(...dates), Math.max(...dates));
-
-    codapData.replaceCases(cases);
+    codapData.setAbsoluteDateRange(Math.min(...dates), Math.max(...dates));
 
     // When the updateDataSetAttributes was called above all of cases were cleared out,
     // so we can just add them back in here

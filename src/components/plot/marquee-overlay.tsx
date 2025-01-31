@@ -3,7 +3,7 @@ import React, { PointerEventHandler, useRef, useState } from "react";
 import { Vector2, Vector3 } from "three";
 import { graph } from "../../models/graph";
 import { ui } from "../../models/ui";
-import { codapNumberValue, dstCases, dstDataSet, dstSelectCases } from "../../utilities/codap-utils";
+import { dstAttributeNumericValue, dstCaseIds, dstDataSet, dstSelectCases } from "../../utilities/codap-utils";
 import "./marquee-overlay.scss";
 
 let throttleUpdate = false;
@@ -43,18 +43,18 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef }: IM
         -(adjustedY / ref.current.clientHeight) * 2 + 1
       );
 
-      const selectingPoints = new Set(dstCases().filter((aCase) => {
-        if (graph.caseIsVisible(aCase)) {
-          const x = graph.latitudeInGraphSpace(codapNumberValue(aCase.Latitude));
-          const y = graph.convertCaseDate(aCase);
-          const z = graph.longitudeInGraphSpace(codapNumberValue(aCase.Longitude));
+      const selectingPoints = new Set(dstCaseIds().filter((caseId) => {
+        if (graph.caseIsVisible(caseId)) {
+          const x = graph.latitudeInGraphSpace(dstAttributeNumericValue("Latitude", caseId));
+          const y = graph.convertCaseDate(caseId);
+          const z = graph.longitudeInGraphSpace(dstAttributeNumericValue("Longitude", caseId));
           const ndcPoint = new Vector3(x, y, z).project(cameraRef.current);
           return ndcPoint.x >= Math.min(startPoint.x, endPoint.x) &&
             ndcPoint.x <= Math.max(startPoint.x, endPoint.x) &&
             ndcPoint.y >= Math.min(startPoint.y, endPoint.y) &&
             ndcPoint.y <= Math.max(startPoint.y, endPoint.y);
         }
-      }).map((aCase) => aCase.__id__));
+      }));
 
       dstDataSet().setSelectedCases(Array.from(selectingPoints));
       if (!throttleUpdate || forceUpdate) {
