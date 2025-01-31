@@ -72,7 +72,7 @@ describe("DSTCamera", () => {
   });
 
   test("should animate by given deltas", (done) => {
-    dstCamera.animateBy(5, 0.1, Math.PI / 4);
+    dstCamera.animateBy({ dZoom: 5, dPivot: 0.1, dRotation: Math.PI / 4 });
     expect(dstCamera.zoom).toBeLessThan(defaultZoom + 5);
     expect(dstCamera.pivot).toBeLessThan(defaultPivot + 0.1);
     expect(dstCamera.rotation).toBeLessThan(defaultRotation + Math.PI / 4);

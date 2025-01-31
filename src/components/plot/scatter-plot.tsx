@@ -4,7 +4,6 @@ import { observer } from "mobx-react-lite";
 import React, { useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { EffectComposer, HueSaturation } from "@react-three/postprocessing";
-import { graph } from "../../models/graph";
 import { ui } from "../../models/ui";
 import { DSTOrbitControls } from "../dst-orbit-controls";
 import { CubeOutline } from "./cube-outline";
@@ -41,7 +40,7 @@ export const ScatterPlot = observer(function ScatterPlot() {
           />
           <ambientLight intensity={2.75} />
           <Points />
-          <MapPlane zPosition={graph.mapPosition} />
+          <MapPlane />
           <EffectComposer>
             <HueSaturation saturation={0.05} />
           </EffectComposer>

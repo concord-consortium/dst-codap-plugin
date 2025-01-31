@@ -21,8 +21,8 @@ export function DSTOrbitControls({
 
   return (
     <OrbitControls
-      enabled={enabled}
       enableDamping={false}
+      enableRotate={enabled}
       enableZoom={false}
       onChange={handleChange}
     />

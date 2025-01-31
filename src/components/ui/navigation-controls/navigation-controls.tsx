@@ -12,24 +12,24 @@ export const NavigationControls = observer(function NavigationControls() {
       <ArrowButton
         className="navigation-cube-arrow"
         direction="left"
-        onClick={() => dstCamera.animateBy(0, 0, -kUIRotationChange)}
+        onClick={() => dstCamera.animateBy({ dRotation: -kUIRotationChange })}
       />
       <ArrowButton
         className="navigation-cube-arrow"
         direction="right"
-        onClick={() => dstCamera.animateBy(0, 0, kUIRotationChange)}
+        onClick={() => dstCamera.animateBy({ dRotation: kUIRotationChange })}
       />
       <ArrowButton
         className="navigation-cube-arrow"
         direction="up"
         disabled={!dstCamera.canPivotDown}
-        onClick={() => dstCamera.animateBy(0, -kUIPivotChange, 0)}
+        onClick={() => dstCamera.animateBy({ dPivot: -kUIPivotChange })}
       />
       <ArrowButton
         className="navigation-cube-arrow"
         direction="down"
         disabled={!dstCamera.canPivotUp}
-        onClick={() => dstCamera.animateBy(0, kUIPivotChange, 0)}
+        onClick={() => dstCamera.animateBy({ dPivot: kUIPivotChange })}
       />
       <NavigationCubeContainer />
     </div>

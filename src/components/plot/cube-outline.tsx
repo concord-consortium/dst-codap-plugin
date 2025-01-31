@@ -81,8 +81,8 @@ export const CubeOutline = observer(function CubeOutline() {
         <TimeAxis
           startPoint={new Vector3(yAxisX, yMin, yAxisZ)}
           endPoint={new Vector3(yAxisX, yMax, yAxisZ)}
-          minValue={graph.dateMin}
-          maxValue={graph.dateMax}
+          minValue={graph.minDate}
+          maxValue={graph.maxDate}
         />
       )}
       {displayZAxis && (
