@@ -66,15 +66,9 @@ export async function getData() {
     // The id should never be undefined but it is typed that way
     const cases: ICase[] = casesValues.map(aCase => ({ __id__: toV3CaseId(aCase.id!), ...aCase.values }));
 
-    // Update data ranges
+    // Update date range
     const dates = cases.map(aCase => getDate(aCase)).filter((time: number) => isFinite(time));
-    graph.setDateRange(Math.min(...dates), Math.max(...dates));
-    // const lats = is.map((item: any) => item.Latitude);
-    // dataRanges.latMin = Math.min(...lats);
-    // dataRanges.latMax = Math.max(...lats);
-    // const longs = is.map((item: any) => item.Longitude);
-    // dataRanges.longMin = Math.min(...longs);
-    // dataRanges.longMax = Math.max(...longs);
+    graph.setAbsoluteDateRange(Math.min(...dates), Math.max(...dates));
 
     codapData.replaceCases(cases);
 

@@ -96,6 +96,14 @@ context("Test the overall app", () => {
       ae.getUIButton("button-pointer-mode").click({ force: true });
       ae.getUIButton("button-pointer-mode").should("have.class", "active");
       ae.getUIButton("button-marquee-mode").should("not.have.class", "active");
+
+      // Play button
+      ae.getUIButton("button-play").should("not.be.enabled");
+
+      // Time slider thumbs
+      ae.getApp().get(".map-slider-thumb-container").should("exist");
+      ae.getApp().get(".time-slider-thumb-container").should("exist");
+      ae.getApp().get(".date-range-slider-thumb-container").should("have.length", 2);
     });
   });
 });

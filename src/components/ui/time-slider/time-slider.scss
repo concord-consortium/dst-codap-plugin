@@ -27,5 +27,9 @@
     position: absolute;
     top: 350px;
     width: 42px;
+
+    &.disabled {
+      opacity: .4;
+    }
   }
 }

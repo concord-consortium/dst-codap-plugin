@@ -92,7 +92,7 @@ class DSTCamera {
   }
 
   // Sets up an animation to move the camera by the given amounts.
-  animateBy(dZoom: number, dPivot: number, dRotation: number) {
+  animateBy({ dPivot = 0, dRotation = 0, dZoom = 0 }) {
     // Capture the state when the animation starts.
     this.animating = true;
     this.animationPercentage = 0;
@@ -108,11 +108,11 @@ class DSTCamera {
   }
 
   // Sets up an animation to move the camera to the given values.
-  animateTo(zoom: number, pivot: number, rotation: number) {
-    const dZoom = zoom - (this.targetZoom ?? this.zoom);
-    const dPivot = pivot - (this.targetPivot ?? this.pivot);
-    const dRotation = rotation - (this.targetRotation ?? this.rotation);
-    this.animateBy(dZoom, dPivot, dRotation);
+  animateTo({ pivot, rotation, zoom }: { pivot?: number; rotation?: number; zoom?: number }) {
+    const dPivot = (pivot ?? this.pivot) - (this.targetPivot ?? this.pivot);
+    const dRotation = (rotation ?? this.rotation) - (this.targetRotation ?? this.rotation);
+    const dZoom = (zoom ?? this.zoom) - (this.targetZoom ?? this.zoom);
+    this.animateBy({ dPivot, dRotation, dZoom });
   }
 
   get canPivotUp() {
@@ -151,7 +151,7 @@ class DSTCamera {
   }
 
   resetHome() {
-    this.animateTo(defaultZoom, defaultPivot, defaultRotation);
+    this.animateTo({ pivot: defaultPivot, rotation: defaultRotation, zoom: defaultZoom });
   }
 
   setDistance(distance: number) {
@@ -178,11 +178,11 @@ class DSTCamera {
   }
 
   zoomIn() {
-    this.animateBy((this.targetZoom ?? this.zoom) / 3, 0, 0);
+    this.animateBy({ dZoom: (this.targetZoom ?? this.zoom) });
   }
 
   zoomOut() {
-    this.animateBy(-(this.targetZoom ?? this.zoom) / 4, 0, 0);
+    this.animateBy({ dZoom: -(this.targetZoom ?? this.zoom) / 4 });
   }
 }
 
