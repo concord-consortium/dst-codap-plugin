@@ -1,6 +1,6 @@
 import { createDataContextFromURL, getCaseByFormulaSearch, getDataContext } from "@concord-consortium/codap-plugin-api";
 import { codapData } from "../models/codap-data";
-import { dstCaseIds, getData } from "./codap-utils";
+import { getData } from "./codap-utils";
 
 jest.mock("@concord-consortium/codap-plugin-api");
 
@@ -64,7 +64,7 @@ describe("codap utilities", () => {
         ]
       }));
       await getData();
-      expect(dstCaseIds().length).toBe(2);
+      expect(codapData.caseIds.length).toBe(2);
       expect(codapData.absoluteMinDate).toBe(Date.UTC(2020,0,1));
       expect(codapData.absoluteMaxDate).toBe(Date.UTC(2022,0,1));
     });
@@ -103,7 +103,7 @@ describe("codap utilities", () => {
       }));
       await getData();
       expect(mockedCreateDataContextFromURL).not.toHaveBeenCalled();
-      expect(dstCaseIds().length).toBe(2);
+      expect(codapData.caseIds.length).toBe(2);
       expect(codapData.absoluteMinDate).toBe(Date.UTC(2020,0,1));
       expect(codapData.absoluteMaxDate).toBe(Date.UTC(2022,0,1));
     });

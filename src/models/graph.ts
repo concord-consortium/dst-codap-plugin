@@ -1,5 +1,4 @@
 import { makeAutoObservable } from "mobx";
-import { caseDate, dstAttributeNumericValue } from "../utilities/codap-utils";
 import {
   kBackgroundLatMax, kBackgroundLatMin, kBackgroundLongMax, kBackgroundLongMin, kHomeMaxLatitude, kHomeMaxLongitude,
   kHomeMinLatitude, kHomeMinLongitude, kLatScale
@@ -117,8 +116,8 @@ class Graph {
   }
 
   caseIsVisible(caseId: string) {
-    const latitude = dstAttributeNumericValue("Latitude", caseId);
-    const longitude = dstAttributeNumericValue("Longitude", caseId);
+    const latitude = codapData.getAttributeNumericValue("Latitude", caseId);
+    const longitude = codapData.getAttributeNumericValue("Longitude", caseId);
     if (latitude == null || longitude == null) return false;
 
     const datePercent = this.convertCaseDateToPercent(caseId);
@@ -128,7 +127,7 @@ class Graph {
   }
   
   convertCaseDate(caseId: string) {
-    const _date = caseDate(caseId);
+    const _date = codapData.getCaseDate(caseId);
     return isFinite(_date) ? _date : this.defaultDate;
   }
   

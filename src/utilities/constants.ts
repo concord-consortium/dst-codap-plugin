@@ -5,6 +5,9 @@ export const kInitialDimensions = {
   height: 542
 };
 
+export const kDataContextName = "Tornado_Tracks_2020-2022";
+export const kCollectionName = "Cases";
+
 export const kGraphTabLabel = "3D Graph";
 export const kAboutTabLabel = "About";
 
