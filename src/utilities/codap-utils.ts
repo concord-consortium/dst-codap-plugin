@@ -11,9 +11,9 @@ import { toV3CaseId } from "../codap/utilities/codap-utils";
 import { ICaseCreation } from "../codap/models/data/data-set-types";
 
 import { codapData } from "../models/codap-data";
+import { DstContainer, dstContainer } from "../models/dst-container";
 import { ui } from "../models/ui";
 import { kCollectionName, kDataContextName, kInitialDimensions, kPluginName, kVersion } from "./constants";
-import { DstContainer, dstContainer } from "../models/dst-container";
 
 import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
 
@@ -62,16 +62,7 @@ export async function getData() {
     // The id should never be undefined but it is typed that way
     const cases: ICaseCreation[] = casesValues.map(aCase => ({ __id__: toV3CaseId(aCase.id!), ...aCase.values }));
 
-    // When the updateDataSetAttributes was called above all of cases were cleared out,
-    // so we can just add them back in here
-    const dstDataset = dstContainer.dataSet;
-    dstDataset.addCases(cases, {canonicalize: true});
-    const configuration = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
-    
-    // For the configuration to refresh, the following functions have to be called.
-    // This might show up as a problem with undo/redo as well.
-    configuration._clearFilteredCases(configuration.dataset);
-    configuration.clearCasesCache();
+    setDSTCases(cases);
 
     // Update date range
     const dates = codapData.caseIds.map(caseId => codapData.getCaseDate(caseId));
@@ -162,4 +153,17 @@ export function updateDataSetAttributes(dataContext: DIDataContext) {
   configuration.setAttribute("legend", {attributeID: colorAttribute.id});
   configuration.setAttribute("x", {attributeID: longAttribute.id});
   configuration.setAttribute("y", {attributeID: latAttribute.id});
+}
+
+export function setDSTCases(cases: ICaseCreation[]) {
+  // When the updateDataSetAttributes was called above all of cases were cleared out,
+  // so we can just add them back in here
+  const dstDataset = dstContainer.dataSet;
+  dstDataset.addCases(cases, {canonicalize: true});
+  const configuration = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
+  
+  // For the configuration to refresh, the following functions have to be called.
+  // This might show up as a problem with undo/redo as well.
+  configuration._clearFilteredCases(configuration.dataset);
+  configuration.clearCasesCache();
 }

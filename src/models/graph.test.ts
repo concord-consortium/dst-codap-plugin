@@ -1,10 +1,38 @@
+import { ICaseCreation } from "../codap/models/data/data-set-types";
+import testDataSet from "../test/test-data-set.json";
+import { setDSTCases, updateDataSetAttributes } from "../utilities/codap-utils";
 import { kHomeMaxLatitude, kHomeMaxLongitude, kHomeMinLatitude, kHomeMinLongitude } from "../utilities/constants";
 import { graph, graphMax, graphMin } from "./graph";
+
+const cases: ICaseCreation[] = [
+  { __id__: "1", Day: 4, Month: 1, Year: 2020 },
+  {
+    __id__: "2", Latitude: graph.centerLat, Longitude: graph.centerLong,
+    Year: 2021, Month: 1, Day: 1
+  },
+  {
+    __id__: "3", Latitude: graph.absoluteMaxLatitude + 1, Longitude: graph.absoluteMaxLongitude + 1,
+    Year: 2021, Month: 1, Day: 1
+  },
+  {
+    __id__: "4", Latitude: graph.absoluteMaxLatitude, Longitude: graph.absoluteMaxLongitude,
+    Year: 1980, Month: 1, Day: 1
+  },
+  {
+    __id__: "5", Latitude: graph.absoluteMaxLatitude, Longitude: graph.absoluteMaxLongitude,
+    Year: 2100, Month: 1, Day: 1
+  }
+];
 
 // Normally this would be handled by useFrame in the MapPane componet.
 const interval = setInterval(() => graph.animate(33), 33);
 
 describe("graph", () => {
+  beforeAll(() => {
+    updateDataSetAttributes(testDataSet as any);
+    setDSTCases(cases);
+  });
+
   beforeEach(() => {
     graph.setMaxDatePercent(1);
     graph.setMinDatePercent(0);
@@ -89,33 +117,22 @@ describe("graph", () => {
 
   describe("convertDateToGraph", () => {
     it("should convert date to graph coordinates", () => {
-      // const aCase: ICase = { __id__: "1", Day: 4, Month: 1, Year: 2020 };
       expect(graph.convertCaseDateToGraph("1")).toBeCloseTo(-5);
     });
   });
 
   describe("caseIsVisible", () => {
     it("should return true if case is within graph bounds", () => {
-      // const aCase: ICase = { __id__: "1", Latitude: graph.centerLat, Longitude: graph.centerLong };
-      expect(graph.caseIsVisible("1")).toBe(true);
+      expect(graph.caseIsVisible("2")).toBe(true);
     });
 
     it("should return false if case is outside graph bounds", () => {
-      // const aCase: ICase = { __id__: "1", Latitude: graph.absoluteMaxLatitude + 1, Longitude: graph.absoluteMaxLongitude + 1 };
-      expect(graph.caseIsVisible("1")).toBe(false);
+      expect(graph.caseIsVisible("3")).toBe(false);
     });
 
     it("should return false if case is outside time range", () => {
-      // const aCase: ICase = {
-      //   __id__: "1", Latitude: graph.absoluteMaxLatitude, Longitude: graph.absoluteMaxLongitude,
-      //   Year: 1980, Month: 1, Day: 1
-      // };
-      expect(graph.caseIsVisible("1")).toBe(false);
-      // const aCase2: ICase = {
-      //   __id__: "2", Latitude: graph.absoluteMaxLatitude, Longitude: graph.absoluteMaxLongitude,
-      //   Year: 2100, Month: 1, Day: 1
-      // };
-      expect(graph.caseIsVisible("2")).toBe(false);
+      expect(graph.caseIsVisible("4")).toBe(false);
+      expect(graph.caseIsVisible("5")).toBe(false);
     });
   });
 
