@@ -11,7 +11,7 @@ import { toV3CaseId } from "../codap/utilities/codap-utils";
 import { IValueType } from "../codap/models/data/attribute-types";
 import { ICaseCreation } from "../codap/models/data/data-set-types";
 
-import { codapData, getDate, ICase } from "../models/codap-data";
+import { codapData } from "../models/codap-data";
 import { ui } from "../models/ui";
 import { kInitialDimensions, kPluginName, kVersion } from "./constants";
 import { DstContainer, dstContainer } from "../models/dst-container";
@@ -64,22 +64,22 @@ export async function getData() {
 
     const casesValues = casesResult.values as DIGetCaseResult["case"][];
     // The id should never be undefined but it is typed that way
-    const cases: ICase[] = casesValues.map(aCase => ({ __id__: toV3CaseId(aCase.id!), ...aCase.values }));
-
-    // Update date range
-    const dates = cases.map(aCase => getDate(aCase)).filter((time: number) => isFinite(time));
-    codapData.setAbsoluteDateRange(Math.min(...dates), Math.max(...dates));
+    const cases: ICaseCreation[] = casesValues.map(aCase => ({ __id__: toV3CaseId(aCase.id!), ...aCase.values }));
 
     // When the updateDataSetAttributes was called above all of cases were cleared out,
     // so we can just add them back in here
     const dstDataset = dstContainer.dataSet;
-    dstDataset.addCases(cases as ICaseCreation[], {canonicalize: true});
+    dstDataset.addCases(cases, {canonicalize: true});
     const configuration = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
     
     // For the configuration to refresh, the following functions have to be called.
     // This might show up as a problem with undo/redo as well.
     configuration._clearFilteredCases(configuration.dataset);
     configuration.clearCasesCache();
+
+    // Update date range
+    const dates = dstCaseIds().map(caseId => caseDate(caseId));
+    codapData.setAbsoluteDateRange(Math.min(...dates), Math.max(...dates));
   } catch (error) {
     // This will happen if not embedded in CODAP
     console.warn("Not embedded in CODAP", error);
