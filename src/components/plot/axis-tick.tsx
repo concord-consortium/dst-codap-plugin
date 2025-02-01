@@ -33,7 +33,7 @@ export function AxisTick({ direction, position, text }: IAxisTickProps) {
       <PlotLine points={[startPosition, endPosition]} />
       <Text
         position={textPosition}
-        fontSize={.5}
+        fontSize={.55}
         color="black"
         anchorX={anchorX}
         anchorY={anchorY}

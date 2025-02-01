@@ -10,10 +10,11 @@
   width: 470px;
 
   .scatter-plot {
-    height: 346px;
-    padding-bottom: 8px;
+    height: 350px;
+    margin-right: -20px;
+    padding-bottom: 4px;
     position: relative;
-    width: 356px;
+    width: 416px;
 
     &.pointer-mode {
       cursor: pointer;
