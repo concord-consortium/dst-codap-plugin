@@ -116,8 +116,8 @@ class Graph {
   }
 
   caseIsVisible(caseId: string) {
-    const latitude = codapData.getAttributeNumericValue("Latitude", caseId);
-    const longitude = codapData.getAttributeNumericValue("Longitude", caseId);
+    const latitude = codapData.getLatitude(caseId);
+    const longitude = codapData.getLongitude(caseId);
     if (latitude == null || longitude == null) return false;
 
     const datePercent = this.convertCaseDateToPercent(caseId);

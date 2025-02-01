@@ -48,8 +48,12 @@ describe("CodapData", () => {
     expect(codapData.caseIds.length).toEqual(5);
   });
 
-  it("should return attribute numeric value correctly", () => {
-    expect(codapData.getAttributeNumericValue("Latitude", "CASE2")).toBe(graph.centerLat);
+  it("should return latitude correctly", () => {
+    expect(codapData.getLatitude("CASE2")).toBe(graph.centerLat);
+  });
+
+  it("should return longitude correctly", () => {
+    expect(codapData.getLongitude("CASE2")).toBe(graph.centerLong);
   });
 
   it("should return case date correctly", () => {

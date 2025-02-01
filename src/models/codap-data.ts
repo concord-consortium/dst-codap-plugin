@@ -40,6 +40,14 @@ class CodapData {
     return Date.UTC(year, month, day);
   }
 
+  getLatitude(caseId: string) {
+    return this.getAttributeNumericValue("Latitude", caseId);
+  }
+
+  getLongitude(caseId: string) {
+    return this.getAttributeNumericValue("Longitude", caseId);
+  }
+
   setAbsoluteDateRange(min: number, max: number) {
     this.absoluteMinDate = min;
     this.absoluteMaxDate = max;

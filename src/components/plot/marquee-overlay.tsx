@@ -46,9 +46,9 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef }: IM
 
       const selectingPoints = codapData.caseIds.filter((caseId) => {
         if (graph.caseIsVisible(caseId)) {
-          const x = graph.latitudeInGraphSpace(codapData.getAttributeNumericValue("Latitude", caseId));
+          const x = graph.latitudeInGraphSpace(codapData.getLatitude(caseId));
           const y = graph.convertCaseDate(caseId);
-          const z = graph.longitudeInGraphSpace(codapData.getAttributeNumericValue("Longitude", caseId));
+          const z = graph.longitudeInGraphSpace(codapData.getLongitude(caseId));
           const ndcPoint = new Vector3(x, y, z).project(cameraRef.current);
           return ndcPoint.x >= Math.min(startPoint.x, endPoint.x) &&
             ndcPoint.x <= Math.max(startPoint.x, endPoint.x) &&

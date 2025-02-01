@@ -13,9 +13,9 @@ export const Points = observer(function Points() {
             key={`point-${caseId}`}
             id={caseId}
             visible={graph.caseIsVisible(caseId)}
-            x={graph.latitudeInGraphSpace(codapData.getAttributeNumericValue("Latitude", caseId))}
+            x={graph.latitudeInGraphSpace(codapData.getLatitude(caseId))}
             y={graph.convertCaseDateToGraph(caseId)}
-            z={graph.longitudeInGraphSpace(codapData.getAttributeNumericValue("Longitude", caseId))}
+            z={graph.longitudeInGraphSpace(codapData.getLongitude(caseId))}
           />
         );
       })}
