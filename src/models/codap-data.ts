@@ -48,6 +48,10 @@ class CodapData {
     return this.getAttributeNumericValue("Longitude", caseId);
   }
 
+  isSelected(caseId: string) {
+    return this.dataSet.isCaseSelected(caseId);
+  }
+
   setAbsoluteDateRange(min: number, max: number) {
     this.absoluteMinDate = min;
     this.absoluteMaxDate = max;

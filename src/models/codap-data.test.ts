@@ -60,6 +60,12 @@ describe("CodapData", () => {
     expect(codapData.getCaseDate("CASE1")).toBe(Date.UTC(2020, 0, 4));
   });
 
+  it("should correctly check if a case is selected", () => {
+    expect(codapData.isSelected("CASE1")).toBe(false);
+    codapData.dataSet.selectCases(["CASE1"]);
+    expect(codapData.isSelected("CASE1")).toBe(true);
+  });
+
   it("should set absolute date range correctly", () => {
     codapData.setAbsoluteDateRange(1609459200000, 1640995200000);
     expect(codapData.absoluteMinDate).toBe(1609459200000);
