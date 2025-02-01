@@ -127,8 +127,8 @@ class Graph {
   }
   
   convertCaseDate(caseId: string) {
-    const _date = codapData.getCaseDate(caseId);
-    return isFinite(_date) ? _date : this.defaultDate;
+    const date = codapData.getCaseDate(caseId);
+    return isFinite(date) ? date : this.defaultDate;
   }
   
   convertCaseDateToGraph(caseId: string) {
