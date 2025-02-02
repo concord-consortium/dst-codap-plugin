@@ -16,9 +16,11 @@ import { ui } from "../models/ui";
 import { kInitialDimensions, kPluginName, kVersion } from "./constants";
 import { DstContainer, dstContainer } from "../models/dst-container";
 
-import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
+// import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
+import dataURL from "../data/Tornado_Tracks_2.csv";
 
-const dataContextName = "Tornado_Tracks_2020-2022";
+// const dataContextName = "Tornado_Tracks_2020-2022";
+const dataContextName = "Tornado_Tracks_2";
 const collectionName = "Cases";
 
 export async function initializeDST() {
@@ -172,7 +174,10 @@ export function updateDataSetAttributes(dataContext: DIDataContext) {
   if (!colorAttribute || !latAttribute || !longAttribute) return;
 
   const configuration = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
-  configuration.setAttribute("legend", {attributeID: colorAttribute.id});
+  configuration.setAttribute("legend", {
+    attributeID: colorAttribute.id,
+    type: "categoricalSize" as any // need to hack this for now
+  });
   configuration.setAttribute("x", {attributeID: longAttribute.id});
   configuration.setAttribute("y", {attributeID: latAttribute.id});
 }

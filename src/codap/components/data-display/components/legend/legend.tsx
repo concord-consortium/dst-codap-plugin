@@ -8,7 +8,8 @@ import { ColorLegend } from "./color-legend"
 import { IBaseLegendProps } from "./legend-common"
 import {NumericLegend} from "./numeric-legend"
 
-const legendComponentMap: Partial<Record<string, React.ComponentType<IBaseLegendProps>>> = {
+// This is exported so we can add additional types to it
+export const legendComponentMap: Partial<Record<string, React.ComponentType<IBaseLegendProps>>> = {
   categorical: CategoricalLegend,
   color: ColorLegend,
   date: NumericLegend,
@@ -25,12 +26,13 @@ export const Legend = function Legend({
                                         layerIndex, setDesiredExtent, onDropAttribute
                                       }: ILegendProps) {
   const dataConfiguration = useDataConfigurationContext(),
-    legendAttrID = dataConfiguration?.attributeID('legend'),
-    attrType = dataConfiguration?.dataset?.attrFromID(legendAttrID ?? '')?.type,
+    // This change fixes the issue with the legend not updating
+    // when the user changes the type
+    attrType = dataConfiguration?.attributeType('legend'),
     LegendComponent = attrType && legendComponentMap[attrType],
     legendRef = useRef() as React.RefObject<SVGSVGElement>
 
-  return legendAttrID ? (
+  return attrType ? (
     <>
       <svg ref={legendRef} className='legend-component' data-testid='legend-component'>
         <LegendAttributeLabel

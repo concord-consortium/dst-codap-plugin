@@ -1,0 +1,48 @@
+@use "../../codap/components/vars.scss";
+
+.legend-component {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  .legend-background {
+    fill: vars.$background-fill;
+    opacity: 1;
+    stroke: none;
+  }
+
+  .legend-key {
+    cursor: pointer;
+
+    &:hover {
+      circle {
+        stroke-width: 2px;
+
+        &.legend-key-selected {
+          stroke-width: 3px;
+        }
+      }
+    }
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  text {
+    fill: black;
+    font: 12px sans-serif;
+  }
+
+  circle {
+    stroke: black;
+    fill: white;
+
+    &.legend-key-selected {
+      stroke: red;
+      stroke-width: 2px;    
+    }
+  }
+
+}

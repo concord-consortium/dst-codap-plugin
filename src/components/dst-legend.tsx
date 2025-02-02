@@ -9,11 +9,14 @@ import { BaseDataDisplayModelContext } from "../codap/components/data-display/ho
 import { ITileSelection, TileSelectionContext } from "../codap/hooks/use-tile-selection-context";
 import { DataDisplayLayoutContext } from "../codap/components/data-display/hooks/use-data-display-layout";
 import { DataDisplayLayout } from "../codap/components/data-display/models/data-display-layout";
-
+import { dstContainer } from "../models/dst-container";
+import { legendComponentMap } from "../codap/components/data-display/components/legend/legend";
+import { CategoricalSizeLegend } from "./legend/categorical-size-legend";
 
 import "./dst-legend.scss";
-import { dstContainer } from "../models/dst-container";
 
+// register our new legend
+legendComponentMap.categoricalSize = CategoricalSizeLegend;
 
 const tileSelection: ITileSelection = {
   isTileSelected() {

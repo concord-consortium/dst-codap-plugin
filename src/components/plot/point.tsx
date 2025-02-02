@@ -19,8 +19,21 @@ interface IPointProps {
 export const Point = observer(function Point({ id, visible, x, y, z }: IPointProps) {
   const [isPointerOver, setPointerOver] = useState(false);
   const dataConfig = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
-  const dotColor = dataConfig.getLegendColorForCase(id);
-  const basePointSize = 0.12;
+  
+  // The default color from the spec is: "#e6805bd9" (RGBA)
+  // TODO: If there is no value for attribute on this case 
+  // dataConfig.getLegendColorForCase(id) will return "#888888"
+  // Even if this isn't a coloring legend like the new "categoricalSize"
+  // legend. This issue should be fixed when we have a separate legend
+  // for color and size.
+  const dotColor = dataConfig.getLegendColorForCase(id) || "#e6805b";
+  const dotDiameterInPixels = dataConfig.getLegendSizeForCase(id);
+  // TODO: replace this hardcoded 0.026 with an actual calculation
+  // It should be possible to compute it from the camera settings.
+  // The basePointSize was originally 0.12
+  // The pointSize is a radius so if we had a conversion from pixels to 
+  // 3d units we also have to divide by 2.
+  const basePointSize = dotDiameterInPixels * 0.026;
   const isSelected = codapData.isSelected(id);
   const selectedExtra = isSelected ? .02 : 0;
   const hoverMultiplier = isPointerOver ? 1.5 : 1;
