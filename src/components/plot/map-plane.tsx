@@ -12,10 +12,7 @@ import { halfPi } from "../../utilities/trig-utils";
 
 const mapBaseSize = graphMax - graphMin;
 
-interface IMapPlaneProps {
-  zPosition: number;
-}
-export const MapPlane = observer(function MapPlane({ zPosition }: IMapPlaneProps) {
+export const MapPlane = observer(function MapPlane() {
   useFrame((_state, delta) => graph.animate(delta * 1000));
 
   const texture = useTexture(map);
@@ -34,7 +31,7 @@ export const MapPlane = observer(function MapPlane({ zPosition }: IMapPlaneProps
 
   /* eslint-disable react/no-unknown-property */
   return (
-    <mesh rotation={[-halfPi, 0, -halfPi]} position={[x, zPosition, z]}>
+    <mesh rotation={[-halfPi, 0, -halfPi]} position={[x, graph.mapPosition, z]}>
       <planeGeometry args={[mapBaseSize * scale, mapBaseSize * scale * kBackgroundHeight / kBackgroundWidth]} />
       <meshStandardMaterial clippingPlanes={clippingPlanes} map={texture} />
     </mesh>

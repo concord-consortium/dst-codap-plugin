@@ -8,3 +8,7 @@ export function formatDateString(date: Date) {
   const year = padZero(date.getFullYear() % 100);
   return `${month}/${day}/${year}`;
 }
+
+export function datePercentInRange(date: number, min = 0, max = 1) {
+  return Math.min(max, Math.max(min, date));
+}

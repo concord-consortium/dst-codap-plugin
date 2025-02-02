@@ -12,7 +12,7 @@ declare namespace process {
   const env: {
     NODE_ENV: string; // e.g. "development" or "production"
     [index: string]: string;
-  }
+  };
 }
 
 type Maybe<T> = T | undefined;

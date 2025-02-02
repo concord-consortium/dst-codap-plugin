@@ -28,7 +28,7 @@ export function NavigationCubeButton({ position, size, targetPivot, targetRotati
       const { x, y } = clickPosition.current;
       const distanceSquared = (event.clientX - x) ** 2 + (event.clientY - y) ** 2;
       if (distanceSquared < 25) {
-        dstCamera.animateTo(dstCamera.targetZoom ?? dstCamera.zoom, targetPivot, targetRotation);
+        dstCamera.animateTo({ pivot: targetPivot, rotation: targetRotation });
       }
     }
 

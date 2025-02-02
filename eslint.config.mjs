@@ -99,7 +99,8 @@ export default typescriptEslint.config(
       "eqeqeq": ["error", "smart"],
       "@eslint-community/eslint-comments/no-unused-disable": "off",   // enabled in eslint.build.config.js
       "import/no-cycle": "warn",
-      "import/no-extraneous-dependencies": "warn",
+      // This was causing a problem with the Concord mobx-state-tree override
+      // "import/no-extraneous-dependencies": "warn",
       "import/no-useless-path-segments": "warn",
       "@stylistic/js/jsx-quotes": ["error", "prefer-double"],
       "max-len": ["off", { code: 120, ignoreUrls: true }],
