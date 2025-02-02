@@ -40,6 +40,23 @@ export const dstContainer = DstContainer.create({
           "_attributeDescriptions": {
             "legend": {
               "attributeID": "ATTR444185124424189",
+              "type": "categorical"
+            }
+          },
+          "dataset": "DATA33637005901959",
+          "metadata": "SHARQxjKerhUm8ts",
+          "hiddenCases": [],
+        }
+      },
+      {
+        "id": "LAYRL123",
+        "layerIndex": 0,
+        "dataConfiguration": {
+          "id": "GDCON123",
+          "type": "graphDataConfigurationType",
+          "_attributeDescriptions": {
+            "legend": {
+              "attributeID": "ATTR444185124424189",
               "type": "categoricalSize" as any // need to hack this as MST types don't update with modified modes
             }
           },

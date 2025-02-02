@@ -50,11 +50,19 @@ export const DstLegend = observer(function DstLegend() {
         <TileSelectionContext.Provider value={tileSelection}>
           <BaseDataDisplayModelContext.Provider value={dstContainer.dataDisplayModel}>
             <MultiLegend divElt={null} 
-              onDropAttribute={function (place: GraphPlace, dataSet: IDataSet, attrId: string): void {
+              onDropAttribute={function (place: GraphPlace, dataSet: IDataSet, attrId: string, layer): void {
                 // TODO: handle mis-matched dataSet
-                const configuration = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
+                // TODO: how do we figure out which layer this came from
+                if (!layer) {
+                  console.warn("No layer available when changing legend attribute");
+                  return;
+                }
+                const configuration = layer.dataConfiguration;
                 if (place !== "legend") return;
-                configuration.setAttribute(place, {attributeID: attrId});              
+                // preserve the type for now, when representation is added we'd preserve that instead
+                // and let the default type be used
+                const type = configuration.attributeType(place);
+                configuration.setAttribute(place, {attributeID: attrId, type});              
               } }    
             />
           </BaseDataDisplayModelContext.Provider>

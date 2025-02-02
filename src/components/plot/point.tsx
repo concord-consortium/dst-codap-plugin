@@ -18,7 +18,10 @@ interface IPointProps {
 }
 export const Point = observer(function Point({ id, visible, x, y, z }: IPointProps) {
   const [isPointerOver, setPointerOver] = useState(false);
-  const dataConfig = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
+  
+  // TODO: these configs might be undefined
+  const colorDataConfig = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
+  const sizeDataConfig = dstContainer.dataDisplayModel.layers[1].dataConfiguration;
   
   // The default color from the spec is: "#e6805bd9" (RGBA)
   // TODO: If there is no value for attribute on this case 
@@ -26,8 +29,8 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   // Even if this isn't a coloring legend like the new "categoricalSize"
   // legend. This issue should be fixed when we have a separate legend
   // for color and size.
-  const dotColor = dataConfig.getLegendColorForCase(id) || "#e6805b";
-  const dotDiameterInPixels = dataConfig.getLegendSizeForCase(id);
+  const dotColor = colorDataConfig.getLegendColorForCase(id) || "#e6805b";
+  const dotDiameterInPixels = sizeDataConfig.getLegendSizeForCase(id);
   // TODO: replace this hardcoded 0.026 with an actual calculation
   // It should be possible to compute it from the camera settings.
   // The basePointSize was originally 0.12
