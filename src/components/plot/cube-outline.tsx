@@ -3,6 +3,7 @@ import React from "react";
 import { Vector3 } from "three";
 import { dstCamera } from "../../models/camera";
 import { graph } from "../../models/graph";
+import { tickDirectionType } from "../../types/graph-types";
 import { halfPi } from "../../utilities/trig-utils";
 import { PlotLine } from "./plot-line";
 import { SpaceAxis } from "./space-axis";
@@ -15,7 +16,10 @@ const yMin = -5;
 const zMax = 5;
 const zMin = -5;
 
-export const CubeOutline = observer(function CubeOutline() {
+interface ICubeOutlineProps {
+  cameraRef: React.MutableRefObject<any>;
+}
+export const CubeOutline = observer(function CubeOutline({ cameraRef }: ICubeOutlineProps) {
   const { pivot, rotation } = dstCamera;
 
   // The corners of the cube
@@ -36,13 +40,37 @@ export const CubeOutline = observer(function CubeOutline() {
 
   // The x (latitude) axis
   const xAxisZ = rotation > Math.PI ? zMax : zMin;
-  const xDirection = rotation < Math.PI / 8 ? "left"
-    : rotation < Math.PI * 7 / 8 ? spaceTickDirection
-    : rotation < Math.PI ? "right"
-    : rotation < Math.PI * 9 / 8 ? "left"
-    : rotation < Math.PI * 15 / 8 ? spaceTickDirection
-    : "right";
+  let xDirection: tickDirectionType = "right";
+  let xXOffset = 0;
+  let xYOffset = 0;
+  let xZOffset = 0;
+  if (rotation < Math.PI / 8) {
+    xDirection = "left";
+    xZOffset = -2.5;
+  } else if (rotation < Math.PI * 7 / 8) {
+    xDirection = spaceTickDirection;
+    xZOffset = -2.5;
+  } else if (rotation < Math.PI) {
+    xDirection = "right";
+    xZOffset = -2.5;
+  } else if (rotation < Math.PI * 9 / 8) {
+    xDirection = "left";
+    xZOffset = 2.5;
+  } else if (rotation < Math.PI * 15 / 8) {
+    xDirection = spaceTickDirection;
+    xZOffset = 2.5;
+  } else {
+    xDirection = "right";
+    xZOffset = 2.5;
+  }
+  // const xDirection = rotation < Math.PI / 8 ? "left"
+  //   : rotation < Math.PI * 7 / 8 ? spaceTickDirection
+  //   : rotation < Math.PI ? "right"
+  //   : rotation < Math.PI * 9 / 8 ? "left"
+  //   : rotation < Math.PI * 15 / 8 ? spaceTickDirection
+  //   : "right";
   const displayXAxis = !horizontalView || xDirection === spaceTickDirection;
+  const xLabelOffset = new Vector3(xXOffset, xYOffset, xZOffset);
 
   // The y (time) axis
   const displayTimeAxis = pivot > -3/8 * Math.PI && pivot < 3/8 * Math.PI;
@@ -59,6 +87,11 @@ export const CubeOutline = observer(function CubeOutline() {
     : rotation < Math.PI * 13 / 8 ? "left"
     : spaceTickDirection;
   const displayZAxis = !horizontalView || zDirection === spaceTickDirection;
+  const zLabelOffset = new Vector3(
+    0,
+    (zDirection === "down" ? -1 : zDirection === "up" ? 1.5 : 0) * 2,
+    0
+  );
 
   return (
     <>
@@ -70,27 +103,33 @@ export const CubeOutline = observer(function CubeOutline() {
       <PlotLine points={[AIA, IIA]} />
       {displayXAxis && (
         <SpaceAxis
-          startPoint={new Vector3(xMin, spaceY, xAxisZ)}
+          cameraRef={cameraRef}
           endPoint={new Vector3(xMax, spaceY, xAxisZ)}
+          label="y: Latitude"
+          labelOffset={xLabelOffset}
           minValue={graph.minLatitude}
           maxValue={graph.maxLatitude}
+          startPoint={new Vector3(xMin, spaceY, xAxisZ)}
           tickDirection={xDirection}
         />
       )}
       {displayTimeAxis && (
         <TimeAxis
-          startPoint={new Vector3(yAxisX, yMin, yAxisZ)}
           endPoint={new Vector3(yAxisX, yMax, yAxisZ)}
           minValue={graph.minDate}
+          startPoint={new Vector3(yAxisX, yMin, yAxisZ)}
           maxValue={graph.maxDate}
         />
       )}
       {displayZAxis && (
         <SpaceAxis
-          startPoint={new Vector3(zAxisX, spaceY, zMin)}
+          cameraRef={cameraRef}
           endPoint={new Vector3(zAxisX, spaceY, zMax)}
+          label="x: Longitude"
+          labelOffset={zLabelOffset}
           minValue={graph.minLongitude}
           maxValue={graph.maxLongitude}
+          startPoint={new Vector3(zAxisX, spaceY, zMin)}
           tickDirection={zDirection}
         />
       )}

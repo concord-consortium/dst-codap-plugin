@@ -58,7 +58,6 @@ export function Axis({
             color="black"
             fontSize={.7}
             fontWeight={600}
-            // position={labelPosition}
             rotation={labelRotation}
           >
             {label}

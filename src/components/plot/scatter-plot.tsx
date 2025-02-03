@@ -29,10 +29,8 @@ export const ScatterPlot = observer(function ScatterPlot() {
     <div className="scatter-plot-container">
       <div className={plotClassName} onPointerDown={handlePointerDown}>
         <Canvas gl={{ localClippingEnabled: true }}>
-          <CubeOutline />
-          <DSTCamera
-            cameraRef={cameraRef}
-          />
+          <CubeOutline cameraRef={cameraRef} />
+          <DSTCamera cameraRef={cameraRef} />
           <DSTOrbitControls
             cameraRef={cameraRef}
             enabled={enableOrbitControls}

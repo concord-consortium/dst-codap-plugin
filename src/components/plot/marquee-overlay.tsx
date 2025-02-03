@@ -19,7 +19,7 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef }: IM
 
   // TODO I couldn't figure out how to programmatically determine these offsets, but they're based on the position
   // of the containing elements.
-  const adjustClientX = (clientX: number) => clientX - 174;
+  const adjustClientX = (clientX: number) => clientX - 136;
   const adjustClientY = (clientY: number) => clientY - 40;
   
   const handlePointerDown: PointerEventHandler<HTMLDivElement> = event => {
