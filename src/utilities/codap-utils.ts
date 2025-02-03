@@ -14,7 +14,10 @@ import { ICaseCreation } from "../codap/models/data/data-set-types";
 import { codapData } from "../models/codap-data";
 import { DstContainer, dstContainer } from "../models/dst-container";
 import { ui } from "../models/ui";
-import { kCollectionName, kDataContextName, kDataURL, kInitialDimensions, kPluginName, kVersion } from "./constants";
+import { kCollectionName, kInitialDimensions, kPluginName, kVersion } from "./constants";
+
+import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
+const dataContextName = "Tornado_Tracks_2020-2022";
 
 export async function initializeDST() {
   initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions})
@@ -26,7 +29,7 @@ export async function initializeDST() {
   getData();
   updateSelection();
 
-  addDataContextChangeListener(kDataContextName, notification => {
+  addDataContextChangeListener(dataContextName, notification => {
     const { operation } = notification.values;
 
     if (operation === "selectCases") {
@@ -37,26 +40,26 @@ export async function initializeDST() {
   // When the selection changes in the plugin, pass those changes to Codap.
   reaction(
     () => Array.from(codapData.dataSet.selection).join(","),
-    selection => selectCases(kDataContextName, Array.from(codapData.dataSet.selection))
+    selection => selectCases(dataContextName, Array.from(codapData.dataSet.selection))
   );
 }
 
 export async function getData() {
   try {
-    let dataContextResult = await getDataContext(kDataContextName);
+    let dataContextResult = await getDataContext(dataContextName);
 
     if (!dataContextResult.success) {
-      const createContextResult = await createDataContextFromURL(kDataURL);
+      const createContextResult = await createDataContextFromURL(dataURL);
       if (!createContextResult.success) {
         console.error("Couldn't load dataset");
         return;
       }
-      dataContextResult = await getDataContext(kDataContextName);
+      dataContextResult = await getDataContext(dataContextName);
     }
 
     updateDataSetAttributes(dataContextResult.values);
 
-    const casesResult = await getCaseByFormulaSearch(kDataContextName, kCollectionName, "true");
+    const casesResult = await getCaseByFormulaSearch(dataContextName, kCollectionName, "true");
 
     if (!casesResult.success) {
       console.error("Couldn't load cases from dataset");
@@ -83,7 +86,7 @@ export async function updateSelection() {
   if (ui.activeMarquee) return;
 
   try {
-    const selectionListResult = await getSelectionList(kDataContextName);
+    const selectionListResult = await getSelectionList(dataContextName);
     if (selectionListResult.success) {
       codapData.dataSet.setSelectedCases(selectionListResult.values.map((aCase: any) => toV3CaseId(aCase.caseID)));
     }
