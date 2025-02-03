@@ -43,24 +43,24 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef }: IM
         -(adjustedY / ref.current.clientHeight) * 2 + 1
       );
 
-      const selectingPoints = codapData.caseIds.filter((caseId) => {
+      const selectingPoints = codapData.caseIds.filter((caseId, index) => {
         if (graph.caseIsVisible(caseId)) {
           const x = graph.latitudeInGraphSpace(codapData.getLatitude(caseId));
-          const y = graph.convertCaseDate(caseId);
+          const y = graph.convertCaseDateToGraph(caseId);
           const z = graph.longitudeInGraphSpace(codapData.getLongitude(caseId));
           const ndcPoint = new Vector3(x, y, z).project(cameraRef.current);
-          return ndcPoint.x >= Math.min(startPoint.x, endPoint.x) &&
-            ndcPoint.x <= Math.max(startPoint.x, endPoint.x) &&
-            ndcPoint.y >= Math.min(startPoint.y, endPoint.y) &&
-            ndcPoint.y <= Math.max(startPoint.y, endPoint.y);
+          return ndcPoint.x >= Math.min(startPoint.x, endPoint.x) && ndcPoint.x <= Math.max(startPoint.x, endPoint.x) &&
+            ndcPoint.y >= Math.min(startPoint.y, endPoint.y) && ndcPoint.y <= Math.max(startPoint.y, endPoint.y);
         }
       });
 
-      codapData.dataSet.setSelectedCases(selectingPoints);
-      if (!throttleUpdate || forceUpdate) {
-        throttleUpdate = true;
+      if (forceUpdate) {
         codapData.dataSet.setSelectedCases(selectingPoints);
-        setTimeout(() => throttleUpdate = false, 250);
+        codapData.setMarqueeSelection();
+      } else if (!throttleUpdate) {
+        throttleUpdate = true;
+        codapData.setMarqueeSelection(selectingPoints);
+        setTimeout(() => throttleUpdate = false, 100);
       }
     }
   };

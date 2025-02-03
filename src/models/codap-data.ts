@@ -1,10 +1,12 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, ObservableSet } from "mobx";
 import { kCollectionName } from "../utilities/constants";
 import { dstContainer } from "./dst-container";
 
 class CodapData {
   absoluteMinDate = 1578124800000;
   absoluteMaxDate = 1672358400000;
+
+  marqueeSelection = new ObservableSet<string>();
 
   constructor() {
     makeAutoObservable(this);
@@ -49,12 +51,24 @@ class CodapData {
   }
 
   isSelected(caseId: string) {
-    return this.dataSet.isCaseSelected(caseId);
+    if (this.marqueeSelection.size > 0) {
+      return this.marqueeSelection.has(caseId);
+    } else {
+      return this.dataSet.isCaseSelected(caseId);
+    }
   }
 
   setAbsoluteDateRange(min: number, max: number) {
     this.absoluteMinDate = min;
     this.absoluteMaxDate = max;
+  }
+
+  setMarqueeSelection(caseIds?: string[]) {
+    if (caseIds) {
+      this.marqueeSelection.replace(caseIds);
+    } else {
+      this.marqueeSelection.clear();
+    }
   }
 }
 
