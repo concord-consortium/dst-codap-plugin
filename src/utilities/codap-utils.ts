@@ -2,7 +2,7 @@ import {
   addDataContextChangeListener, createDataContextFromURL, getCaseByFormulaSearch, getDataContext,
   getSelectionList, initializePlugin, selectCases
 } from "@concord-consortium/codap-plugin-api";
-import { reaction } from "mobx";
+import { comparer, reaction } from "mobx";
 import { applySnapshot, getSnapshot } from "mobx-state-tree";
 
 import { DIDataContext, DIGetCaseResult } from "../codap/data-interactive/data-interactive-data-set-types";
@@ -39,8 +39,9 @@ export async function initializeDST() {
 
   // When the selection changes in the plugin, pass those changes to Codap.
   reaction(
-    () => Array.from(codapData.dataSet.selection).join(","),
-    selection => selectCases(dataContextName, Array.from(codapData.dataSet.selection))
+    () => Array.from(codapData.dataSet.selection),
+    selection => selectCases(dataContextName, Array.from(codapData.dataSet.selection)),
+    { equals: comparer.structural}
   );
 }
 
