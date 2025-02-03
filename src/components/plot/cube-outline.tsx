@@ -21,6 +21,7 @@ interface ICubeOutlineProps {
 }
 export const CubeOutline = observer(function CubeOutline({ cameraRef }: ICubeOutlineProps) {
   const { pivot, rotation } = dstCamera;
+  console.log(`--- rotation`, rotation);
 
   // The corners of the cube
   const AAA = new Vector3(xMax, yMax, zMax);
@@ -41,28 +42,30 @@ export const CubeOutline = observer(function CubeOutline({ cameraRef }: ICubeOut
   // The x (latitude) axis
   const xAxisZ = rotation > Math.PI ? zMax : zMin;
   let xDirection: tickDirectionType = "right";
+  const baseScale = (topSpaceAxis ? 3 : 2) + Math.abs(Math.cos(rotation) * .5);
+  const adjustedScale = Math.abs(Math.sin(pivot)) * baseScale;
   let xXOffset = 0;
-  let xYOffset = 0;
   let xZOffset = 0;
   if (rotation < Math.PI / 8) {
     xDirection = "left";
-    xZOffset = -2.5;
+    xZOffset = -baseScale;
   } else if (rotation < Math.PI * 7 / 8) {
     xDirection = spaceTickDirection;
-    xZOffset = -2.5;
+    xZOffset = -adjustedScale;
   } else if (rotation < Math.PI) {
     xDirection = "right";
-    xZOffset = -2.5;
+    xZOffset = -baseScale;
   } else if (rotation < Math.PI * 9 / 8) {
     xDirection = "left";
-    xZOffset = 2.5;
+    xZOffset = baseScale;
   } else if (rotation < Math.PI * 15 / 8) {
     xDirection = spaceTickDirection;
-    xZOffset = 2.5;
+    xZOffset = adjustedScale;
   } else {
     xDirection = "right";
-    xZOffset = 2.5;
+    xZOffset = baseScale;
   }
+  let xYOffset = xDirection === spaceTickDirection ? Math.cos(pivot) * (topSpaceAxis ? 3 : -2) : 0;
   // const xDirection = rotation < Math.PI / 8 ? "left"
   //   : rotation < Math.PI * 7 / 8 ? spaceTickDirection
   //   : rotation < Math.PI ? "right"
