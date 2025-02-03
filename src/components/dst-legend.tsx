@@ -10,13 +10,27 @@ import { ITileSelection, TileSelectionContext } from "../codap/hooks/use-tile-se
 import { DataDisplayLayoutContext } from "../codap/components/data-display/hooks/use-data-display-layout";
 import { DataDisplayLayout } from "../codap/components/data-display/models/data-display-layout";
 import { dstContainer } from "../models/dst-container";
-import { legendComponentMap } from "../codap/components/data-display/components/legend/legend";
+import { legendComponentManager } from "../codap/components/data-display/components/legend/legend";
 import { CategoricalSizeLegend } from "./legend/categorical-size-legend";
 
 import "./dst-legend.scss";
 
+// function UnsupportedNumericSize() {
+//   return <text>Numeric attributes do not have a size legend yet</text>;
+// }
+
 // register our new legend
-legendComponentMap.categoricalSize = CategoricalSizeLegend;
+legendComponentManager.getLegendComponent = (dataConfig) => {
+  const type = dataConfig.attributeType("legend");
+  const representation = dataConfig.legendRepresentation;
+
+  if (representation === "size" && type === "categorical") return CategoricalSizeLegend;
+
+  // If the representation is size by the type is numeric or date then the result is currently
+  // broken. The legend will show as color numeric legend. But the points will get rendered
+  // based on a size scale
+  return type && legendComponentManager.legendComponentMap[type];
+};
 
 const tileSelection: ITileSelection = {
   isTileSelected() {
@@ -59,10 +73,7 @@ export const DstLegend = observer(function DstLegend() {
                 }
                 const configuration = layer.dataConfiguration;
                 if (place !== "legend") return;
-                // preserve the type for now, when representation is added we'd preserve that instead
-                // and let the default type be used
-                const type = configuration.attributeType(place);
-                configuration.setAttribute(place, {attributeID: attrId, type});              
+                configuration.setAttribute(place, {attributeID: attrId});              
               } }    
             />
           </BaseDataDisplayModelContext.Provider>

@@ -172,7 +172,6 @@ export function updateDataSetAttributes(dataContext: DIDataContext) {
   const colorConfiguration = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
   colorConfiguration.setAttribute("legend", {
     attributeID: colorAttribute.id,
-    type: "categorical"
   });
   colorConfiguration.setAttribute("x", {attributeID: longAttribute.id});
   colorConfiguration.setAttribute("y", {attributeID: latAttribute.id});
@@ -180,7 +179,6 @@ export function updateDataSetAttributes(dataContext: DIDataContext) {
   const sizeConfiguration = dstContainer.dataDisplayModel.layers[1].dataConfiguration;
   sizeConfiguration.setAttribute("legend", {
     attributeID: sizeAttribute.id,
-    type: "categoricalSize" as any // need to hack this for now
   });
   sizeConfiguration.setAttribute("x", {attributeID: longAttribute.id});
   sizeConfiguration.setAttribute("y", {attributeID: latAttribute.id});
