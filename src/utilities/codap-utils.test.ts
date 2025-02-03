@@ -1,16 +1,13 @@
-import {
-  createDataContextFromURL, getCaseByFormulaSearch, getDataContext, selectCases
-} from "@concord-consortium/codap-plugin-api";
+import { createDataContextFromURL, getCaseByFormulaSearch, getDataContext } from "@concord-consortium/codap-plugin-api";
 import { codapData } from "../models/codap-data";
 import testDataContext from "../test/test-data-set.json";
-import { dstAddCaseToSelection, dstRemoveCaseFromSelection, dstSelectCases, getData } from "./codap-utils";
+import { getData } from "./codap-utils";
 
 jest.mock("@concord-consortium/codap-plugin-api");
 
 const mockedGetDataContext = getDataContext as jest.MockedFunction<typeof getDataContext>;
 const mockedGetCaseByFormulaSearch = getCaseByFormulaSearch as jest.MockedFunction<typeof getCaseByFormulaSearch>;
 const mockedCreateDataContextFromURL = createDataContextFromURL as jest.MockedFunction<typeof createDataContextFromURL>;
-const mockedSelectCases = selectCases as jest.MockedFunction<typeof selectCases>;
 
 describe("codap utilities", () => {
   describe("getData", () => {
@@ -117,28 +114,6 @@ describe("codap utilities", () => {
       expect(consoleWarn).toHaveBeenCalled();
       expect(mockedCreateDataContextFromURL).not.toHaveBeenCalled();
       expect(mockedGetCaseByFormulaSearch).not.toHaveBeenCalled();
-    });
-
-    it("handles setting selection", async () => {
-      mockedSelectCases.mockReturnValue(Promise.resolve({ success: true, values: "" }));
-      expect(Array.from(codapData.dataSet.selection)).toEqual([]);
-      await dstSelectCases(["1", "2"]);
-      expect(mockedSelectCases).toHaveBeenCalled();
-      expect(Array.from(codapData.dataSet.selection)).toEqual(["1", "2"]);
-    });
-
-    it("handles removing from selection", async () => {
-      mockedSelectCases.mockReturnValue(Promise.resolve({ success: true, values: "" }));
-      await dstRemoveCaseFromSelection("2");
-      expect(mockedSelectCases).toHaveBeenCalled();
-      expect(Array.from(codapData.dataSet.selection)).toEqual(["1"]);
-    });
-
-    it("handles adding to selection", async () => {
-      mockedSelectCases.mockReturnValue(Promise.resolve({ success: true, values: "" }));
-      await dstAddCaseToSelection("2");
-      expect(mockedSelectCases).toHaveBeenCalled();
-      expect(Array.from(codapData.dataSet.selection)).toEqual(["1", "2"]);
     });
   });
 });

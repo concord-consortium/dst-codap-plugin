@@ -6,7 +6,6 @@ import { observer } from "mobx-react-lite";
 import { codapData } from "../../models/codap-data";
 import { dstContainer } from "../../models/dst-container";
 import { ui } from "../../models/ui";
-import { dstAddCaseToSelection, dstRemoveCaseFromSelection, dstSelectCases } from "../../utilities/codap-utils";
 
 interface IPointProps {
   id: string;
@@ -45,12 +44,12 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
       event.stopPropagation();
       if (event.shiftKey) {
         if (isSelected) {
-          dstRemoveCaseFromSelection(id);
+          codapData.dataSet.selectCases([id], false);
         } else {
-          dstAddCaseToSelection(id);
+          codapData.dataSet.selectCases([id]);
         }
       } else {
-        dstSelectCases([id]);
+        codapData.dataSet.setSelectedCases([id]);
       }
     }
   };

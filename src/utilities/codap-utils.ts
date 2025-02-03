@@ -16,6 +16,7 @@ import { ui } from "../models/ui";
 import { kCollectionName, kDataContextName, kInitialDimensions, kPluginName, kVersion } from "./constants";
 
 import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
+import { reaction } from "mobx";
 
 export async function initializeDST() {
   initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions})
@@ -34,6 +35,12 @@ export async function initializeDST() {
       updateSelection();
     }
   });
+
+  // When the selection changes in the plugin, pass those changes to Codap.
+  reaction(
+    () => Array.from(codapData.dataSet.selection).join(","),
+    selection => selectCases(kDataContextName, Array.from(codapData.dataSet.selection))
+  );
 }
 
 export async function getData() {
@@ -88,19 +95,12 @@ export async function updateSelection() {
   }
 }
 
-export async function dstSelectCases(caseIds: string[]) {
-  codapData.dataSet.setSelectedCases(caseIds);
-  return await selectCases(kDataContextName, caseIds);
-}
-
 export async function dstAddCaseToSelection(caseId: string) {
   codapData.dataSet.selectCases([caseId]);
-  return await selectCases(kDataContextName, Array.from(codapData.dataSet.selection));
 }
 
 export async function dstRemoveCaseFromSelection(caseId: string) {
   codapData.dataSet.selectCases([caseId], false);
-  return await selectCases(kDataContextName, Array.from(codapData.dataSet.selection));
 }
 
 export function updateDataSetAttributes(dataContext: DIDataContext) {
