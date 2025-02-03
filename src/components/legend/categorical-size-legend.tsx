@@ -107,22 +107,15 @@ export const CategoricalSizeLegend =
               .on("click", handleLegendKeyClick)
               .call(dragBehavior);
 
-            // FIXME: I think this can be simplified
-            // the d parameter on the child elements should be
-            // right so I don't need the each, but I thought 
-            // that was what I tried before...
-            group.each((d, i, nodes) => {
-              const g = select(nodes[i]);
-              g.append("circle")
-                .attr("r", d.size/2)
-                .attr("cx", keySize/2)
-                .attr("cy", keySize/2);
-              g.append("text")
-                .text(d.category)
-                .attr("x", keySize/2 + d.size/2 + 4)
-                .attr("dominant-baseline", "middle")
-                .attr("y", keySize/2);
-            });
+            group.append("circle")
+              .attr("r", (d) => d.size/2)
+              .attr("cx", keySize/2)
+              .attr("cy", keySize/2);
+            group.append("text")
+              .text((d) => d.category)
+              .attr("x", (d) => keySize/2 + d.size/2 + 4)
+              .attr("dominant-baseline", "middle")
+              .attr("y", keySize/2);
 
             return group;
           }
