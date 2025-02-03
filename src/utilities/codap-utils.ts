@@ -2,6 +2,7 @@ import {
   addDataContextChangeListener, createDataContextFromURL, getCaseByFormulaSearch, getDataContext,
   getSelectionList, initializePlugin, selectCases
 } from "@concord-consortium/codap-plugin-api";
+import { reaction } from "mobx";
 import { applySnapshot, getSnapshot } from "mobx-state-tree";
 
 import { DIDataContext, DIGetCaseResult } from "../codap/data-interactive/data-interactive-data-set-types";
@@ -13,10 +14,7 @@ import { ICaseCreation } from "../codap/models/data/data-set-types";
 import { codapData } from "../models/codap-data";
 import { DstContainer, dstContainer } from "../models/dst-container";
 import { ui } from "../models/ui";
-import { kCollectionName, kDataContextName, kInitialDimensions, kPluginName, kVersion } from "./constants";
-
-import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
-import { reaction } from "mobx";
+import { kCollectionName, kDataContextName, kDataURL, kInitialDimensions, kPluginName, kVersion } from "./constants";
 
 export async function initializeDST() {
   initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions})
@@ -48,7 +46,7 @@ export async function getData() {
     let dataContextResult = await getDataContext(kDataContextName);
 
     if (!dataContextResult.success) {
-      const createContextResult = await createDataContextFromURL(dataURL);
+      const createContextResult = await createDataContextFromURL(kDataURL);
       if (!createContextResult.success) {
         console.error("Couldn't load dataset");
         return;

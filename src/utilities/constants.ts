@@ -1,3 +1,5 @@
+import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
+
 export const kPluginName = "Space-Time Cube";
 export const kVersion = "0.0.1";
 export const kInitialDimensions = {
@@ -5,6 +7,7 @@ export const kInitialDimensions = {
   height: 542
 };
 
+export const kDataURL = dataURL;
 export const kDataContextName = "Tornado_Tracks_2020-2022";
 export const kCollectionName = "Cases";
 
