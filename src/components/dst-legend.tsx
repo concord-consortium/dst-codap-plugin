@@ -33,7 +33,7 @@ const tileSelection: ITileSelection = {
 // should probably follow the same pattern if so.
 const dataDisplayLayout = new DataDisplayLayout({
   tileWidth: 500,
-  tileHeight: 470,
+  tileHeight: 440,
 });
 
 export const DstLegend = observer(function DstLegend() {
