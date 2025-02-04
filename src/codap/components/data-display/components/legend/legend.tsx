@@ -34,8 +34,6 @@ export const Legend = function Legend({
                                         layerIndex, setDesiredExtent, onDropAttribute
                                       }: ILegendProps) {
   const dataConfiguration = useDataConfigurationContext(),
-    // This change fixes the issue with the legend not updating
-    // when the user changes the type
     attrType = dataConfiguration?.attributeType('legend'),
     LegendComponent = dataConfiguration && legendComponentManager.getLegendComponent(dataConfiguration),
     legendRef = useRef() as React.RefObject<SVGSVGElement>
