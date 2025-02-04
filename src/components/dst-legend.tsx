@@ -2,9 +2,6 @@ import React from "react";
 import { observer } from "mobx-react-lite";
 import { DndContext, useSensors } from "@dnd-kit/core";
 
-import { MultiLegend } from "../codap/components/data-display/components/legend/multi-legend";
-import { GraphPlace } from "../codap/components/axis-graph-shared";
-import { IDataSet } from "../codap/models/data/data-set";
 import { BaseDataDisplayModelContext } from "../codap/components/data-display/hooks/use-base-data-display-model";
 import { ITileSelection, TileSelectionContext } from "../codap/hooks/use-tile-selection-context";
 import { DataDisplayLayoutContext } from "../codap/components/data-display/hooks/use-data-display-layout";
@@ -14,6 +11,7 @@ import { legendComponentManager } from "../codap/components/data-display/compone
 import { CategoricalSizeLegend } from "./legend/categorical-size-legend";
 
 import "./dst-legend.scss";
+import { MultiLegend } from "./legend/dst-multi-legend";
 
 // function UnsupportedNumericSize() {
 //   return <text>Numeric attributes do not have a size legend yet</text>;
@@ -64,16 +62,14 @@ export const DstLegend = observer(function DstLegend() {
         <TileSelectionContext.Provider value={tileSelection}>
           <BaseDataDisplayModelContext.Provider value={dstContainer.dataDisplayModel}>
             <MultiLegend divElt={null} 
-              onDropAttribute={function (place: GraphPlace, dataSet: IDataSet, attrId: string, layer): void {
+              onChangeAttribute={function (dataSet, attrId, layer): void {
                 // TODO: handle mis-matched dataSet
-                // TODO: how do we figure out which layer this came from
                 if (!layer) {
                   console.warn("No layer available when changing legend attribute");
                   return;
                 }
                 const configuration = layer.dataConfiguration;
-                if (place !== "legend") return;
-                configuration.setAttribute(place, {attributeID: attrId});              
+                configuration.setAttribute("legend", {attributeID: attrId});              
               } }    
             />
           </BaseDataDisplayModelContext.Provider>

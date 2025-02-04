@@ -3,20 +3,19 @@ import React, {createRef, RefObject, useCallback, useRef} from "react"
 import {Active} from "@dnd-kit/core"
 import {DroppableSvg} from "../droppable-svg"
 import {useInstanceIdContext} from "../../../../hooks/use-instance-id-context"
+import {useBaseDataDisplayModelContext} from "../../hooks/use-base-data-display-model"
 import {getDragAttributeInfo, useDropHandler} from "../../../../hooks/use-drag-drop"
 import {useDropHintString} from "../../../../hooks/use-drop-hint-string"
 import {IDataSet} from "../../../../models/data/data-set"
-import {GraphPlace} from "../../../axis-graph-shared"
-import {useBaseDataDisplayModelContext} from "../../hooks/use-base-data-display-model"
 import {DataConfigurationContext} from "../../hooks/use-data-configuration-context"
 import {useDataDisplayLayout} from "../../hooks/use-data-display-layout"
 import {GraphAttrRole} from "../../data-display-types"
-import { IBaseLayerModel } from "../../models/base-data-display-content-model"
+import {GraphPlace} from "../../../axis-graph-shared"
 import {Legend} from "./legend"
 
 interface IMultiLegendProps {
   divElt: HTMLDivElement | null
-  onDropAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, layer?: IBaseLayerModel) => void
+  onDropAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
 }
 
 export const MultiLegend = observer(function MultiLegend({divElt, onDropAttribute}: IMultiLegendProps) {
@@ -67,7 +66,7 @@ export const MultiLegend = observer(function MultiLegend({divElt, onDropAttribut
                 <DataConfigurationContext.Provider value={layer.dataConfiguration}>
                   <Legend layerIndex={index}
                           setDesiredExtent={setDesiredExtent}
-                          onDropAttribute={(place, dataSet, attributeID) => onDropAttribute(place, dataSet, attributeID, layer)}
+                          onDropAttribute={onDropAttribute}
                   />
                 </DataConfigurationContext.Provider>
               </div>
