@@ -6,12 +6,13 @@ import { BaseDataDisplayModelContext } from "../codap/components/data-display/ho
 import { ITileSelection, TileSelectionContext } from "../codap/hooks/use-tile-selection-context";
 import { DataDisplayLayoutContext } from "../codap/components/data-display/hooks/use-data-display-layout";
 import { DataDisplayLayout } from "../codap/components/data-display/models/data-display-layout";
-import { dstContainer } from "../models/dst-container";
 import { legendComponentManager } from "../codap/components/data-display/components/legend/legend";
+import { dstContainer } from "../models/dst-container";
+import { IDstDataConfigurationModel } from "../models/dst-data-display-model";
 import { CategoricalSizeLegend } from "./legend/categorical-size-legend";
+import { MultiLegend } from "./legend/dst-multi-legend";
 
 import "./dst-legend.scss";
-import { MultiLegend } from "./legend/dst-multi-legend";
 
 // function UnsupportedNumericSize() {
 //   return <text>Numeric attributes do not have a size legend yet</text>;
@@ -20,7 +21,7 @@ import { MultiLegend } from "./legend/dst-multi-legend";
 // register our new legend
 legendComponentManager.getLegendComponent = (dataConfig) => {
   const type = dataConfig.attributeType("legend");
-  const representation = dataConfig.legendRepresentation;
+  const representation = (dataConfig as IDstDataConfigurationModel).legendRepresentation;
 
   if (representation === "size" && type === "categorical") return CategoricalSizeLegend;
 

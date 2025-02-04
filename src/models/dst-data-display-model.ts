@@ -1,14 +1,8 @@
 import { Instance, types } from "mobx-state-tree";
-import { AttributeDescription, DataConfigurationModel } from "../codap/components/data-display/models/data-configuration-model";
+import { DataConfigurationModel } from "../codap/components/data-display/models/data-configuration-model";
 import { GraphPlace } from "../codap/components/axis-graph-shared";
 import { IDataSet } from "../codap/models/data/data-set";
 import { scalePoint } from "d3";
-import { attributeTypes } from "../codap/models/data/attribute-types";
-
-export const DstAttributeDescription = AttributeDescription.named("DstAttributeDescription")
-.props({  
-  type: types.maybe(types.enumeration([...attributeTypes, "categoricalSize"] as const))
-});
 
 // These are diameters
 const minDiameter = 3;
@@ -17,7 +11,7 @@ export const defaultPointDiameter = 12;
 
 export const DstDataConfigurationModel = DataConfigurationModel.named("DstDataConfiguration")
 .props({
-  _attributeDescriptions: types.map(DstAttributeDescription)
+  legendRepresentation: types.maybe(types.enumeration(["color", "size"]))
 })
 .views(self => ({
   get categoricalSizeScale() {

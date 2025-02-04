@@ -95,8 +95,7 @@ export const DataConfigurationModel = types
     }),
     hiddenCases: types.array(types.string),
     displayOnlySelectedCases: types.maybe(types.boolean),
-    filterFormula: types.maybe(Formula),
-    legendRepresentation: types.maybe(types.enumeration(["color", "size"]))
+    filterFormula: types.maybe(Formula)
   })
   .volatile(() => ({
     actionHandlerDisposer: undefined as (() => void) | undefined,
