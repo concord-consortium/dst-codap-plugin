@@ -1,6 +1,7 @@
 import React from "react";
 import { Euler, Vector3 } from "three";
 import { tickDirectionType } from "../../types/graph-types";
+import { halfPi } from "../../utilities/trig-utils";
 import { Axis } from "./axis";
 
 const tickCount = 5;
@@ -28,7 +29,10 @@ export function SpaceAxis({
     const ndcEndPoint = new Vector3(endPoint.x, endPoint.y, endPoint.z).project(cameraRef);
     const leftPoint = ndcStartPoint.x < ndcEndPoint.x ? ndcStartPoint : ndcEndPoint;
     const rightPoint = ndcStartPoint.x < ndcEndPoint.x ? ndcEndPoint : ndcStartPoint;
-    const labelAngle = Math.atan((rightPoint.y - leftPoint.y) / (rightPoint.x - leftPoint.x));
+    // When the axis is close to vertical, using atan can cause the label be flipped the wrong way
+    const labelAngle = Math.abs(leftPoint.x - rightPoint.x) < .01
+      ? tickDirection === "right" ? halfPi : -halfPi
+      : Math.atan((rightPoint.y - leftPoint.y) / (rightPoint.x - leftPoint.x));
     labelRotation = new Euler(0, 0, labelAngle);
   }
   return (
