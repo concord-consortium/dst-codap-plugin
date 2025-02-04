@@ -10,7 +10,7 @@ import "./marquee-overlay.scss";
 let throttleUpdate = false;
 
 interface IMarqueeOverlayProps {
-  cameraRef: React.MutableRefObject<any>;
+  cameraRef?: any;
 }
 export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef }: IMarqueeOverlayProps) {
   const [marqueeStartPoint, setMarqueeStartPoint] = useState<Maybe<Vector2>>();
@@ -30,7 +30,7 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef }: IM
   };
 
   const updateMarquee = (event: React.PointerEvent<HTMLDivElement>, forceUpdate = false) => {
-    if (ui.mode === "marquee" && marqueeStartPoint && cameraRef.current && ref.current) {
+    if (ui.mode === "marquee" && marqueeStartPoint && cameraRef && ref.current) {
       const adjustedX = adjustClientX(event.clientX);
       const adjustedY = adjustClientY(event.clientY);
       setMarqueeEndPoint(new Vector2(adjustedX, adjustedY));
@@ -49,7 +49,7 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef }: IM
           const x = graph.latitudeInGraphSpace(aCase.Latitude);
           const y = graph.convertCaseDateToGraph(aCase);
           const z = graph.longitudeInGraphSpace(aCase.Longitude);
-          const ndcPoint = new Vector3(x, y, z).project(cameraRef.current);
+          const ndcPoint = new Vector3(x, y, z).project(cameraRef);
           return ndcPoint.x >= Math.min(startPoint.x, endPoint.x) &&
             ndcPoint.x <= Math.max(startPoint.x, endPoint.x) &&
             ndcPoint.y >= Math.min(startPoint.y, endPoint.y) &&

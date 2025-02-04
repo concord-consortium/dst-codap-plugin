@@ -10,7 +10,7 @@ function renderDegrees(value: number) {
 }
 
 interface IAxisProps {
-  cameraRef: React.MutableRefObject<any>;
+  cameraRef?: any;
   endPoint: Vector3;
   label?: string;
   labelOffset?: Vector3;
@@ -22,14 +22,14 @@ interface IAxisProps {
 export function SpaceAxis({
   cameraRef, endPoint, label, labelOffset, maxValue, minValue, startPoint, tickDirection
 }: IAxisProps) {
-  let labelRotation = new Euler(0, 0, 0, "YXZ");
-  if (cameraRef.current) {
-    const ndcStartPoint = new Vector3(startPoint.x, startPoint.y, startPoint.z).project(cameraRef.current);
-    const ndcEndPoint = new Vector3(endPoint.x, endPoint.y, endPoint.z).project(cameraRef.current);
+  let labelRotation = new Euler(0, 0, 0);
+  if (cameraRef) {
+    const ndcStartPoint = new Vector3(startPoint.x, startPoint.y, startPoint.z).project(cameraRef);
+    const ndcEndPoint = new Vector3(endPoint.x, endPoint.y, endPoint.z).project(cameraRef);
     const leftPoint = ndcStartPoint.x < ndcEndPoint.x ? ndcStartPoint : ndcEndPoint;
     const rightPoint = ndcStartPoint.x < ndcEndPoint.x ? ndcEndPoint : ndcStartPoint;
     const labelAngle = Math.atan((rightPoint.y - leftPoint.y) / (rightPoint.x - leftPoint.x));
-    labelRotation = new Euler(0, 0, labelAngle, "YXZ");
+    labelRotation = new Euler(0, 0, labelAngle);
   }
   return (
     <Axis
@@ -46,4 +46,4 @@ export function SpaceAxis({
       tickDirection={tickDirection}
     />
   );
-}
+};

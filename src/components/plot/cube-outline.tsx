@@ -17,7 +17,7 @@ const zMax = 5;
 const zMin = -5;
 
 interface ICubeOutlineProps {
-  cameraRef: React.MutableRefObject<any>;
+  cameraRef?: any;
 }
 export const CubeOutline = observer(function CubeOutline({ cameraRef }: ICubeOutlineProps) {
   const { pivot, rotation } = dstCamera;
