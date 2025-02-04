@@ -36,7 +36,7 @@ export const CubeOutline = observer(function CubeOutline({ cameraRef }: ICubeOut
   const topSpaceAxis = pivot < 0;
   const spaceY = topSpaceAxis ? yMax : yMin;
   const spaceTickDirection = topSpaceAxis ? "up" : "down";
-  const horizontalView = Math.abs(pivot) < Math.PI / 10;
+  const horizontalView = Math.abs(pivot) < Math.PI / 7;
 
   // The x (latitude) axis
   const xAxisZ = rotation > Math.PI ? zMax : zMin;
@@ -75,7 +75,7 @@ export const CubeOutline = observer(function CubeOutline({ cameraRef }: ICubeOut
   // The z (longitude) axis
   const zAxisX = rotation < halfPi || rotation > 3 * halfPi ? xMin : xMax;
   let zDirection: tickDirectionType = "right";
-  const zHorizontalOffset = (topSpaceAxis ? 3.5 : 1.8) + Math.abs(Math.sin(rotation) * .5);
+  const zHorizontalOffset = (topSpaceAxis ? 3.5 : 2.25) + Math.abs(Math.sin(rotation) * .5);
   const zVerticalOffset = Math.abs(Math.sin(pivot)) * xHorizontalOffset;
   let zXOffset = 0;
   if (rotation < Math.PI * 3 / 8) {
