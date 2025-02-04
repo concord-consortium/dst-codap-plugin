@@ -46,4 +46,4 @@ export function SpaceAxis({
       tickDirection={tickDirection}
     />
   );
-};
+}
