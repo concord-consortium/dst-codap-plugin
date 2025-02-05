@@ -8,7 +8,7 @@ import { IDataConfigurationModel } from "../../codap/components/data-display/mod
 import { kDataDisplayFont, kMain } from "../../codap/components/data-display/data-display-types";
 import { measureText } from "../../codap/hooks/use-measure-text";
 import { logMessageWithReplacement } from "../../codap/lib/log-message";
-import { defaultPointDiameter, IDstDataConfigurationModel } from "../../models/dst-data-display-model";
+import { defaultPointDiameter, IDstDataConfigurationModel } from "../../models/dst-data-configuration-model";
 
 export interface Key {
   category: string;

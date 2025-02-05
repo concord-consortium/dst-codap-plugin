@@ -7,7 +7,7 @@ import { useDataDisplayLayout } from "../../codap/components/data-display/hooks/
 import { mstReaction } from "../../codap/utilities/mst-reaction";
 import { axisGap } from "../../codap/components/axis/axis-types";
 import { mstAutorun } from "../../codap/utilities/mst-autorun";
-import { IDstDataConfigurationModel } from "../../models/dst-data-display-model";
+import { IDstDataConfigurationModel } from "../../models/dst-data-configuration-model";
 
 import "./size-legend.scss";
 
