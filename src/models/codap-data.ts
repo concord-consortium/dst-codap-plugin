@@ -1,62 +1,75 @@
-import { makeAutoObservable, observable } from "mobx";
-
-export interface ICase {
-  date?: string;
-  Day?: number;
-  __id__: string;
-  Latitude?: number;
-  Longitude?: number;
-  Month?: number;
-  Year?: number;
-}
+import { makeAutoObservable, ObservableSet } from "mobx";
+import { kCollectionName } from "../utilities/constants";
+import { dstContainer } from "./dst-container";
 
 class CodapData {
-  caseMap = observable.map<string, ICase>();
-  selectedCaseIds = observable.set<string>();
+  absoluteMinDate = 1578124800000;
+  absoluteMaxDate = 1672358400000;
+
+  marqueeSelection = new ObservableSet<string>();
 
   constructor() {
     makeAutoObservable(this);
   }
 
-  addCase(aCase: ICase) {
-    this.caseMap.set(aCase.__id__, aCase);
+  get absoluteDateRange() {
+    return this.absoluteMaxDate - this.absoluteMinDate;
   }
 
-  addCaseToSelection(id?: string) {
-    if (id != null) this.selectedCaseIds.add(id);
+  get caseIds() {
+    return this.dataSet.getCollectionByName(kCollectionName)?.caseIds ?? [];
   }
 
-  clearSelectedCases() {
-    this.selectedCaseIds.clear();
+  get dataSet() {
+    return dstContainer.dataSet;
+  }
+  
+  getAttributeNumericValue(attributeName: string, caseId: string) {
+    const value = this.getAttributeValue(attributeName, caseId);
+    return value ? +value : undefined;
   }
 
-  get cases(): ICase[] {
-    return Array.from(this.caseMap.values());
+  getAttributeValue(attirbuteName: string, caseId: string) {
+    const attributeId = this.dataSet.getAttributeByName(attirbuteName)?.id;
+    return attributeId && this.dataSet.getValue(caseId, attributeId);
+  }
+  
+  getCaseDate(caseId: string) {
+    // We need at least a year. To make things simple we just use 2000 for now
+    const year = this.getAttributeNumericValue("Year", caseId) || 2000;
+    const month = (this.getAttributeNumericValue("Month", caseId) || 1) - 1;
+    const day = this.getAttributeNumericValue("Day", caseId) || 1;
+    return Date.UTC(year, month, day);
   }
 
-  isSelected(id: string) {
-    return this.selectedCaseIds.has(id);
+  getLatitude(caseId: string) {
+    return this.getAttributeNumericValue("Latitude", caseId);
   }
 
-  removeCaseFromSelection(id?: string) {
-    if (id != null) this.selectedCaseIds.delete(id);
+  getLongitude(caseId: string) {
+    return this.getAttributeNumericValue("Longitude", caseId);
   }
 
-  replaceCases(newCases: ICase[]) {
-    this.caseMap.clear();
-    newCases.forEach(aCase => {
-      this.caseMap.set(aCase.__id__, aCase);
-    });
+  isSelected(caseId: string) {
+    if (this.marqueeSelection.size > 0) {
+      return this.marqueeSelection.has(caseId);
+    } else {
+      return this.dataSet.isCaseSelected(caseId);
+    }
   }
 
-  replaceSelectedCases(newSelectedCaseIds: string[]) {
-    this.selectedCaseIds.replace(newSelectedCaseIds);
+  setAbsoluteDateRange(min: number, max: number) {
+    this.absoluteMinDate = min;
+    this.absoluteMaxDate = max;
+  }
+
+  setMarqueeSelection(caseIds?: string[]) {
+    if (caseIds) {
+      this.marqueeSelection.replace(caseIds);
+    } else {
+      this.marqueeSelection.clear();
+    }
   }
 }
 
 export const codapData = new CodapData();
-
-export function getDate(aCase: ICase) {
-  // // We need at least a year. To make things simple we just use 2000 for now
-  return Date.UTC(aCase.Year || 2000, (aCase.Month ?? 1) - 1, aCase.Day);
-}

@@ -5,7 +5,7 @@ import {
 } from "../utilities/constants";
 import { formatDateString, datePercentInRange } from "../utilities/date-utils";
 import { halfPi } from "../utilities/trig-utils";
-import { getDate, ICase } from "./codap-data";
+import { codapData } from "./codap-data";
 
 export const graphMin = -5;
 export const graphMax = 5;
@@ -20,9 +20,6 @@ const dateAnimationRate = 0.1;
 export const kMinDatePercentRange = 0.01;
 
 class Graph {
-  absoluteMinDate = 1578124800000;
-  absoluteMaxDate = 1672358400000;
-
   maxDatePercent = 1;
   minDatePercent = 0;
   mapDatePercent = 0;
@@ -118,26 +115,28 @@ class Graph {
     this.targetMinLong = minLongitude ?? this.targetMinLong ?? this.minLongitude;
   }
 
-  caseIsVisible(aCase: ICase) {
-    if (aCase.Latitude == null || aCase.Longitude == null) return false;
+  caseIsVisible(caseId: string) {
+    const latitude = codapData.getLatitude(caseId);
+    const longitude = codapData.getLongitude(caseId);
+    if (latitude == null || longitude == null) return false;
 
-    const datePercent = this.convertCaseDateToPercent(aCase);
-    return aCase.Latitude >= this.minLatitude && aCase.Latitude <= this.maxLatitude &&
-      aCase.Longitude >= this.minLongitude && aCase.Longitude <= this.maxLongitude &&
+    const datePercent = this.convertCaseDateToPercent(caseId);
+    return latitude >= this.minLatitude && latitude <= this.maxLatitude &&
+      longitude >= this.minLongitude && longitude <= this.maxLongitude &&
       datePercent >= this.minDatePercent && datePercent <= this.currentDatePercent;
   }
-
-  convertCaseDate(aCase: ICase) {
-    const date = getDate(aCase);
+  
+  convertCaseDate(caseId: string) {
+    const date = codapData.getCaseDate(caseId);
     return isFinite(date) ? date : this.defaultDate;
   }
   
-  convertCaseDateToGraph(aCase: ICase) {
-    return this.convertDateToGraph(this.convertCaseDate(aCase));
+  convertCaseDateToGraph(caseId: string) {
+    return this.convertDateToGraph(this.convertCaseDate(caseId));
   }
 
-  convertCaseDateToPercent(aCase: ICase) {
-    return this.convertDateToPercent(this.convertCaseDate(aCase));
+  convertCaseDateToPercent(caseId: string) {
+    return this.convertDateToPercent(this.convertCaseDate(caseId));
   }
 
   convertDateToGraph(date: number) {
@@ -145,7 +144,7 @@ class Graph {
   }
 
   convertDateToPercent(date: number) {
-    return (date - this.absoluteMinDate) / this.absoluteDateRange;
+    return (date - codapData.absoluteMinDate) / codapData.absoluteDateRange;
   }
 
   convertLat(_lat?: number) {
@@ -159,15 +158,11 @@ class Graph {
   }
 
   convertPercentToDate(percent: number) {
-    return this.absoluteMinDate + percent * this.absoluteDateRange;
+    return codapData.absoluteMinDate + percent * codapData.absoluteDateRange;
   }
 
   convertPercentToGraph(percent: number) {
     return (percent - this.minDatePercent) / (this.maxDatePercent - this.minDatePercent) * graphRange + graphMin;
-  }
-
-  get absoluteDateRange() {
-    return this.absoluteMaxDate - this.absoluteMinDate;
   }
 
   get canAnimateDate() {
@@ -329,11 +324,6 @@ class Graph {
 
   setCurrentDatePercent(date: number) {
     this.currentDatePercent = datePercentInRange(date, this.minDatePercent, this.maxDatePercent);
-  }
-
-  setAbsoluteDateRange(min: number, max: number) {
-    this.absoluteMinDate = min;
-    this.absoluteMaxDate = max;
   }
 
   setMapDatePercent(date: number) {

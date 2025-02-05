@@ -1,67 +1,74 @@
-import { codapData, ICase, getDate } from "./codap-data";
+import { getDataContext, getCaseByFormulaSearch } from "@concord-consortium/codap-plugin-api";
+import { ICaseCreation } from "../codap/models/data/data-set-types";
+import testDataSet from "../test/test-data-set.json";
+import { getData } from "../utilities/codap-utils";
+import { codapData } from "./codap-data";
+import { graph } from "./graph";
 
-describe("CodapCases", () => {
-  beforeEach(() => {
-    codapData.replaceCases([]);
-    codapData.clearSelectedCases();
+jest.mock("@concord-consortium/codap-plugin-api");
+
+const mockedGetDataContext = getDataContext as jest.MockedFunction<typeof getDataContext>;
+const mockedGetCaseByFormulaSearch = getCaseByFormulaSearch as jest.MockedFunction<typeof getCaseByFormulaSearch>;
+
+const cases: ICaseCreation[] = [
+  { id: "1", values: { Day: 4, Month: 1, Year: 2020 } },
+  {
+    id: 2, values: { Latitude: graph.centerLat, Longitude: graph.centerLong,
+    Year: 2021, Month: 1, Day: 1 }
+  },
+  {
+    id: 3, values: { Latitude: graph.absoluteMaxLatitude + 1, Longitude: graph.absoluteMaxLongitude + 1,
+    Year: 2021, Month: 1, Day: 1 }
+  },
+  {
+    id: 4, values: { Latitude: graph.absoluteMaxLatitude, Longitude: graph.absoluteMaxLongitude,
+    Year: 1980, Month: 1, Day: 1 }
+  },
+  {
+    id: 5, values: { Latitude: graph.absoluteMaxLatitude, Longitude: graph.absoluteMaxLongitude,
+    Year: 2100, Month: 1, Day: 1 }
+  }
+];
+
+describe("CodapData", () => {
+  beforeAll(async () => {
+    mockedGetDataContext.mockReturnValue(Promise.resolve({ success: true, values: testDataSet }));
+    mockedGetCaseByFormulaSearch.mockReturnValue(Promise.resolve({
+      success: true, 
+      values: cases
+    }));
+    await getData();
   });
 
-  test("should add a case", () => {
-    const aCase: ICase = { __id__: "1", Year: 2021 };
-    codapData.addCase(aCase);
-    expect(codapData.cases.find(({ __id__: id, Year }) => id === aCase.__id__ && Year === aCase.Year)).toBeTruthy();
+  it("should calculate absoluteDateRange correctly", async () => {
+    expect(codapData.absoluteDateRange).toBe(Date.UTC(2100, 0, 1) - Date.UTC(1980, 0, 1));
   });
 
-  test("should add a case to selection", () => {
-    const aCase: ICase = { __id__: "1", Year: 2021 };
-    codapData.addCase(aCase);
-    codapData.addCaseToSelection(aCase.__id__);
-    expect(codapData.isSelected(aCase.__id__)).toBe(true);
+  it("should return caseIds correctly", async () => {
+    expect(codapData.caseIds.length).toEqual(5);
   });
 
-  test("should clear selected cases", () => {
-    const aCase: ICase = { __id__: "1", Year: 2021 };
-    codapData.addCase(aCase);
-    codapData.addCaseToSelection(aCase.__id__);
-    expect(codapData.isSelected(aCase.__id__)).toBe(true);
-    codapData.clearSelectedCases();
-    expect(codapData.isSelected(aCase.__id__)).toBe(false);
+  it("should return latitude correctly", () => {
+    expect(codapData.getLatitude("CASE2")).toBe(graph.centerLat);
   });
 
-  test("should replace cases", () => {
-    const cases: ICase[] = [
-      { __id__: "1", Year: 2021 },
-      { __id__: "2", Year: 2022 }
-    ];
-    codapData.replaceCases(cases);
-    expect(codapData.cases).toEqual(cases);
+  it("should return longitude correctly", () => {
+    expect(codapData.getLongitude("CASE2")).toBe(graph.centerLong);
   });
 
-  test("should replace selected cases", () => {
-    const cases: ICase[] = [
-      { __id__: "1", Year: 2021 },
-      { __id__: "2", Year: 2022 }
-    ];
-    codapData.replaceCases(cases);
-    codapData.replaceSelectedCases(["1", "2"]);
-    expect(codapData.isSelected("1")).toBe(true);
-    expect(codapData.isSelected("2")).toBe(true);
+  it("should return case date correctly", () => {
+    expect(codapData.getCaseDate("CASE1")).toBe(Date.UTC(2020, 0, 4));
   });
 
-  test("should remove case from selection", () => {
-    const aCase: ICase = { __id__: "1", Year: 2021 };
-    codapData.addCase(aCase);
-    codapData.addCaseToSelection(aCase.__id__);
-    expect(codapData.isSelected(aCase.__id__)).toBe(true);
-    codapData.removeCaseFromSelection(aCase.__id__);
-    expect(codapData.isSelected(aCase.__id__)).toBe(false);
+  it("should correctly check if a case is selected", () => {
+    expect(codapData.isSelected("CASE1")).toBe(false);
+    codapData.dataSet.selectCases(["CASE1"]);
+    expect(codapData.isSelected("CASE1")).toBe(true);
   });
-});
 
-describe("getDate", () => {
-  test("should return correct date", () => {
-    const aCase: ICase = { __id__: "1", Year: 2021, Month: 5, Day: 15 };
-    const date = getDate(aCase);
-    expect(new Date(date).toISOString()).toBe("2021-05-15T00:00:00.000Z");
+  it("should set absolute date range correctly", () => {
+    codapData.setAbsoluteDateRange(1609459200000, 1640995200000);
+    expect(codapData.absoluteMinDate).toBe(1609459200000);
+    expect(codapData.absoluteMaxDate).toBe(1640995200000);
   });
 });

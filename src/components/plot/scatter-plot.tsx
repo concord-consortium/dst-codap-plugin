@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unknown-property */
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
-import React, { useRef } from "react";
+import React, { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { EffectComposer, HueSaturation } from "@react-three/postprocessing";
 import { ui } from "../../models/ui";
@@ -14,7 +14,7 @@ import { Points } from "./points";
 import "./scatter-plot.scss";
 
 export const ScatterPlot = observer(function ScatterPlot() {
-  const cameraRef = useRef<any>(null);
+  const [cameraRef, setCameraRef] = useState<Maybe<any>>();
   const controlName = "scatter-plot-controls";
   const enableOrbitControls = ui.mode === "pointer";
 
@@ -29,10 +29,8 @@ export const ScatterPlot = observer(function ScatterPlot() {
     <div className="scatter-plot-container">
       <div className={plotClassName} onPointerDown={handlePointerDown}>
         <Canvas gl={{ localClippingEnabled: true }}>
-          <CubeOutline />
-          <DSTCamera
-            cameraRef={cameraRef}
-          />
+          <CubeOutline cameraRef={cameraRef} />
+          <DSTCamera setCameraRef={setCameraRef} />
           <DSTOrbitControls
             cameraRef={cameraRef}
             enabled={enableOrbitControls}

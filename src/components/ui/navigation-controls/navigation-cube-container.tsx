@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { useRef } from "react";
+import React, { useState } from "react";
 import { OrthographicCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Vector3 } from "three";
@@ -10,7 +10,7 @@ import { NavigationCube } from "./navigation-cube";
 import "./navigation-cube-container.scss";
 
 export const NavigationCubeContainer = observer(function NavigationCubeContainer() {
-  const cameraRef = useRef<any>(null);
+  const [cameraRef, setCameraRef] = useState<any>(null);
   const position = new Vector3(dstCamera.position.x, dstCamera.position.y, dstCamera.position.z);
   const controlName = "navigation-plot-controls";
 
@@ -24,7 +24,7 @@ export const NavigationCubeContainer = observer(function NavigationCubeContainer
         <OrthographicCamera
           makeDefault
           position={position}
-          ref={cameraRef}
+          ref={ref => setCameraRef(ref)}
           zoom={1.2}
         />
         <DSTOrbitControls
