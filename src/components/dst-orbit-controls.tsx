@@ -4,7 +4,7 @@ import { dstCamera } from "../models/camera";
 import { ui } from "../models/ui";
 
 interface IDSTOrbitControlsProps {
-  cameraRef: React.MutableRefObject<any>;
+  cameraRef?: any;
   enabled?: boolean;
   name: string;
 }
@@ -13,8 +13,8 @@ export function DSTOrbitControls({
 }: IDSTOrbitControlsProps) {
 
   const handleChange = () => {
-    if (cameraRef.current && !dstCamera.animating && ui.activeControls === name) {
-      const {x, y, z} = cameraRef.current.position;
+    if (cameraRef?.position && !dstCamera.animating && ui.activeControls === name) {
+      const {x, y, z} = cameraRef.position;
       dstCamera.setPosition(x, y, z);
     }
   };

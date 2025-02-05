@@ -9,7 +9,7 @@ import "./marquee-overlay.scss";
 let throttleUpdate = false;
 
 interface IMarqueeOverlayProps {
-  cameraRef: React.MutableRefObject<any>;
+  cameraRef?: any;
 }
 export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef }: IMarqueeOverlayProps) {
   const [marqueeStartPoint, setMarqueeStartPoint] = useState<Maybe<Vector2>>();
@@ -18,7 +18,7 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef }: IM
 
   // TODO I couldn't figure out how to programmatically determine these offsets, but they're based on the position
   // of the containing elements.
-  const adjustClientX = (clientX: number) => clientX - 174;
+  const adjustClientX = (clientX: number) => clientX - 136;
   const adjustClientY = (clientY: number) => clientY - 40;
   
   const handlePointerDown: PointerEventHandler<HTMLDivElement> = event => {
@@ -29,7 +29,7 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef }: IM
   };
 
   const updateMarquee = (event: React.PointerEvent<HTMLDivElement>, forceUpdate = false) => {
-    if (ui.mode === "marquee" && marqueeStartPoint && cameraRef.current && ref.current) {
+    if (ui.mode === "marquee" && marqueeStartPoint && cameraRef && ref.current) {
       const adjustedX = adjustClientX(event.clientX);
       const adjustedY = adjustClientY(event.clientY);
       setMarqueeEndPoint(new Vector2(adjustedX, adjustedY));
@@ -48,7 +48,7 @@ export const MarqueeOverlay = observer(function MarqueeOverlay({ cameraRef }: IM
           const x = graph.latitudeInGraphSpace(codapData.getLatitude(caseId));
           const y = graph.convertCaseDateToGraph(caseId);
           const z = graph.longitudeInGraphSpace(codapData.getLongitude(caseId));
-          const ndcPoint = new Vector3(x, y, z).project(cameraRef.current);
+          const ndcPoint = new Vector3(x, y, z).project(cameraRef);
           return ndcPoint.x >= Math.min(startPoint.x, endPoint.x) && ndcPoint.x <= Math.max(startPoint.x, endPoint.x) &&
             ndcPoint.y >= Math.min(startPoint.y, endPoint.y) && ndcPoint.y <= Math.max(startPoint.y, endPoint.y);
         }

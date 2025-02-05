@@ -6,9 +6,9 @@ import { Vector3 } from "three";
 import { dstCamera } from "../../models/camera";
 
 interface IDSTCameraProps {
-  cameraRef: React.MutableRefObject<any>;
+  setCameraRef: (ref: any) => void;
 }
-export const DSTCamera = observer(function DSTCamera({ cameraRef }: IDSTCameraProps) {
+export const DSTCamera = observer(function DSTCamera({ setCameraRef }: IDSTCameraProps) {
   useFrame((_state, delta) => dstCamera.animate(delta * 1000));
   const position = new Vector3(dstCamera.position.x, dstCamera.position.y, dstCamera.position.z);
 
@@ -16,7 +16,7 @@ export const DSTCamera = observer(function DSTCamera({ cameraRef }: IDSTCameraPr
     <OrthographicCamera
       makeDefault
       position={position}
-      ref={cameraRef}
+      ref={ref => setCameraRef(ref)}
       zoom={dstCamera.zoom}
     />
   );
