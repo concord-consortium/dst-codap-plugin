@@ -3,14 +3,12 @@ import { Outlines } from "@react-three/drei";
 import { ThreeEvent, useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
 import { observer } from "mobx-react-lite";
-import { ui } from "../../models/ui";
-import { dstAddCaseToSelection, dstRemoveCaseFromSelection, dstSelectCases } from "../../utilities/codap-utils";
-import { dstContainer } from "../../models/dst-container";
 import { codapData } from "../../models/codap-data";
+import { dstContainer } from "../../models/dst-container";
+import { ui } from "../../models/ui";
 
 interface IPointProps {
   id: string;
-  isSelected: boolean;
   visible?: boolean;
   x: number;
   y: number;
@@ -46,12 +44,12 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
       event.stopPropagation();
       if (event.shiftKey) {
         if (isSelected) {
-          dstRemoveCaseFromSelection(id);
+          codapData.dataSet.selectCases([id], false);
         } else {
-          dstAddCaseToSelection(id);
+          codapData.dataSet.selectCases([id]);
         }
       } else {
-        dstSelectCases([id]);
+        codapData.dataSet.setSelectedCases([id]);
       }
     }
   };

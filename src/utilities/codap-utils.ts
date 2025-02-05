@@ -2,6 +2,7 @@ import {
   addDataContextChangeListener, createDataContextFromURL, getCaseByFormulaSearch, getDataContext,
   getSelectionList, initializePlugin, selectCases
 } from "@concord-consortium/codap-plugin-api";
+import { comparer, reaction } from "mobx";
 import { applySnapshot, getSnapshot } from "mobx-state-tree";
 
 import { DIDataContext, DIGetCaseResult } from "../codap/data-interactive/data-interactive-data-set-types";
@@ -10,16 +11,13 @@ import { CodapV2DataSetImporter } from "../codap/v2/codap-v2-data-set-importer";
 import { toV3CaseId } from "../codap/utilities/codap-utils";
 import { ICaseCreation } from "../codap/models/data/data-set-types";
 
-import { codapData, getDate, ICase } from "../models/codap-data";
-import { graph } from "../models/graph";
-import { ui } from "../models/ui";
-import { kInitialDimensions, kPluginName, kVersion } from "./constants";
+import { codapData } from "../models/codap-data";
 import { DstContainer, dstContainer } from "../models/dst-container";
+import { ui } from "../models/ui";
+import { kCollectionName, kInitialDimensions, kPluginName, kVersion } from "./constants";
 
 import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
-
 const dataContextName = "Tornado_Tracks_2020-2022";
-const collectionName = "Cases";
 
 export async function initializeDST() {
   initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions})
@@ -38,6 +36,13 @@ export async function initializeDST() {
       updateSelection();
     }
   });
+
+  // When the selection changes in the plugin, pass those changes to Codap.
+  reaction(
+    () => Array.from(codapData.dataSet.selection),
+    selection => selectCases(dataContextName, Array.from(codapData.dataSet.selection)),
+    { equals: comparer.structural}
+  );
 }
 
 export async function getData() {
@@ -55,7 +60,7 @@ export async function getData() {
 
     updateDataSetAttributes(dataContextResult.values);
 
-    const casesResult = await getCaseByFormulaSearch(dataContextName, collectionName, "true");
+    const casesResult = await getCaseByFormulaSearch(dataContextName, kCollectionName, "true");
 
     if (!casesResult.success) {
       console.error("Couldn't load cases from dataset");
@@ -64,24 +69,13 @@ export async function getData() {
 
     const casesValues = casesResult.values as DIGetCaseResult["case"][];
     // The id should never be undefined but it is typed that way
-    const cases: ICase[] = casesValues.map(aCase => ({ __id__: toV3CaseId(aCase.id!), ...aCase.values }));
+    const cases: ICaseCreation[] = casesValues.map(aCase => ({ __id__: toV3CaseId(aCase.id!), ...aCase.values }));
+
+    setDSTCases(cases);
 
     // Update date range
-    const dates = cases.map(aCase => getDate(aCase)).filter((time: number) => isFinite(time));
-    graph.setAbsoluteDateRange(Math.min(...dates), Math.max(...dates));
-
-    codapData.replaceCases(cases);
-
-    // When the updateDataSetAttributes was called above all of cases were cleared out,
-    // so we can just add them back in here
-    const dstDataset = dstContainer.dataSet;
-    dstDataset.addCases(cases as ICaseCreation[], {canonicalize: true});
-    const configuration = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
-    
-    // For the configuration to refresh, the following functions have to be called.
-    // This might show up as a problem with undo/redo as well.
-    configuration._clearFilteredCases(configuration.dataset);
-    configuration.clearCasesCache();
+    const dates = codapData.caseIds.map(caseId => codapData.getCaseDate(caseId));
+    codapData.setAbsoluteDateRange(Math.min(...dates), Math.max(...dates));
   } catch (error) {
     // This will happen if not embedded in CODAP
     console.warn("Not embedded in CODAP", error);
@@ -95,8 +89,7 @@ export async function updateSelection() {
   try {
     const selectionListResult = await getSelectionList(dataContextName);
     if (selectionListResult.success) {
-      codapData.clearSelectedCases();
-      codapData.replaceSelectedCases(selectionListResult.values.map((aCase: any) => toV3CaseId(aCase.caseID)));
+      codapData.dataSet.setSelectedCases(selectionListResult.values.map((aCase: any) => toV3CaseId(aCase.caseID)));
     }
   } catch (error) {
     // This will happen if not embedded in CODAP
@@ -104,19 +97,12 @@ export async function updateSelection() {
   }
 }
 
-export async function dstSelectCases(caseIds: string[]) {
-  codapData.replaceSelectedCases(caseIds);
-  return await selectCases(dataContextName, caseIds);
-}
-
 export async function dstAddCaseToSelection(caseId: string) {
-  codapData.addCaseToSelection(caseId);
-  return await selectCases(dataContextName, Array.from(codapData.selectedCaseIds));
+  codapData.dataSet.selectCases([caseId]);
 }
 
 export async function dstRemoveCaseFromSelection(caseId: string) {
-  codapData.removeCaseFromSelection(caseId);
-  return await selectCases(dataContextName, Array.from(codapData.selectedCaseIds));
+  codapData.dataSet.selectCases([caseId], false);
 }
 
 export function updateDataSetAttributes(dataContext: DIDataContext) {
@@ -169,4 +155,16 @@ export function updateDataSetAttributes(dataContext: DIDataContext) {
   configuration.setAttribute("legend", {attributeID: colorAttribute.id});
   configuration.setAttribute("x", {attributeID: longAttribute.id});
   configuration.setAttribute("y", {attributeID: latAttribute.id});
+}
+
+export function setDSTCases(cases: ICaseCreation[]) {
+  const dstDataset = dstContainer.dataSet;
+  dstDataset.removeCases(dstDataset.itemIds);
+  dstDataset.addCases(cases, {canonicalize: true});
+  const configuration = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
+  
+  // For the configuration to refresh, the following functions have to be called.
+  // This might show up as a problem with undo/redo as well.
+  configuration._clearFilteredCases(configuration.dataset);
+  configuration.clearCasesCache();
 }
