@@ -102,7 +102,6 @@ export class CategoricalSizeLegendModel {
     const columnWidth = fullWidth / numColumns;
     const numRows = Math.ceil((this.numCategories ?? 0) / numColumns);
     const rowHeight = this.categoryCircleMaxDiameter + padding;
-    // TODO: the row height is semi dynamic too, so probably it should be added her
 
     const lod: Layout = {
       fullWidth,

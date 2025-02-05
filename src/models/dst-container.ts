@@ -49,7 +49,7 @@ export const dstContainer = DstContainer.create({
       },
       {
         "id": "LAYRL123",
-        "layerIndex": 0,
+        "layerIndex": 1,
         "dataConfiguration": {
           "id": "GDCON123",
           "type": "graphDataConfigurationType",
@@ -105,10 +105,10 @@ export const dstContainer = DstContainer.create({
         "deleteable": true,
         "editable": true,
         "values": [
-          "Toyota",
-          "Volkswagen",
-          "Ford",
-          "Chevy"
+          "A",
+          "B",
+          "C",
+          "D"
         ]
       },
       "ATTR859044866983853": {

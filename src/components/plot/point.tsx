@@ -24,11 +24,9 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   const sizeDataConfig = dstContainer.dataDisplayModel.layers[1].dataConfiguration;
   
   // The default color from the spec is: "#e6805bd9" (RGBA)
-  // TODO: If there is no value for attribute on this case 
-  // dataConfig.getLegendColorForCase(id) will return "#888888"
-  // Even if this isn't a coloring legend like the new "categoricalSize"
-  // legend. This issue should be fixed when we have a separate legend
-  // for color and size.
+  // Note: If there is no value for the attribute on this case getLegendColorForCase(id) 
+  // will return "#888888". Showing this color for points that can't colored by the
+  // legend is the same behavior as CODAP.
   const dotColor = colorDataConfig.getLegendColorForCase(id) || "#e6805b";
   const dotDiameterInPixels = sizeDataConfig.getLegendSizeForCase(id);
   // TODO: replace this hardcoded 0.026 with an actual calculation

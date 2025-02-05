@@ -1,19 +1,7 @@
-@use "../../codap/components/vars.scss";
-
+// This extends codap/components/data-display/components/legend/legend.scss
 .legend-component {
-  position: relative;
-  width: 100%;
-  height: 100%;
-
-  .legend-background {
-    fill: vars.$background-fill;
-    opacity: 1;
-    stroke: none;
-  }
 
   .legend-key {
-    cursor: pointer;
-
     &:hover {
       circle {
         stroke-width: 2px;
@@ -23,16 +11,6 @@
         }
       }
     }
-  }
-
-  svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  text {
-    fill: black;
-    font: 12px sans-serif;
   }
 
   circle {

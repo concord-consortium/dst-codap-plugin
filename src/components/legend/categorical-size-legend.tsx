@@ -9,7 +9,7 @@ import { axisGap } from "../../codap/components/axis/axis-types";
 import { mstAutorun } from "../../codap/utilities/mst-autorun";
 import { IDstDataConfigurationModel } from "../../models/dst-data-display-model";
 
-import "./legend.scss";
+import "./size-legend.scss";
 
 const movingTransitionDuration = 200;
 const sizingTransitionDuration = 300;

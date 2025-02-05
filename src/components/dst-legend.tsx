@@ -9,8 +9,9 @@ import { DataDisplayLayout } from "../codap/components/data-display/models/data-
 import { legendComponentManager } from "../codap/components/data-display/components/legend/legend";
 import { dstContainer } from "../models/dst-container";
 import { IDstDataConfigurationModel } from "../models/dst-data-display-model";
+import { kInitialDimensions } from "../utilities/constants";
 import { CategoricalSizeLegend } from "./legend/categorical-size-legend";
-import { MultiLegend } from "./legend/dst-multi-legend";
+import { DstMultiLegend } from "./legend/dst-multi-legend";
 
 import "./dst-legend.scss";
 
@@ -40,13 +41,12 @@ const tileSelection: ITileSelection = {
   }
 };
 
-// TODO: dynamically compute this height better
-// CODAP reduces the graph to give space to the legend. 
-// I'm not sure if that has some eventual limits, but we 
-// should probably follow the same pattern if so.
+// TODO: handle this height better
+// CODAP reduces the graph to give space to the legend, but the DST cube is not responsive.
 const dataDisplayLayout = new DataDisplayLayout({
-  tileWidth: 500,
-  tileHeight: 440,
+  tileWidth: kInitialDimensions.width,
+  // Need to subtract off the size of the tabs
+  tileHeight: kInitialDimensions.height - 50
 });
 
 export const DstLegend = observer(function DstLegend() {
@@ -62,7 +62,7 @@ export const DstLegend = observer(function DstLegend() {
       <DataDisplayLayoutContext.Provider value={dataDisplayLayout}>
         <TileSelectionContext.Provider value={tileSelection}>
           <BaseDataDisplayModelContext.Provider value={dstContainer.dataDisplayModel}>
-            <MultiLegend divElt={null} 
+            <DstMultiLegend divElt={null} 
               onChangeAttribute={function (dataSet, attrId, layer): void {
                 // TODO: handle mis-matched dataSet
                 if (!layer) {
