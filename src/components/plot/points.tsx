@@ -7,17 +7,15 @@ import { Point } from "./point";
 export const Points = observer(function Points() {
   return (
     <group>
-      {codapData.cases.map((aCase, i) => {
-        const { __id__:id, Latitude, Longitude } = aCase;
+      {codapData.caseIds.map((caseId, i) => {
         return (
           <Point
-            key={`point-${id}`}
-            id={id}
-            isSelected={codapData.isSelected(id)}
-            visible={graph.caseIsVisible(aCase)}
-            x={graph.latitudeInGraphSpace(Latitude)}
-            y={graph.convertCaseDateToGraph(aCase)}
-            z={graph.longitudeInGraphSpace(Longitude)}
+            key={`point-${caseId}`}
+            id={caseId}
+            visible={graph.caseIsVisible(caseId)}
+            x={graph.latitudeInGraphSpace(codapData.getLatitude(caseId))}
+            y={graph.convertCaseDateToGraph(caseId)}
+            z={graph.longitudeInGraphSpace(codapData.getLongitude(caseId))}
           />
         );
       })}

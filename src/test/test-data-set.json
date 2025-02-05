@@ -1,0 +1,201 @@
+{
+    "type": "DG.DataContext",
+    "document": 1,
+    "guid": 806145617244090,
+    "id": 806145617244090,
+    "name": "Tornado_Tracks_2020-2022",
+    "title": "Tornado_Tracks_2020-2022",
+    "collections": [
+        {
+            "attrs": [
+                {
+                    "name": "Year",
+                    "type": "numeric",
+                    "title": "Year",
+                    "cid": "ATTR288273439210548",
+                    "editable": true,
+                    "hidden": false,
+                    "renameable": true,
+                    "deleteable": true,
+                    "guid": 288273439210548,
+                    "id": 288273439210548
+                },
+                {
+                    "name": "Month",
+                    "type": "numeric",
+                    "title": "Month",
+                    "cid": "ATTR385148907825502",
+                    "editable": true,
+                    "hidden": false,
+                    "renameable": true,
+                    "deleteable": true,
+                    "guid": 385148907825502,
+                    "id": 385148907825502
+                },
+                {
+                    "name": "Day",
+                    "type": "numeric",
+                    "title": "Day",
+                    "cid": "ATTR178307284508793",
+                    "editable": true,
+                    "hidden": false,
+                    "renameable": true,
+                    "deleteable": true,
+                    "guid": 178307284508793,
+                    "id": 178307284508793
+                },
+                {
+                    "name": "date",
+                    "type": "date",
+                    "title": "date",
+                    "cid": "ATTR900798028562135",
+                    "editable": true,
+                    "hidden": false,
+                    "renameable": true,
+                    "deleteable": true,
+                    "guid": 900798028562135,
+                    "id": 900798028562135
+                },
+                {
+                    "name": "Time (CST)",
+                    "type": "categorical",
+                    "title": "Time (CST)",
+                    "cid": "ATTR311204243180409",
+                    "editable": true,
+                    "hidden": false,
+                    "renameable": true,
+                    "deleteable": true,
+                    "guid": 311204243180409,
+                    "id": 311204243180409
+                },
+                {
+                    "name": "State",
+                    "type": "categorical",
+                    "title": "State",
+                    "cid": "ATTR922835964659525",
+                    "editable": true,
+                    "hidden": false,
+                    "renameable": true,
+                    "deleteable": true,
+                    "guid": 922835964659525,
+                    "id": 922835964659525
+                },
+                {
+                    "name": "Magnitude (0-5)",
+                    "type": "categorical",
+                    "title": "Magnitude (0-5)",
+                    "cid": "ATTR152208734405953",
+                    "editable": true,
+                    "hidden": false,
+                    "renameable": true,
+                    "deleteable": true,
+                    "guid": 152208734405953,
+                    "id": 152208734405953
+                },
+                {
+                    "name": "Injuries",
+                    "type": "numeric",
+                    "title": "Injuries",
+                    "cid": "ATTR458091096200697",
+                    "editable": true,
+                    "hidden": false,
+                    "renameable": true,
+                    "deleteable": true,
+                    "guid": 458091096200697,
+                    "id": 458091096200697
+                },
+                {
+                    "name": "Fatalities",
+                    "type": "numeric",
+                    "title": "Fatalities",
+                    "cid": "ATTR69643157170537",
+                    "editable": true,
+                    "hidden": false,
+                    "renameable": true,
+                    "deleteable": true,
+                    "guid": 69643157170537,
+                    "id": 69643157170537
+                },
+                {
+                    "name": "Property Loss ($) [0=unk]",
+                    "type": "numeric",
+                    "title": "Property Loss ($) [0=unk]",
+                    "cid": "ATTR784577078719013",
+                    "editable": true,
+                    "hidden": false,
+                    "renameable": true,
+                    "deleteable": true,
+                    "guid": 784577078719013,
+                    "id": 784577078719013
+                },
+                {
+                    "name": "Crop Loss ($) [0=unk]",
+                    "type": "numeric",
+                    "title": "Crop Loss ($) [0=unk]",
+                    "cid": "ATTR873285998291215",
+                    "editable": true,
+                    "hidden": false,
+                    "renameable": true,
+                    "deleteable": true,
+                    "guid": 873285998291215,
+                    "id": 873285998291215
+                },
+                {
+                    "name": "Latitude",
+                    "type": "numeric",
+                    "title": "Latitude",
+                    "cid": "ATTR867722591520141",
+                    "editable": true,
+                    "hidden": false,
+                    "renameable": true,
+                    "deleteable": true,
+                    "guid": 867722591520141,
+                    "id": 867722591520141
+                },
+                {
+                    "name": "Longitude",
+                    "type": "numeric",
+                    "title": "Longitude",
+                    "cid": "ATTR884978505765120",
+                    "editable": true,
+                    "hidden": false,
+                    "renameable": true,
+                    "deleteable": true,
+                    "guid": 884978505765120,
+                    "id": 884978505765120
+                },
+                {
+                    "name": "Length of track (miles)",
+                    "type": "numeric",
+                    "title": "Length of track (miles)",
+                    "cid": "ATTR118108751911961",
+                    "editable": true,
+                    "hidden": false,
+                    "renameable": true,
+                    "deleteable": true,
+                    "guid": 118108751911961,
+                    "id": 118108751911961
+                },
+                {
+                    "name": "Width of track (yards)",
+                    "type": "numeric",
+                    "title": "Width of track (yards)",
+                    "cid": "ATTR199779666258",
+                    "editable": true,
+                    "hidden": false,
+                    "renameable": true,
+                    "deleteable": true,
+                    "guid": 199779666258,
+                    "id": 199779666258
+                }
+            ],
+            "guid": 474867582288850,
+            "id": 474867582288850,
+            "name": "Cases",
+            "title": "Cases",
+            "type": "DG.Collection"
+        }
+    ],
+    "setAsideItems": [],
+    "contextStorage": {}
+}
