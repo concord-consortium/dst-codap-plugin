@@ -18,8 +18,8 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   const [isPointerOver, setPointerOver] = useState(false);
   
   // TODO: these configs might be undefined
-  const colorDataConfig = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
-  const sizeDataConfig = dstContainer.dataDisplayModel.layers[1].dataConfiguration;
+  const colorDataConfig = dstContainer.dataDisplayModel.colorDataConfiguration;
+  const sizeDataConfig = dstContainer.dataDisplayModel.sizeDataConfiguration;
   
   // The default color from the spec is: "#e6805bd9" (RGBA)
   // Note: If there is no value for the attribute on this case getLegendColorForCase(id) 
