@@ -17,10 +17,6 @@ import { NumericSizeLegend } from "./legend/numeric-size-legend";
 
 import "./dst-legend.scss";
 
-// function UnsupportedNumericSize() {
-//   return <text>Numeric attributes do not have a size legend yet</text>;
-// }
-
 const sizeLegendComponentMap: Partial<Record<string, React.ComponentType<IBaseLegendProps>>> = {
   categorical: CategoricalSizeLegend,
   numeric: NumericSizeLegend
