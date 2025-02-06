@@ -96,8 +96,8 @@ export const DstDataConfigurationModel = DataConfigurationModel.named("DstDataCo
   }))
   .views(self => ({
     casesInRangeAreSelected(min: number, max: number): boolean {
-      const selection = self.getCasesForLegendRange(min, max);
-      return !!(selection.length > 0 && selection?.every((anID: string) => self.dataset?.isCaseSelected(anID)));
+      const casesInRange = self.getCasesForLegendRange(min, max);
+      return !!(casesInRange.length > 0 && casesInRange?.every((anID: string) => self.dataset?.isCaseSelected(anID)));
     },
     getLegendSizeForCase(id: string) {
       const legendID = self.attributeID("legend");

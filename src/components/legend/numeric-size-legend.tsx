@@ -6,7 +6,7 @@ import { useDataDisplayLayout } from "../../codap/components/data-display/hooks/
 import { mstReaction } from "../../codap/utilities/mst-reaction";
 import { mstAutorun } from "../../codap/utilities/mst-autorun";
 import { IDstDataConfigurationModel } from "../../models/dst-data-configuration-model";
-import { NumericSizeLegendModel, labelHeight, Key } from "./numeric-size-legend-model";
+import { NumericSizeLegendModel, labelHeight, NumericSizeLegendKey } from "./numeric-size-legend-model";
 
 import "./size-legend.scss";
 
@@ -38,7 +38,8 @@ export const NumericSizeLegend =
           }
           // There is just one row so this is a basic calculation
           // We are just hacking the height of the axis for now
-          return labelHeight + legendModel.layoutData.rowHeight + 20;
+          const axisHeight = 20;
+          return labelHeight + legendModel.layoutData.rowHeight + axisHeight;
         },
         (desiredExtent) => {
           setDesiredExtent(layerIndex, desiredExtent);
@@ -60,7 +61,7 @@ export const NumericSizeLegend =
       };
     }, [layerIndex, setDesiredExtent]);
 
-    const handleLegendKeyClick = useCallback((event: any, d: Key) => {
+    const handleLegendKeyClick = useCallback((event: any, d: NumericSizeLegendKey) => {
       const caseIds = dataConfiguration?.getCasesForLegendRange(d.min, d.max);
       if (caseIds) {
         if (event.shiftKey) dataConfiguration?.dataset?.selectCases(caseIds);
@@ -75,7 +76,7 @@ export const NumericSizeLegend =
 
       const keysSelection = select(keysElt.current)
         .select(".legend-size-numeric-points")
-        .selectAll<SVGGElement, Key>("circle")
+        .selectAll<SVGGElement, NumericSizeLegendKey>("circle")
         .data(legendModel.pointsData)
         .join(
           (enter) => {

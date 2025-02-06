@@ -5,14 +5,14 @@ import { getStringBounds } from "../../codap/components/axis/axis-utils";
 import { DataDisplayLayout } from "../../codap/components/data-display/models/data-display-layout";
 import { IDstDataConfigurationModel } from "../../models/dst-data-configuration-model";
 
-export interface Key {
+export interface NumericSizeLegendKey {
   size: number;
   index: number;
   canonicalValue: number;
   min: number;
   max: number;
 }
-interface Layout {
+interface NumericSizeLegendLayout {
   fullWidth: number;
   numColumns: number;
   rowHeight: number;
@@ -57,7 +57,7 @@ export class NumericSizeLegendModel {
     return this.dataConfiguration?.numericSizeTicks || [];
   }
 
-  get pointsData(): Key[] {
+  get pointsData(): NumericSizeLegendKey[] {
     if (this.ticks.length < 2) return [];
     const halfStep = (this.ticks[1] - this.ticks[0]) / 2;
 
@@ -83,7 +83,7 @@ export class NumericSizeLegendModel {
     const rowHeight = this.circleMaxDiameter + padding;
     const numColumns = this.pointValues.length || 1;
 
-    const lod: Layout = {
+    const lod: NumericSizeLegendLayout = {
       fullWidth,
       numColumns,
       rowHeight

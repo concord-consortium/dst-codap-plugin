@@ -1,6 +1,6 @@
 import {drag, select} from "d3";
 import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import { CategoricalSizeLegendModel, labelHeight, Key } from "./categorical-size-model";
+import { CategoricalSizeLegendModel, labelHeight, CategoricalSizeLegendKey } from "./categorical-size-model";
 import { IBaseLegendProps } from "../../codap/components/data-display/components/legend/legend-common";
 import { useDataConfigurationContext } from "../../codap/components/data-display/hooks/use-data-configuration-context";
 import { useDataDisplayLayout } from "../../codap/components/data-display/hooks/use-data-display-layout";
@@ -61,7 +61,7 @@ export const CategoricalSizeLegend =
       };
     }, [layerIndex, setDesiredExtent]);
 
-    const handleLegendKeyClick = useCallback((event: any, d: Key) => {
+    const handleLegendKeyClick = useCallback((event: any, d: CategoricalSizeLegendKey) => {
       const caseIds = dataConfiguration?.getCasesForLegendValue(d.category);
       if (caseIds) {
         // This is breaking the graph-legend cypress test
@@ -73,19 +73,19 @@ export const CategoricalSizeLegend =
 
     // The dragBehavior is created first, so d3Render can add this to all new elements.
     const dragBehavior = useMemo(() => {
-      const onDragStart = (event: { x: number; y: number }, d: Key) => {
+      const onDragStart = (event: { x: number; y: number }, d: CategoricalSizeLegendKey) => {
         legendModel.onDragStart(event, d);
       };
 
-      const onDrag = (event: { dx: number; dy: number }, d: Key) => {
+      const onDrag = (event: { dx: number; dy: number }, d: CategoricalSizeLegendKey) => {
         legendModel.onDrag(event, d);
       };
 
-      const onDragEnd = (event: any, d: Key) => {
+      const onDragEnd = (event: any, d: CategoricalSizeLegendKey) => {
         legendModel.onDragEnd(dataConfiguration, d);
       };
 
-      return drag<SVGGElement, Key>()
+      return drag<SVGGElement, CategoricalSizeLegendKey>()
         .on("start", onDragStart)
         .on("drag", onDrag)
         .on("end", onDragEnd);
@@ -97,7 +97,7 @@ export const CategoricalSizeLegend =
       const keySize = legendModel.categoryCircleMaxDiameter;
 
       const keysSelection = select(keysElt.current)
-        .selectAll<SVGGElement, Key>("g")
+        .selectAll<SVGGElement, CategoricalSizeLegendKey>("g")
         .data(legendModel.categoryData, d => d.category)
         .join(
           (enter) => {
