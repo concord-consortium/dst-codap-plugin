@@ -12,6 +12,14 @@ export const DstLayerModel = types.model("DstLayerModel", {
 export const DstDataDisplayModel = types.model("DstDataDisplayModel", {
   layers: types.array(DstLayerModel)
 })
+.views(self => ({
+  get colorDataConfiguration() {
+    return self.layers[0].dataConfiguration;
+  },
+  get sizeDataConfiguration() {
+    return self.layers[1].dataConfiguration;
+  }
+}))
 .actions(self => ({
   placeCanAcceptAttributeIDDrop(place: GraphPlace,
     dataset: IDataSet | undefined,
