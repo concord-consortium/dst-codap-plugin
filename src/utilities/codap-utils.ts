@@ -149,7 +149,7 @@ export function updateDataSetAttributes(dataContext: DIDataContext) {
   applySnapshot(dstCaseMetadata, metadataSnapshot);
 
   const colorAttribute = dstDataset.getAttributeByName("Magnitude (0-5)");
-  const sizeAttribute = dstDataset.getAttributeByName("Magnitude (0-5)");
+  const sizeAttribute = dstDataset.getAttributeByName("Injuries");
   const latAttribute = dstDataset.getAttributeByName("Latitude");
   const longAttribute = dstDataset.getAttributeByName("Longitude");
   
