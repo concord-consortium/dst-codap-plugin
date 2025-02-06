@@ -3,7 +3,8 @@ import { IDataSet } from "../../../models/data/data-set"
 import { GraphPlace } from "../../axis-graph-shared"
 import { IDataConfigurationModel } from "./data-configuration-model"
 
-interface IBaseLayerModel {
+// This is used when parts of the CODAP source is used outside of CODAP
+export interface IBaseLayerModel {
   layerIndex: number,
   id: string,
   dataConfiguration: IDataConfigurationModel

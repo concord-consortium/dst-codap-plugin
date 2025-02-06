@@ -16,9 +16,23 @@ interface IPointProps {
 }
 export const Point = observer(function Point({ id, visible, x, y, z }: IPointProps) {
   const [isPointerOver, setPointerOver] = useState(false);
-  const dataConfig = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
-  const dotColor = dataConfig.getLegendColorForCase(id);
-  const basePointSize = 0.12;
+  
+  // TODO: these configs might be undefined
+  const colorDataConfig = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
+  const sizeDataConfig = dstContainer.dataDisplayModel.layers[1].dataConfiguration;
+  
+  // The default color from the spec is: "#e6805bd9" (RGBA)
+  // Note: If there is no value for the attribute on this case getLegendColorForCase(id) 
+  // will return "#888888". Showing this color for points that can't colored by the
+  // legend is the same behavior as CODAP.
+  const dotColor = colorDataConfig.getLegendColorForCase(id) || "#e6805b";
+  const dotDiameterInPixels = sizeDataConfig.getLegendSizeForCase(id);
+  // TODO: replace this hardcoded 0.026 with an actual calculation
+  // It should be possible to compute it from the camera settings.
+  // The basePointSize was originally 0.12
+  // The pointSize is a radius so if we had a conversion from pixels to 
+  // 3d units we also have to divide by 2.
+  const basePointSize = dotDiameterInPixels * 0.026;
   const isSelected = codapData.isSelected(id);
   const selectedExtra = isSelected ? .02 : 0;
   const hoverMultiplier = isPointerOver ? 1.5 : 1;

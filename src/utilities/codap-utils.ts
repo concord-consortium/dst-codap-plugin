@@ -16,6 +16,9 @@ import { DstContainer, dstContainer } from "../models/dst-container";
 import { ui } from "../models/ui";
 import { kCollectionName, kInitialDimensions, kPluginName, kVersion } from "./constants";
 
+// This alternative dataset is easier to debug because it only has 2 cases
+// import dataURL from "../data/Tornado_Tracks_2.csv";
+// const dataContextName = "Tornado_Tracks_2";
 import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
 const dataContextName = "Tornado_Tracks_2020-2022";
 
@@ -146,15 +149,26 @@ export function updateDataSetAttributes(dataContext: DIDataContext) {
   applySnapshot(dstCaseMetadata, metadataSnapshot);
 
   const colorAttribute = dstDataset.getAttributeByName("Magnitude (0-5)");
+  const sizeAttribute = dstDataset.getAttributeByName("Magnitude (0-5)");
   const latAttribute = dstDataset.getAttributeByName("Latitude");
   const longAttribute = dstDataset.getAttributeByName("Longitude");
   
-  if (!colorAttribute || !latAttribute || !longAttribute) return;
+  if (!colorAttribute || !sizeAttribute || !latAttribute || !longAttribute) return;
 
-  const configuration = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
-  configuration.setAttribute("legend", {attributeID: colorAttribute.id});
-  configuration.setAttribute("x", {attributeID: longAttribute.id});
-  configuration.setAttribute("y", {attributeID: latAttribute.id});
+  const colorConfiguration = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
+  colorConfiguration.setAttribute("legend", {
+    attributeID: colorAttribute.id,
+  });
+  colorConfiguration.setAttribute("x", {attributeID: longAttribute.id});
+  colorConfiguration.setAttribute("y", {attributeID: latAttribute.id});
+
+  const sizeConfiguration = dstContainer.dataDisplayModel.layers[1].dataConfiguration;
+  sizeConfiguration.setAttribute("legend", {
+    attributeID: sizeAttribute.id,
+  });
+  sizeConfiguration.setAttribute("x", {attributeID: longAttribute.id});
+  sizeConfiguration.setAttribute("y", {attributeID: latAttribute.id});
+
 }
 
 export function setDSTCases(cases: ICaseCreation[]) {

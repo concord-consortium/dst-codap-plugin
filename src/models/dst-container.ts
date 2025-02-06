@@ -1,5 +1,5 @@
 import { types } from "mobx-state-tree";
-import { DstDataDisplayModel } from "./data-display-model";
+import { DstDataDisplayModel } from "./dst-data-display-model";
 import { DataSet } from "../codap/models/data/data-set";
 import { SharedCaseMetadata } from "../codap/models/shared/shared-case-metadata";
 import { IHistoryServiceEnv } from "../codap/models/history/history-service";
@@ -39,9 +39,26 @@ export const dstContainer = DstContainer.create({
           "type": "graphDataConfigurationType",
           "_attributeDescriptions": {
             "legend": {
-              "attributeID": "ATTR444185124424189"
+              "attributeID": "ATTR444185124424189",
             }
           },
+          "dataset": "DATA33637005901959",
+          "metadata": "SHARQxjKerhUm8ts",
+          "hiddenCases": [],
+        }
+      },
+      {
+        "id": "LAYRL123",
+        "layerIndex": 1,
+        "dataConfiguration": {
+          "id": "GDCON123",
+          "type": "graphDataConfigurationType",
+          "_attributeDescriptions": {
+            "legend": {
+              "attributeID": "ATTR444185124424189",
+            }
+          },
+          "legendRepresentation": "size",
           "dataset": "DATA33637005901959",
           "metadata": "SHARQxjKerhUm8ts",
           "hiddenCases": [],
@@ -88,10 +105,10 @@ export const dstContainer = DstContainer.create({
         "deleteable": true,
         "editable": true,
         "values": [
-          "Toyota",
-          "Volkswagen",
-          "Ford",
-          "Chevy"
+          "A",
+          "B",
+          "C",
+          "D"
         ]
       },
       "ATTR859044866983853": {

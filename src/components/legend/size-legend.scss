@@ -1,0 +1,26 @@
+// This extends codap/components/data-display/components/legend/legend.scss
+.legend-component {
+
+  .legend-key {
+    &:hover {
+      circle {
+        stroke-width: 2px;
+
+        &.legend-key-selected {
+          stroke-width: 3px;
+        }
+      }
+    }
+  }
+
+  circle {
+    stroke: black;
+    fill: white;
+
+    &.legend-key-selected {
+      stroke: red;
+      stroke-width: 2px;    
+    }
+  }
+
+}
