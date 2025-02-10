@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { DndContext, useSensors } from "@dnd-kit/core";
 
 import { BaseDataDisplayModelContext } from "../codap/components/data-display/hooks/use-base-data-display-model";
-import { ITileSelection, TileSelectionContext } from "../codap/hooks/use-tile-selection-context";
+import { FocusIgnoreFn, ITileSelection, TileSelectionContext } from "../codap/hooks/use-tile-selection-context";
 import { DataDisplayLayoutContext } from "../codap/components/data-display/hooks/use-data-display-layout";
 import { DataDisplayLayout } from "../codap/components/data-display/models/data-display-layout";
 import { legendComponentManager } from "../codap/components/data-display/components/legend/legend";
@@ -43,6 +43,9 @@ const tileSelection: ITileSelection = {
     throw new Error("Function not implemented.");
   },
   selectTile() {
+    throw new Error("Function not implemented.");
+  },
+  addFocusIgnoreFn(ignoreFn: FocusIgnoreFn) {
     throw new Error("Function not implemented.");
   }
 };
