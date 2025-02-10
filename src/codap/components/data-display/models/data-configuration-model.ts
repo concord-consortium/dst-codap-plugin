@@ -333,7 +333,7 @@ export const DataConfigurationModel = types
         return self.metadata.getCategorySet(attributeID)
       }
     },
-    categoricalRoles(): AttrRole[] {
+    get categoricalRoles(): AttrRole[] {
       return self.attributeType("legend") === "categorical" ? ["legend"] : []
     }
   }))
@@ -347,10 +347,9 @@ export const DataConfigurationModel = types
       calculate: (role: AttrRole, emptyCategoryArray = [kMain]) => {
         const valuesSet = new Set(self.valuesForAttrRole(role)),
           categoryLimitForRole = self.numberOfCategoriesLimitByRole.get(role)
+        if (valuesSet.size === 0) return emptyCategoryArray
+
         let resultArray: string[] = []
-        if (valuesSet.size === 0) {
-          resultArray.push(kMain)
-        }
         // category set maintains the canonical order of categories
         const allCategorySet = self.categorySetForAttrRole(role)
         // if we don't have a category set just return the values
@@ -374,7 +373,7 @@ export const DataConfigurationModel = types
     }),
     get allCategoriesForRoles() {
       const categories: Map<AttrRole, string[]> = new Map()
-      const roles = self.categoricalRoles()
+      const roles = self.categoricalRoles
       roles.forEach(role => {
         const categorySet = self.categorySetForAttrRole(role)
         if (categorySet) {

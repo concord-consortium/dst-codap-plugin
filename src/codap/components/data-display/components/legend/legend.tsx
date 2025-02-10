@@ -1,13 +1,14 @@
-import React, {useRef} from "react"
-import {IDataSet} from "../../../../models/data/data-set"
-import {GraphPlace} from "../../../axis-graph-shared"
-import {useDataConfigurationContext} from "../../hooks/use-data-configuration-context"
+import React, { useRef } from "react"
+import { observer } from "mobx-react-lite"
+import { IDataSet } from "../../../../models/data/data-set"
+import { GraphPlace } from "../../../axis-graph-shared"
+import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context"
 import { IDataConfigurationModel } from "../../models/data-configuration-model"
-import {LegendAttributeLabel} from "./legend-attribute-label"
-import {CategoricalLegend} from "./categorical-legend"
+import { LegendAttributeLabel } from "./legend-attribute-label"
+import { CategoricalLegend } from "./categorical-legend"
 import { ColorLegend } from "./color-legend"
 import { IBaseLegendProps } from "./legend-common"
-import {NumericLegend} from "./numeric-legend"
+import { NumericLegend } from "./numeric-legend"
 
 // This is exported so other users of CODAP can modify its behavior
 export const legendComponentManager = {
@@ -30,7 +31,7 @@ interface ILegendProps {
   onDropAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
 }
 
-export const Legend = function Legend({
+export const Legend = observer(function Legend({
                                         layerIndex, setDesiredExtent, onDropAttribute
                                       }: ILegendProps) {
   const dataConfiguration = useDataConfigurationContext(),
@@ -38,6 +39,7 @@ export const Legend = function Legend({
     LegendComponent = dataConfiguration && legendComponentManager.getLegendComponent(dataConfiguration),
     legendRef = useRef() as React.RefObject<SVGSVGElement>
 
+  // Only show the legend if there is a legend role specified in the dataConfiguration
   return attrType ? (
     <>
       <svg ref={legendRef} className='legend-component' data-testid='legend-component'>
@@ -48,5 +50,4 @@ export const Legend = function Legend({
       </svg>
     </>
   ) : null
-}
-Legend.displayName = "Legend"
+})
