@@ -7,24 +7,30 @@ import { ITileSelection, TileSelectionContext } from "../codap/hooks/use-tile-se
 import { DataDisplayLayoutContext } from "../codap/components/data-display/hooks/use-data-display-layout";
 import { DataDisplayLayout } from "../codap/components/data-display/models/data-display-layout";
 import { legendComponentManager } from "../codap/components/data-display/components/legend/legend";
+import { IBaseLegendProps } from "../codap/components/data-display/components/legend/legend-common";
 import { dstContainer } from "../models/dst-container";
-import { IDstDataConfigurationModel } from "../models/dst-data-display-model";
+import { IDstDataConfigurationModel } from "../models/dst-data-configuration-model";
 import { kInitialDimensions } from "../utilities/constants";
 import { CategoricalSizeLegend } from "./legend/categorical-size-legend";
 import { DstMultiLegend } from "./legend/dst-multi-legend";
+import { NumericSizeLegend } from "./legend/numeric-size-legend";
 
 import "./dst-legend.scss";
 
-// function UnsupportedNumericSize() {
-//   return <text>Numeric attributes do not have a size legend yet</text>;
-// }
+const sizeLegendComponentMap: Partial<Record<string, React.ComponentType<IBaseLegendProps>>> = {
+  categorical: CategoricalSizeLegend,
+  numeric: NumericSizeLegend
+};
 
-// register our new legend
+// register our new legends
 legendComponentManager.getLegendComponent = (dataConfig) => {
   const type = dataConfig.attributeType("legend");
   const representation = (dataConfig as IDstDataConfigurationModel).legendRepresentation;
 
-  if (representation === "size" && type === "categorical") return CategoricalSizeLegend;
+  if (representation === "size" && type) {
+    const component = sizeLegendComponentMap[type];
+    if (component) return component;
+  }
 
   // If the representation is size by the type is numeric or date then the result is currently
   // broken. The legend will show as color numeric legend. But the points will get rendered

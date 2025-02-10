@@ -8,9 +8,9 @@ import { IDataConfigurationModel } from "../../codap/components/data-display/mod
 import { kDataDisplayFont, kMain } from "../../codap/components/data-display/data-display-types";
 import { measureText } from "../../codap/hooks/use-measure-text";
 import { logMessageWithReplacement } from "../../codap/lib/log-message";
-import { defaultPointDiameter, IDstDataConfigurationModel } from "../../models/dst-data-display-model";
+import { defaultPointDiameter, IDstDataConfigurationModel } from "../../models/dst-data-configuration-model";
 
-export interface Key {
+export interface CategoricalSizeLegendKey {
   category: string;
   size: number;
   index: number;
@@ -124,7 +124,7 @@ export class CategoricalSizeLegendModel {
     return catIndex >= 0 && catIndex < this.numCategories ? catIndex : -1;
   }
 
-  catLocation(categoryKey: Key) {
+  catLocation(categoryKey: CategoricalSizeLegendKey) {
     return {
       x: axisGap + categoryKey.column * this.layoutData.columnWidth,
       y: categoryKey.row * this.layoutData.rowHeight
@@ -155,7 +155,7 @@ export class CategoricalSizeLegendModel {
     }));
   }
 
-  onDragStart(event: { x: number; y: number; }, d: Key) {
+  onDragStart(event: { x: number; y: number; }, d: CategoricalSizeLegendKey) {
     const localPt = {
       x: event.x,
       y: event.y - labelHeight
@@ -179,7 +179,7 @@ export class CategoricalSizeLegendModel {
     dI.currentIndex = d.index;
   }
 
-  onDrag(event: { dx: number; dy: number; }, d: Key) {
+  onDrag(event: { dx: number; dy: number; }, d: CategoricalSizeLegendKey) {
     if (event.dx !== 0 || event.dy !== 0) {
       const dI = this.dragInfo;
 
@@ -197,7 +197,7 @@ export class CategoricalSizeLegendModel {
   }
 
   onDragEnd(
-    dataConfiguration: IDataConfigurationModel | undefined, d: Key
+    dataConfiguration: IDataConfigurationModel | undefined, d: CategoricalSizeLegendKey
   ) {
     const categories = dataConfiguration?.categoryArrayForAttrRole("legend") || [];
     const dI = this.dragInfo;

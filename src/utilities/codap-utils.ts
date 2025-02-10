@@ -149,20 +149,20 @@ export function updateDataSetAttributes(dataContext: DIDataContext) {
   applySnapshot(dstCaseMetadata, metadataSnapshot);
 
   const colorAttribute = dstDataset.getAttributeByName("Magnitude (0-5)");
-  const sizeAttribute = dstDataset.getAttributeByName("Magnitude (0-5)");
+  const sizeAttribute = dstDataset.getAttributeByName("Injuries");
   const latAttribute = dstDataset.getAttributeByName("Latitude");
   const longAttribute = dstDataset.getAttributeByName("Longitude");
   
   if (!colorAttribute || !sizeAttribute || !latAttribute || !longAttribute) return;
 
-  const colorConfiguration = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
+  const colorConfiguration = dstContainer.dataDisplayModel.colorDataConfiguration;
   colorConfiguration.setAttribute("legend", {
     attributeID: colorAttribute.id,
   });
   colorConfiguration.setAttribute("x", {attributeID: longAttribute.id});
   colorConfiguration.setAttribute("y", {attributeID: latAttribute.id});
 
-  const sizeConfiguration = dstContainer.dataDisplayModel.layers[1].dataConfiguration;
+  const sizeConfiguration = dstContainer.dataDisplayModel.sizeDataConfiguration;
   sizeConfiguration.setAttribute("legend", {
     attributeID: sizeAttribute.id,
   });
@@ -175,10 +175,13 @@ export function setDSTCases(cases: ICaseCreation[]) {
   const dstDataset = dstContainer.dataSet;
   dstDataset.removeCases(dstDataset.itemIds);
   dstDataset.addCases(cases, {canonicalize: true});
-  const configuration = dstContainer.dataDisplayModel.layers[0].dataConfiguration;
-  
-  // For the configuration to refresh, the following functions have to be called.
-  // This might show up as a problem with undo/redo as well.
-  configuration._clearFilteredCases(configuration.dataset);
-  configuration.clearCasesCache();
+
+  dstContainer.dataDisplayModel.layers.forEach(layer => {
+    const configuration = layer.dataConfiguration;
+
+    // For the configuration to refresh, the following functions have to be called.
+    // This might show up as a problem with undo/redo as well.
+    configuration._clearFilteredCases(configuration.dataset);
+    configuration.clearCasesCache();
+  });  
 }
