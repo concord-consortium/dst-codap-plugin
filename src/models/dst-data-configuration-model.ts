@@ -9,7 +9,7 @@ const minDiameter = 3;
 const maxDiameter = 21;
 
 // The spec has this at 12, but it is little big with our default data
-export const defaultPointDiameter = 9;
+export const defaultPointDiameter = 8;
 
 export const DstDataConfigurationModel = DataConfigurationModel.named("DstDataConfiguration")
   .props({

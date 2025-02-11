@@ -1,4 +1,4 @@
-import { types } from "mobx-state-tree";
+import { Instance, types } from "mobx-state-tree";
 import { DstDataDisplayModel } from "./dst-data-display-model";
 import { DataSet } from "../codap/models/data/data-set";
 import { SharedCaseMetadata } from "../codap/models/shared/shared-case-metadata";
@@ -9,6 +9,7 @@ export const DstContainer = types.model("DstContainer", {
   dataSet: DataSet,
   sharedCaseMetadata: SharedCaseMetadata,
 });
+export interface IDstContainer extends Instance<typeof DstContainer> {}
 
 const historyServiceEnv: IHistoryServiceEnv = {
   historyService: {
@@ -23,7 +24,8 @@ const historyServiceEnv: IHistoryServiceEnv = {
 
 // The initial model here is mostly a place holder. However some parts of it are
 // preserved when the real data is imported from CODAP.
-// - the dataDisplayModel is mostly preserved. Only the legend.attributeID is updated
+// - the dataDisplayModel is preserved. Only _attributeDescripts.legend.attributeID is updated
+//   when an attribute is configured in the legend.
 // - the dataset id from this initial dataset will replace the imported dataset id, 
 //   so this initial id is preserved.
 // - the metadata id from this initial metadata will replace the imported metadata id,
@@ -36,12 +38,7 @@ export const dstContainer = DstContainer.create({
         "layerIndex": 0,
         "dataConfiguration": {
           "id": "GDCONCfyNftDdK3cd",
-          "type": "graphDataConfigurationType",
-          "_attributeDescriptions": {
-            "legend": {
-              "attributeID": "ATTR444185124424189",
-            }
-          },
+          "_attributeDescriptions": {},
           "dataset": "DATA33637005901959",
           "metadata": "SHARQxjKerhUm8ts",
           "hiddenCases": [],
@@ -52,12 +49,7 @@ export const dstContainer = DstContainer.create({
         "layerIndex": 1,
         "dataConfiguration": {
           "id": "GDCON123",
-          "type": "graphDataConfigurationType",
-          "_attributeDescriptions": {
-            "legend": {
-              "attributeID": "ATTR444185124424189",
-            }
-          },
+          "_attributeDescriptions": {},
           "legendRepresentation": "size",
           "dataset": "DATA33637005901959",
           "metadata": "SHARQxjKerhUm8ts",
