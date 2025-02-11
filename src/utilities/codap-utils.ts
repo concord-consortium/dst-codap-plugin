@@ -155,6 +155,9 @@ export function updateDataSetAttributes(dataContext: DIDataContext) {
   
   if (!colorAttribute || !sizeAttribute || !latAttribute || !longAttribute) return;
 
+  dstCaseMetadata.setAttributeBinningType(colorAttribute.id, "quantize");
+  dstCaseMetadata.setAttributeBinningType(sizeAttribute.id, "quantize");
+
   const colorConfiguration = dstContainer.dataDisplayModel.colorDataConfiguration;
   colorConfiguration.setAttribute("legend", {
     attributeID: colorAttribute.id,
