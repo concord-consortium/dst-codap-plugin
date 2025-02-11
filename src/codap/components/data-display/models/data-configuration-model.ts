@@ -1,4 +1,4 @@
-import {scaleQuantile, ScaleQuantile} from "d3"
+import {extent, scaleQuantile, scaleQuantize} from "d3"
 import {comparer, observable, reaction} from "mobx"
 import {
   addDisposer, getEnv, getSnapshot, hasEnv, IAnyStateTreeNode, Instance, ISerializedActionCall,
@@ -21,12 +21,14 @@ import {
   kDefaultHighAttributeColor, kDefaultLowAttributeColor
 } from "../../../models/shared/shared-case-metadata-constants"
 import {hashStringSets, typedId, uniqueId} from "../../../utilities/js-utils"
-import {getQuantileScale, missingColor, parseColor} from "../../../utilities/color-utils"
+import {getCholorplethColors, missingColor, parseColor} from "../../../utilities/color-utils"
 import { numericSortComparator } from "../../../utilities/data-utils"
 import {GraphPlace} from "../../axis-graph-shared"
+import { getScaleThresholds } from "../components/legend/choropleth-legend/choropleth-legend"
 import {CaseData} from "../d3-types"
-import { AttrRole, GraphAttrRole, TipAttrRoles, graphPlaceToAttrRole, kOther, kMain, GraphSplitAttrRoles }
-  from "../data-display-types"
+import {
+  AttrRole, GraphAttrRole, TipAttrRoles, graphPlaceToAttrRole, kOther, kMain, GraphSplitAttrRoles
+} from "../data-display-types"
 
 export const AttributeDescription = types
   .model('AttributeDescription', {
@@ -277,6 +279,16 @@ export const DataConfigurationModel = types
       // The first attribute is always assigned as 'caption'. So it's really no attributes assigned except for that
       return this.attributes.length <= 1
     },
+    /**
+     * Return all cases that are plotted at least once:
+     * - set aside cases in the dataset should be excluded
+     * - cases filtered by the filter formula in the dataset should be excluded
+     * - cases hidden in the visualization should be excluded
+     * - cases filtered by the filter formula in the visualization should be excluded
+     * - cases that do not have valid values for the configured role attribute descriptions. And example is
+     *   when a case has a non-numeric value for a numeric axis. If the case can be shown multiple times,
+     *   all instances have to be invalid for it to be excluded.
+     */
     get visibleCaseIds() {
       const allCaseIds = new Set<string>()
       self.filteredCases.forEach(aFilteredCases => {
@@ -294,6 +306,10 @@ export const DataConfigurationModel = types
       if (!self.dataset) return []
       return Array.from(this.visibleCaseIds).filter(caseId => self.dataset?.isCaseSelected(caseId))
     },
+    /**
+     * This returns an array of the visible cases that are unselected.
+     * If displayOnlySelectedCases is enabled, this will return an empty set.
+     */
     get unselectedCases() {
       if (!self.dataset) return []
       return Array.from(this.visibleCaseIds).filter(caseId => !self.dataset?.isCaseSelected(caseId))
@@ -309,10 +325,16 @@ export const DataConfigurationModel = types
         const allCaseIDs = Array.from(self.visibleCaseIds)
         const allValues = attrID ? allCaseIDs.map((anID: string) => dataset?.getStrValue(anID, attrID)) : []
         return allValues.filter(aValue => aValue) as string[]
-      }
+      },
+      name: "valuesForAttrRole"
     })
   }))
   .views(self => ({
+    /**
+     * This returns just values which can be converted to numbers for the
+     * attribute of this role. It does not include all cases, see `visibleCaseIds`.
+     * TODO: it seems better if this included unselected cases when displayOnlySelectedCases is enabled
+     */
     numericValuesForAttrRole: cachedFnWithArgsFactory({
       key: (role: AttrRole) => role,
       calculate: (role: AttrRole) => {
@@ -325,7 +347,8 @@ export const DataConfigurationModel = types
             return isFiniteNumber(value) ? value : null
           }) : []
         return allValues.filter(aValue => aValue != null)
-      }
+      },
+      name: "numericValuesForAttrRole"
     }),
     categorySetForAttrRole(role: AttrRole) {
       if (self.metadata) {
@@ -369,7 +392,8 @@ export const DataConfigurationModel = types
           }
         }
         return resultArray
-      }
+      },
+      name: "categoryArrayForAttrRole"
     }),
     get allCategoriesForRoles() {
       const categories: Map<AttrRole, string[]> = new Map()
@@ -414,7 +438,8 @@ export const DataConfigurationModel = types
           }
         }
         return caseDataArray
-      }
+      },
+      name: "getCaseDataArray"
     }),
     get joinedCaseDataArrays() {
       const joinedCaseData: CaseData[] = []
@@ -439,42 +464,58 @@ export const DataConfigurationModel = types
     get caseDataHash() {
       return hashStringSets(self.filteredCases.map(cases => cases.caseIds))
     },
-    get quantileScaleColors() {
-      return getQuantileScale(
+    get choroplethColors() {
+      return getCholorplethColors(
         self.lowColor ?? kDefaultLowAttributeColor,
         self.highColor ?? kDefaultHighAttributeColor
       )
     }
   }))
-  .extend(self => {
-    // TODO: This is a hack to get around the fact that MST doesn't seem to cache this as expected
-    // when implemented as simple view.
-    let quantileScale: ScaleQuantile<string> | undefined = undefined
-    let previousLowAttributeColor: string | undefined
-    let previousHighAttributeColor: string | undefined
+  .views(self => ({
+    get legendNumericColorScale() {
+      // TODO: Handle the displayOnlySelectedCases better. What we would like to do is
+      // to basically ignore displayOnlySelectedCases when computing the legend bins.
+      // This way the legend will not jump around when the user is selecting different
+      // cases when in displayOnlySelectedCases mode.
+      // There are several criteria besides displayOnlySelectedCases which impact which
+      // cases are shown on the visualization:
+      // - set aside cases in the dataset should be excluded
+      // - cases filtered by the filter formula in the dataset should be excluded
+      // - cases hidden in the visualization should be excluded
+      // - cases filtered by the filter formula in the visualization should be excluded
+      // - cases that are not plottable on at least one of the plots of the visualization
+      //   should be excluded
+      // All of these criteria are handled by numericValuesForAttrRole("legend") but it also
+      // excludes unselected cases if displayOnlySelectedCases is enabled.
+      // It would make sense for numericValuesForAttrRole to ignore the
+      // displayOnlySelectedCases criteria. It is used here and also to compute the axis extents.
+      // The axes should also not jump around when using displayOnlySelectedCases.
+      // Implementing this is hard because of the last bullet. Handling the "not plottable"
+      // cases is done by the FilteredCases system which is overridden by the
+      // GraphDataConfigurationModel in order to handle graphs with multiple y axes. This
+      // FilterCases system is also what implements displayOnlySelectedCases.
+      // The best solution might be to separate the displayOnlySelectedCases from FilterCases,
+      // perhaps by renaming it PlottableCases and then apply the displayOnlySelectedCases
+      // criteria further up chain of filters.
+      const values = self.numericValuesForAttrRole("legend") ?? []
 
-    return {
-      views: {
-        get legendQuantileScale() {
-          if (
-            !quantileScale ||
-            previousLowAttributeColor !== self.lowColor ||
-            previousHighAttributeColor !== self.highColor
-          ) {
-            previousLowAttributeColor = self.lowColor
-            previousHighAttributeColor = self.highColor
-            quantileScale = scaleQuantile(self.numericValuesForAttrRole('legend'), self.quantileScaleColors)
+      const legendAttrId = self.attributeID("legend")
+      const binningType = self.metadata?.getAttributeBinningType(legendAttrId)
+      switch (binningType) {
+        case "quantize": {
+          const extents = extent(values)
+          if (extents[0] == null || extents[1] == null) {
+            return scaleQuantize([], self.choroplethColors)
           }
-          return quantileScale
-        },
-      },
-      actions: {
-        invalidateQuantileScale() {
-          quantileScale = undefined
+          return scaleQuantize(extents, self.choroplethColors)
+
         }
+        case "quantile":
+        default:
+          return scaleQuantile(values, self.choroplethColors)
       }
-    }
-  })
+    },
+  }))
   .views(self => (
     {
       getLegendColorForCategory(cat: string): string {
@@ -483,12 +524,12 @@ export const DataConfigurationModel = types
       },
 
       getLegendColorForNumericValue(value: number): string {
-        return self.legendQuantileScale(value)
+        return self.legendNumericColorScale(value)
       },
 
       getLegendColorForDateValue(value: string): string {
         const dateValueArray = stringValuesToDateSeconds([value])
-        return self.legendQuantileScale(dateValueArray[0])
+        return self.legendNumericColorScale(dateValueArray[0])
       },
 
       getCasesForCategoryValues(
@@ -548,23 +589,35 @@ export const DataConfigurationModel = types
             dataset?.getStrValue(aCaseData.caseID, legendID) === cat
           ).map((aCaseData: CaseData) => aCaseData.caseID)) ?? []
           return selection.length > 0 && (selection as Array<string>).every(anID => dataset?.isCaseSelected(anID))
-        }
+        },
+        name: "allCasesForCategoryAreSelected"
       }),
-      getCasesForLegendQuantile(quantile: number) {
-        const dataset = self.dataset,
-          legendID = self.attributeID('legend'),
-          thresholds = self.legendQuantileScale.quantiles(),
-          min = quantile === 0 ? -Infinity : thresholds[quantile - 1],
-          max = quantile === thresholds.length ? Infinity : thresholds[quantile]
+      getCasesInLegendRange(min: number, max: number) {
+        const dataset = self.dataset
+        const legendID = self.attributeID('legend')
         return legendID
           ? self.getCaseDataArray(0).filter((aCaseData: CaseData) => {
             const value = dataDisplayGetNumericValue(dataset, aCaseData.caseID, legendID)
             return value !== undefined && value >= min && value < max
           }).map((aCaseData: CaseData) => aCaseData.caseID)
           : []
-      },
-      casesInQuantileAreSelected(quantile: number): boolean {
-        const selection = this.getCasesForLegendQuantile(quantile)
+
+      }
+    }))
+  .views(self => (
+    {
+      getCasesForLegendBin(bin: number) {
+        const scale = self.legendNumericColorScale
+        const thresholds = getScaleThresholds(scale)
+        const min = bin === 0 ? -Infinity : thresholds[bin - 1]
+        const max = bin === thresholds.length ? Infinity : thresholds[bin]
+        return self.getCasesInLegendRange(min, max)
+      }
+    }))
+  .views(self => (
+    {
+      casesInBinAreSelected(quantile: number): boolean {
+        const selection = self.getCasesForLegendBin(quantile)
         return !!(selection.length > 0 && selection?.every((anID: string) => self.dataset?.isCaseSelected(anID)))
       }
     }))
@@ -581,6 +634,30 @@ export const DataConfigurationModel = types
           return !desc || desc.attributeID !== idToDrop
         }
         return false
+      },
+      /**
+       * This is a domain which can be monitored by reactions without having to
+       * request the color for every case to see if the colors have changed.
+       * For numeric and date it is an actual d3 color scale.
+       * For categorical it is a map of categories to colors
+       * The color type is not handled yet.
+       */
+      get legendColorDomain() {
+        const legendType = self.attributeType('legend')
+        switch (legendType) {
+          case "categorical": {
+            const categorySet = self.categorySetForAttrRole('legend')
+            return categorySet?.colorMap
+          }
+          case "numeric":
+          case "date":
+            return self.legendNumericColorScale
+          case "color":
+            // TODO: we need to be watching for any changes to the legend attribute values
+            return 0
+          default:
+            return 0
+        }
       },
       getLegendColorForCase(id: string): string {
 
@@ -663,7 +740,7 @@ export const DataConfigurationModel = types
     },
     handleSetCaseValues(actionCall: ISerializedActionCall, cases: IFilteredChangedCases) {
       if (!isSetCaseValuesAction(actionCall)) return
-      let [affectedCases, affectedAttrIDs] = actionCall.args
+      const [affectedCases] = actionCall.args
       // this is called by the FilteredCases object with additional information about
       // whether the value changes result in adding/removing any cases from the filtered set
       // a single call to setCaseValues can result in up to three calls to the handlers
@@ -679,23 +756,6 @@ export const DataConfigurationModel = types
         const changedCases = affectedCases.filter(aCase => idSet.has(aCase.__id__))
         self.handlers.forEach(handler => handler({name: "setCaseValues", args: [changedCases]}))
         ++self.casesChangeCount
-      }
-      // Changes to case values require that existing cached categorySets be wiped.
-      // But if we know the ids of the attributes involved, we can determine whether
-      // an attribute that has a cache is involved
-      if (!affectedAttrIDs && affectedCases.length === 1) {
-        affectedAttrIDs = Object.keys(affectedCases[0])
-      }
-      if (affectedAttrIDs) {
-        for (const [key, desc] of Object.entries(self.attributeDescriptions)) {
-          if (affectedAttrIDs.includes(desc.attributeID)) {
-            if (key === "legend") {
-              self.invalidateQuantileScale()
-            }
-          }
-        }
-      } else {
-        self.invalidateQuantileScale()
       }
     },
     _updateFilteredCasesCollectionID() {
@@ -846,7 +906,6 @@ export const DataConfigurationModel = types
       addDisposer(self, reaction(
         () => JSON.stringify(self.attributeDescriptionForRole("legend")),
         () => {
-          self.invalidateQuantileScale()
           self.clearCasesCache()
         },
         {name: "DataConfigurationModel.afterCreate.reaction [legend attribute]"}

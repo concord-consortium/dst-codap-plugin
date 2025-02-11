@@ -79,7 +79,8 @@ export const DstLegend = observer(function DstLegend() {
                   return;
                 }
                 const configuration = layer.dataConfiguration;
-                configuration.setAttribute("legend", {attributeID: attrId});              
+                configuration.setAttribute("legend", {attributeID: attrId});
+                configuration.metadata?.setAttributeBinningType(attrId, "quantize");
               } }    
             />
           </BaseDataDisplayModelContext.Provider>
