@@ -17,7 +17,6 @@ interface IPointProps {
 export const Point = observer(function Point({ id, visible, x, y, z }: IPointProps) {
   const [isPointerOver, setPointerOver] = useState(false);
   
-  // TODO: these configs might be undefined
   const colorDataConfig = dstContainer.dataDisplayModel.colorDataConfiguration;
   const sizeDataConfig = dstContainer.dataDisplayModel.sizeDataConfiguration;
   
