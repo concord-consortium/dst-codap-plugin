@@ -13,6 +13,7 @@ import { ICaseCreation } from "../codap/models/data/data-set-types";
 
 import { codapData } from "../models/codap-data";
 import { DstContainer, dstContainer } from "../models/dst-container";
+import { IDstDataConfigurationModel } from "../models/dst-data-configuration-model";
 import { ui } from "../models/ui";
 import { kCollectionName, kInitialDimensions, kPluginName, kVersion } from "./constants";
 
@@ -148,43 +149,36 @@ export function updateDataSetAttributes(dataContext: DIDataContext) {
   const metadataSnapshot = getSnapshot(sharedCaseMetadata);
   applySnapshot(dstCaseMetadata, metadataSnapshot);
 
-  const colorAttribute = dstDataset.getAttributeByName("Magnitude (0-5)");
-  const sizeAttribute = dstDataset.getAttributeByName("Injuries");
   const latAttribute = dstDataset.getAttributeByName("Latitude");
   const longAttribute = dstDataset.getAttributeByName("Longitude");
+
+  // The x and y attributes have to be set for the two configurations.
+  // This is necessary so legend code which can identify what the childmost collection is
+  if (!latAttribute || !longAttribute) return;
   
-  if (!colorAttribute || !sizeAttribute || !latAttribute || !longAttribute) return;
-
-  dstCaseMetadata.setAttributeBinningType(colorAttribute.id, "quantize");
-  dstCaseMetadata.setAttributeBinningType(sizeAttribute.id, "quantize");
-
   const colorConfiguration = dstContainer.dataDisplayModel.colorDataConfiguration;
-  colorConfiguration.setAttribute("legend", {
-    attributeID: colorAttribute.id,
-  });
   colorConfiguration.setAttribute("x", {attributeID: longAttribute.id});
   colorConfiguration.setAttribute("y", {attributeID: latAttribute.id});
 
   const sizeConfiguration = dstContainer.dataDisplayModel.sizeDataConfiguration;
-  sizeConfiguration.setAttribute("legend", {
-    attributeID: sizeAttribute.id,
-  });
   sizeConfiguration.setAttribute("x", {attributeID: longAttribute.id});
   sizeConfiguration.setAttribute("y", {attributeID: latAttribute.id});
+}
 
+function updateConfiguration(configuration?: IDstDataConfigurationModel) {
+  if (!configuration) return;
+
+  // For the configuration to refresh, the following functions have to be called.
+  // This might show up as a problem with undo/redo as well.
+  configuration._clearFilteredCases(configuration.dataset);
+  configuration.clearCasesCache();
 }
 
 export function setDSTCases(cases: ICaseCreation[]) {
   const dstDataset = dstContainer.dataSet;
   dstDataset.removeCases(dstDataset.itemIds);
   dstDataset.addCases(cases, {canonicalize: true});
-
-  dstContainer.dataDisplayModel.layers.forEach(layer => {
-    const configuration = layer.dataConfiguration;
-
-    // For the configuration to refresh, the following functions have to be called.
-    // This might show up as a problem with undo/redo as well.
-    configuration._clearFilteredCases(configuration.dataset);
-    configuration.clearCasesCache();
-  });  
+  const {dataDisplayModel} = dstContainer;
+  updateConfiguration(dataDisplayModel.colorDataConfiguration);
+  updateConfiguration(dataDisplayModel.sizeDataConfiguration);
 }

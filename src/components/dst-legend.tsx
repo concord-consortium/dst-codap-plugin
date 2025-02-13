@@ -2,7 +2,6 @@ import React from "react";
 import { observer } from "mobx-react-lite";
 import { DndContext, useSensors } from "@dnd-kit/core";
 
-import { BaseDataDisplayModelContext } from "../codap/components/data-display/hooks/use-base-data-display-model";
 import { FocusIgnoreFn, ITileSelection, TileSelectionContext } from "../codap/hooks/use-tile-selection-context";
 import { DataDisplayLayoutContext } from "../codap/components/data-display/hooks/use-data-display-layout";
 import { DataDisplayLayout } from "../codap/components/data-display/models/data-display-layout";
@@ -11,6 +10,7 @@ import { IBaseLegendProps } from "../codap/components/data-display/components/le
 import { dstContainer } from "../models/dst-container";
 import { IDstDataConfigurationModel } from "../models/dst-data-configuration-model";
 import { kInitialDimensions } from "../utilities/constants";
+import { DstDataDisplayModelContext } from "./hooks/use-dst-data-display-model";
 import { CategoricalSizeLegend } from "./legend/categorical-size-legend";
 import { DstMultiLegend } from "./legend/dst-multi-legend";
 import { NumericSizeLegend } from "./legend/numeric-size-legend";
@@ -70,7 +70,7 @@ export const DstLegend = observer(function DstLegend() {
     >
       <DataDisplayLayoutContext.Provider value={dataDisplayLayout}>
         <TileSelectionContext.Provider value={tileSelection}>
-          <BaseDataDisplayModelContext.Provider value={dstContainer.dataDisplayModel}>
+          <DstDataDisplayModelContext.Provider value={dstContainer.dataDisplayModel}>
             <DstMultiLegend divElt={null} 
               onChangeAttribute={function (dataSet, attrId, layer): void {
                 // TODO: handle mis-matched dataSet
@@ -79,11 +79,15 @@ export const DstLegend = observer(function DstLegend() {
                   return;
                 }
                 const configuration = layer.dataConfiguration;
-                configuration.setAttribute("legend", {attributeID: attrId});
-                configuration.metadata?.setAttributeBinningType(attrId, "quantize");
+                if (attrId) {
+                  configuration.setAttribute("legend", {attributeID: attrId});
+                  configuration.metadata?.setAttributeBinningType(attrId, "quantize");  
+                } else {
+                  configuration.setAttribute("legend");
+                }
               } }    
             />
-          </BaseDataDisplayModelContext.Provider>
+          </DstDataDisplayModelContext.Provider>
         </TileSelectionContext.Provider>
       </DataDisplayLayoutContext.Provider>
     </DndContext>
