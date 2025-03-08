@@ -16,5 +16,5 @@ test("Test app inside of CODAP", async ({page}) => {
   const iframe = page.frameLocator(".codap-web-view-iframe");
   const firstLegendArea = iframe.getByText("To create a Color Legend");
   await firstLegendArea.click();
-  await expect(iframe.getByTestId("axis-legend-attribute-button-legend")).toHaveText("Magnitude (0-5)");
+  await expect(iframe.getByTestId("attribute-label")).toHaveText("Magnitude (0-5)");
 });
