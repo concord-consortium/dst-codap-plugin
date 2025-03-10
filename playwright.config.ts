@@ -83,7 +83,10 @@ export default defineConfig<PlaywrightCoverageOptions>({
     // baseURL: 'http://127.0.0.1:3000',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: "on-first-retry",
+    // The default value of this is "on-first-retry". This is the recommended because recording traces
+    // slows down the test. However it is nice to have record of the trace for example when reviewing 
+    // a PR and want to see what things look like. We should revisit this in the future.
+    trace: process.env.CI ? "on" : "off",
 
     ignoreHTTPSErrors: true,
 
