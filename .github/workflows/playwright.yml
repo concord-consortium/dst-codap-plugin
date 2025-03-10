@@ -32,3 +32,7 @@ jobs:
       with:
         flags: playwright
         token: ${{ secrets.CODECOV_TOKEN }}
+    - uses: daun/playwright-report-summary@v3
+      if: always()
+      with:
+        report-file: results.json
