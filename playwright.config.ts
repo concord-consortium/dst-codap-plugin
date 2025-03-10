@@ -101,7 +101,7 @@ export default defineConfig<PlaywrightCoverageOptions>({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: { ...devices["Desktop Chrome"], channel: "chromium" },
     },
 
     // {

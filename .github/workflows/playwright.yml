@@ -12,7 +12,7 @@ jobs:
     - name: Install dependencies
       run: npm ci
     - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
+      run: npx playwright install --with-deps --no-shell chromium
     - name: Run Playwright tests
       run: npx playwright test
       env:
@@ -38,6 +38,11 @@ jobs:
       env: 
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    # This currently fails with: "No PR associated with this action run. Not posting a check or comment."
+    # That happens because we are triggering not on the PR but on the push.
+    # However it is possible to figure out the PR because the codecov and cypress actions are doing it.
+    # We stopped using the trigger on PR because that was breaking the s3-deploy-action
+    # So either we fix that action or we fix this one.
     - uses: daun/playwright-report-summary@v3
       if: always()
       with:
