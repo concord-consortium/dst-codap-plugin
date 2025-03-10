@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@bgotink/playwright-coverage";
 
 test("Test app inside of CODAP", async ({page}) => {
   await page.setViewportSize({width: 1400, height: 800});
