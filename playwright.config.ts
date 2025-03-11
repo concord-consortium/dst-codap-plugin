@@ -14,34 +14,35 @@ const collectCoverage = !!process.env.CI;
 const coverageReporter: ReporterDescription = [
   "@bgotink/playwright-coverage",
   /** @type {import('@bgotink/playwright-coverage').CoverageReporterOptions} */ {
-    // Path to the root files should be resolved from, most likely your repository root
+    /* Path to the root files should be resolved from */
     sourceRoot: __dirname,
-    // The coverage seems to be reported with a prefix. This is probably because we are 
-    // running with an iframe so the coverage is separated by the two projects.
+    /* The coverage is reported with a prefix. This is probably because we are 
+       running in an iframe so the coverage of CODAP and the plugin is differenciated
+       by the two prefixes. */
     exclude: [
-      // Because we are running in an iframe inside of CODAPv3 the coverage reporter includes
-      // codap3.
+      /* Ingore all coverage of the CODAP application itself. */
       "codap3/src/**", "codap3/webpack/**",
-      // This plugin has a copy of many of the codap files which are tested within CODAP so
-      // we're going to ignore them here
-      "dst-codap-plugin/src/codap/**"
-    
+      /* This repository has a copy of many of the CODAP files which it uses like a 
+         library to handle it's dataset and add the legend component. These files are 
+         identical to the files in CODAP and should be tested there not here. So we
+         ignore them here. */
+      "dst-codap-plugin/src/codap/**"    
     ],
-    // Directory in which to write coverage reports
+    /* Directory in which to write coverage reports */
     resultDir: path.join(__dirname, "results/e2e-coverage"),
-    // Configure the reports to generate.
-    // The value is an array of istanbul reports, with optional configuration attached.
+    /* Configure the reports to generate.
+       The value is an array of istanbul reports, with optional configuration attached. */
     reports: [
-      // Create an HTML view at <resultDir>/index.html
+      /* Create an HTML view at <resultDir>/index.html */
       ["html"],
-      // Create <resultDir>/coverage.lcov for consumption by tooling
+      /* Create <resultDir>/coverage.lcov for consumption by codecov */
       [
         "lcovonly",
         {
           file: "coverage.lcov",
         },
       ],
-      // Log a coverage summary at the end of the test run
+      /* Log a coverage summary at the end of the test run */
       [
         "text-summary",
         {
@@ -49,12 +50,13 @@ const coverageReporter: ReporterDescription = [
         },
       ],
     ],
-    // Configure watermarks, see https://github.com/istanbuljs/nyc#high-and-low-watermarks
+    /* Configure watermarks, see https://github.com/istanbuljs/nyc#high-and-low-watermarks */
     // watermarks: {},
   },
 ];
 
-// We report json in CI so that a summary of the results can be added to a comment in the PR
+/* We report json in CI so the `daun/playwright-report-summary` action can add a summary of 
+   the results to a PR comment. */
 const reportJson = !!process.env.CI;
 const jsonReporter: ReporterDescription = ["json", { outputFile: "results.json" }];
 
@@ -82,18 +84,16 @@ export default defineConfig<PlaywrightCoverageOptions>({
     /* Base URL to use in actions like `await page.goto('/')`. */
     // baseURL: 'http://127.0.0.1:3000',
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    // The default value of this is "on-first-retry". This is the recommended because recording traces
-    // slows down the test. However it is nice to have record of the trace for example when reviewing 
-    // a PR and want to see what things look like. We should revisit this in the future.
+    /* Collect trace. See https://playwright.dev/docs/trace-viewer 
+       The default value of this is "on-first-retry". This is the recommended because recording traces
+       slows down the test. However it is nice to have record of the trace for example when reviewing 
+       a PR and you want to see what things look like. We should revisit this in the future. */
     trace: process.env.CI ? "on" : "off",
 
+    /* Ignore https errors so we don't have to have valid certificates especially on CI */
     ignoreHTTPSErrors: true,
 
-    /* This setting is ignored by the current version of playwright-coverage 
-       I submitted a PR to fix that: https://github.com/bgotink/playwright-coverage/pull/27
-       In the meantime the coverage is skipped by not mixing in the text method.
-    */
+    /* Only collect coverage information if we are running in CI */
     collectCoverage,
   },
 

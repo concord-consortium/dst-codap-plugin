@@ -7,5 +7,4 @@ This certificate is used when running Playwright in GitHub actions. Playwright i
 
 You might think that running the dev server with our npm script `start:secure:no-certs` would work the same. However this approach doesn't work properly for some reason. 
 
-It might be possible to avoid the `ignoreHTTPSErrors` setting but it adds complication. First the root certificate is required and its location must be supplied to nodeJS via: `export NODE_EXTRA_CA_CERTS="path/rootCA.pem"`. This is necessary so Playwright can verify the server has started up.
-Additionally this root certificate needs to be installed in the GitHub runners trust store. This way the browsers that Playwright runs will trust the certificate. Running `mkcert` should be able to do this.
+It might be possible to avoid the `ignoreHTTPSErrors` setting but it adds complication. First the root certificate is required and its location must be supplied to nodeJS via: `export NODE_EXTRA_CA_CERTS="path/rootCA.pem"`. This is necessary so Playwright can verify the server has started up. Additionally this root certificate needs to be installed in the GitHub runner's trust store. This way the browsers that Playwright runs will trust the certificate. Running `mkcert` might be able to do this.
