@@ -1,5 +1,8 @@
 name: Playwright Tests
-on: push
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
 jobs:
   test:
     timeout-minutes: 60
@@ -29,7 +32,7 @@ jobs:
       with:
         flags: playwright
         token: ${{ secrets.CODECOV_TOKEN }}    
-    - uses: concord-consortium/s3-deploy-action/deploy-path@v1
+    - uses: concord-consortium/s3-deploy-action/deploy-path@SDEPLOY-1-pull-request-trigger
       if: always()
       id: s3-deploy-path
     - name: Upload Playwright Report
@@ -38,11 +41,11 @@ jobs:
       env: 
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    # This currently fails with: "No PR associated with this action run. Not posting a check or comment."
-    # That happens because we are triggering not on the PR but on the push.
-    # However it is possible to figure out the PR because the codecov and cypress actions are doing it.
-    # We stopped using the trigger on PR because that was breaking the s3-deploy-action
-    # So either we fix that action or we fix this one.
+
+    # This requires running on a pull_request event. It uses the info from the event to figure
+    # out what PR to add/update the comment on. At some point it might be useful to update this
+    # action to support push events for branches attached to PRs. That can be supported by this
+    # approach https://github.com/bcgov/action-get-pr/blob/main/action.yml
     - uses: daun/playwright-report-summary@v3
       if: always()
       with:
