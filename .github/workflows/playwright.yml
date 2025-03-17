@@ -25,7 +25,7 @@ jobs:
       with:
         flags: playwright
         token: ${{ secrets.CODECOV_TOKEN }}    
-    - uses: concord-consortium/s3-deploy-action/deploy-path@SDEPLOY-1-pull-request-trigger
+    - uses: concord-consortium/s3-deploy-action/deploy-path@v1
       if: always()
       id: s3-deploy-path
     - name: Upload Playwright Report
