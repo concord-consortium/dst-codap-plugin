@@ -12,6 +12,8 @@ class UI {
 
   mode: modeType = "pointer";
   displayLegend = true;
+  // Whether to show the dataset configuration panel
+  showDatasetConfig = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -31,6 +33,13 @@ class UI {
 
   setMode(mode: modeType) {
     this.mode = mode;
+  }
+
+  /**
+   * Sets whether to show the dataset configuration panel
+   */
+  setShowDatasetConfig(show: boolean) {
+    this.showDatasetConfig = show;
   }
 }
 

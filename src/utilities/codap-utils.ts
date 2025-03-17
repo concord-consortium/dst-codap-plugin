@@ -16,6 +16,8 @@ import { DstContainer, dstContainer } from "../models/dst-container";
 import { IDstDataConfigurationModel } from "../models/dst-data-configuration-model";
 import { ui } from "../models/ui";
 import { kCollectionName, kInitialDimensions, kPluginName, kVersion } from "./constants";
+import { loadInteractiveState } from "./codap-dataset-utils";
+import { datasetConfig } from "../models/dataset-config";
 
 // This alternative dataset is easier to debug because it only has 2 cases
 // import dataURL from "../data/Tornado_Tracks_2.csv";
@@ -24,47 +26,74 @@ import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
 const dataContextName = "Tornado_Tracks_2020-2022";
 
 export async function initializeDST() {
-  initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions})
+  await initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions})
     .catch(reason => {
       // This will happen if not embedded in CODAP
       console.warn("Not embedded in CODAP");
     });
 
-  getData();
-  updateSelection();
-
-  addDataContextChangeListener(dataContextName, notification => {
-    const { operation } = notification.values;
-
-    if (operation === "selectCases") {
-      updateSelection();
+  // Check for existing configuration
+  try {
+    const state = await loadInteractiveState();
+    
+    if (state?.datasetConfig) {
+      // Apply saved configuration
+      Object.assign(datasetConfig, state.datasetConfig);
+      
+      if (datasetConfig.isConfigured && datasetConfig.dataContextName) {
+        // Load the configured dataset
+        await getData(datasetConfig.dataContextName);
+        setupSelectionSynchronization(datasetConfig.dataContextName);
+      } else {
+        // Show configuration panel if not fully configured
+        ui.setShowDatasetConfig(true);
+      }
+    } else {
+      // No previous configuration, check if default dataset exists
+      const dataContextResult = await getDataContext(dataContextName);
+      
+      if (dataContextResult.success) {
+        // Default dataset exists, use it
+        await getData();
+        setupSelectionSynchronization(dataContextName);
+      } else {
+        // No default dataset, show configuration panel
+        ui.setShowDatasetConfig(true);
+      }
     }
-  });
-
-  // When the selection changes in the plugin, pass those changes to Codap.
-  reaction(
-    () => Array.from(codapData.dataSet.selection),
-    selection => selectCases(dataContextName, Array.from(codapData.dataSet.selection)),
-    { equals: comparer.structural}
-  );
+  } catch (error) {
+    console.warn("Error initializing plugin:", error);
+    // Show configuration panel on error
+    ui.setShowDatasetConfig(true);
+  }
 }
 
-export async function getData() {
+/**
+ * Load data from CODAP and set up visualization
+ * @param contextName Optional context name to load, defaults to hardcoded dataContextName
+ */
+export async function getData(contextName: string = dataContextName) {
   try {
-    let dataContextResult = await getDataContext(dataContextName);
+    let dataContextResult = await getDataContext(contextName);
 
     if (!dataContextResult.success) {
-      const createContextResult = await createDataContextFromURL(dataURL);
-      if (!createContextResult.success) {
-        console.error("Couldn't load dataset");
+      // If specified dataset doesn't exist and it's the default dataset, try to create it
+      if (contextName === dataContextName) {
+        const createContextResult = await createDataContextFromURL(dataURL);
+        if (!createContextResult.success) {
+          console.error("Couldn't load dataset");
+          return;
+        }
+        dataContextResult = await getDataContext(contextName);
+      } else {
+        console.error(`Dataset ${contextName} not found`);
         return;
       }
-      dataContextResult = await getDataContext(dataContextName);
     }
 
     updateDataSetAttributes(dataContextResult.values);
 
-    const casesResult = await getCaseByFormulaSearch(dataContextName, kCollectionName, "true");
+    const casesResult = await getCaseByFormulaSearch(contextName, kCollectionName, "true");
 
     if (!casesResult.success) {
       console.error("Couldn't load cases from dataset");
@@ -86,12 +115,37 @@ export async function getData() {
   }
 }
 
-export async function updateSelection() {
+/**
+ * Set up selection synchronization between CODAP and the plugin
+ * @param contextName The name of the dataset context to synchronize with
+ */
+export function setupSelectionSynchronization(contextName: string) {
+  addDataContextChangeListener(contextName, notification => {
+    const { operation } = notification.values;
+
+    if (operation === "selectCases") {
+      updateSelection(contextName);
+    }
+  });
+
+  // When the selection changes in the plugin, pass those changes to Codap.
+  reaction(
+    () => Array.from(codapData.dataSet.selection),
+    selection => selectCases(contextName, Array.from(codapData.dataSet.selection)),
+    { equals: comparer.structural}
+  );
+}
+
+/**
+ * Update the selection from CODAP to the plugin
+ * @param contextName The name of the dataset context to get selection from
+ */
+export async function updateSelection(contextName: string = dataContextName) {
   // If the user is selecting using a marquee, ignore updates from codap.
   if (ui.activeMarquee) return;
 
   try {
-    const selectionListResult = await getSelectionList(dataContextName);
+    const selectionListResult = await getSelectionList(contextName);
     if (selectionListResult.success) {
       codapData.dataSet.setSelectedCases(selectionListResult.values.map((aCase: any) => toV3CaseId(aCase.caseID)));
     }
