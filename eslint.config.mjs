@@ -1,19 +1,19 @@
 // @ts-check
 
-import stylisticEslintPlugin from "@stylistic/eslint-plugin"
-import stylisticJs from "@stylistic/eslint-plugin-js"
-import globals from "globals"
-import jest from "eslint-plugin-jest"
-import json from "eslint-plugin-json"
-import react from "eslint-plugin-react"
-import reactHooks from "eslint-plugin-react-hooks"
-import testingLibrary from "eslint-plugin-testing-library"
-import tsParser from "@typescript-eslint/parser"
-import typescriptEslint from "typescript-eslint"
-import js from "@eslint/js"
-import comments from "@eslint-community/eslint-plugin-eslint-comments/configs"
-import { flatConfigs as importPluginConfig } from "eslint-plugin-import"
-import pluginCypress from "eslint-plugin-cypress/flat"
+import stylisticEslintPlugin from "@stylistic/eslint-plugin";
+import stylisticJs from "@stylistic/eslint-plugin-js";
+import globals from "globals";
+import jest from "eslint-plugin-jest";
+import json from "eslint-plugin-json";
+import react from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
+import testingLibrary from "eslint-plugin-testing-library";
+import tsParser from "@typescript-eslint/parser";
+import typescriptEslint, { configs as tsConfigs } from "typescript-eslint";
+import js from "@eslint/js";
+import comments from "@eslint-community/eslint-plugin-eslint-comments/configs";
+import { flatConfigs as importPluginConfig } from "eslint-plugin-import";
+import pluginCypress from "eslint-plugin-cypress/flat";
 
 // This helper `config()` function replaces the basic [] used by 
 // eslint normally:
@@ -24,8 +24,8 @@ export default typescriptEslint.config(
     ignores: [ "dist/", "node_modules/" ]  
   },
   js.configs.recommended,
-  typescriptEslint.configs.recommended,
-  typescriptEslint.configs.stylistic,
+  tsConfigs.recommended,
+  tsConfigs.stylistic,
   // @ts-expect-error for some reason the rules in comments.recommend are not compatible with
   // RuleEntry
   comments.recommended,
@@ -37,10 +37,10 @@ export default typescriptEslint.config(
   {
     name: "react hooks rules",
     plugins: {
-      'react-hooks': reactHooks,
+      "react-hooks": reactHooks,
     },
     rules: {
-      'react/react-in-jsx-scope': 'off',
+      "react/react-in-jsx-scope": "off",
       ...reactHooks.configs.recommended.rules,
     },
   },
@@ -167,8 +167,8 @@ export default typescriptEslint.config(
     },
     // ts eslint's config function adds back in the `extends` feature of the older eslint
     extends: [
-      jest.configs['flat/recommended'],
-      testingLibrary.configs['flat/react']
+      jest.configs["flat/recommended"],
+      testingLibrary.configs["flat/react"]
     ],
     rules: {
       "@typescript-eslint/no-non-null-assertion": "off",
@@ -194,7 +194,7 @@ export default typescriptEslint.config(
   {
     name: "json files",
     files: ["**/*.json"],
-    ...json.configs["recommended"]
+    ...json.configs.recommended
   },
   {
     name: "webpack configs",
