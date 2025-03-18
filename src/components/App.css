@@ -1,3 +1,10 @@
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 .App {
   text-align: center;
   background-color: white;
@@ -5,6 +12,10 @@
   color: rgb(110,109,95);
   font-family: "Montserrat", serif;
   font-size: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent scrollbars */
 
   .buttons {
     display: flex;
@@ -12,14 +23,19 @@
   }
 
   .chakra-tabs {
-    margin: 0px;
+    margin: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent scrollbars */
 
     .chakra-tabs__tablist {
       border-color: #777;
-      margin-left: 0px;
-      margin-right: 0px;
+      margin-left: 0;
+      margin-right: 0;
       margin-top: 2px;
       padding-left: 3px;
+      flex: 0 0 auto;
 
       .chakra-tabs__tab {
         border: solid 1px #777;
@@ -44,6 +60,17 @@
           height: 25px;
           margin-top: 2px;
         }
+      }
+    }
+    
+    .chakra-tabs__tabpanels {
+      flex: 1 1 auto;
+      height: calc(100% - 30px);
+      overflow: hidden; /* Prevent scrollbars */
+      
+      .chakra-tabs__tab-panel {
+        height: 100%;
+        overflow: hidden; /* Prevent scrollbars */
       }
     }
   }

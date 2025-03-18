@@ -2,7 +2,7 @@ export const kPluginName = "Space-Time Cube";
 export const kVersion = "0.0.1";
 export const kInitialDimensions = {
   width: 685,
-  height: 542
+  height: 700
 };
 
 export const kCollectionName = "Cases";
