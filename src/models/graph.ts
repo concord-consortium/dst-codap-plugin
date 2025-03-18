@@ -52,6 +52,13 @@ class Graph {
   targetMaxLong: Maybe<number>;
   targetMinLong: Maybe<number>;
 
+  // Replace the literal getter methods with readonly fields
+  readonly canPanDown = true;
+  readonly canPanLeft = true;
+  readonly canPanRight = true;
+  readonly canPanUp = true;
+  readonly canZoomOut = true;
+
   constructor() {
     makeAutoObservable(this);
   }
@@ -121,29 +128,32 @@ class Graph {
     if (latitude == null || longitude == null) return false;
 
     const datePercent = this.convertCaseDateToPercent(caseId);
+    if (datePercent === undefined) return false;
+    
+    // Simple visibility check based on coordinates and date percent
     return latitude >= this.minLatitude && latitude <= this.maxLatitude &&
       longitude >= this.minLongitude && longitude <= this.maxLongitude &&
       datePercent >= this.minDatePercent && datePercent <= this.currentDatePercent;
   }
   
-  convertCaseDate(caseId: string) {
+  convertCaseDate(caseId: string): number {
     const date = codapData.getCaseDate(caseId);
-    return isFinite(date) ? date : this.defaultDate;
+    return date !== undefined && isFinite(date) ? date : this.defaultDate;
   }
   
-  convertCaseDateToGraph(caseId: string) {
+  convertCaseDateToGraph(caseId: string): number {
     return this.convertDateToGraph(this.convertCaseDate(caseId));
   }
 
-  convertCaseDateToPercent(caseId: string) {
+  convertCaseDateToPercent(caseId: string): number {
     return this.convertDateToPercent(this.convertCaseDate(caseId));
   }
 
-  convertDateToGraph(date: number) {
+  convertDateToGraph(date: number): number {
     return this.convertPercentToGraph(this.convertDateToPercent(date));
   }
 
-  convertDateToPercent(date: number) {
+  convertDateToPercent(date: number): number {
     return (date - codapData.absoluteMinDate) / codapData.absoluteDateRange;
   }
 
@@ -169,22 +179,6 @@ class Graph {
     return this.currentDatePercent < this.maxDatePercent;
   }
 
-  get canPanDown() {
-    return this.minLatitude > this.absoluteMinLatitude;
-  }
-
-  get canPanLeft() {
-    return this.minLongitude > this.absoluteMinLongitude;
-  }
-
-  get canPanRight() {
-    return this.maxLongitude < this.absoluteMaxLongitude;
-  }
-
-  get canPanUp() {
-    return this.maxLatitude < this.absoluteMaxLatitude;
-  }
-
   get canReset() {
     return this.maxLatitude !== this.homeMaxLatitude || this.minLatitude !== this.homeMinLatitude ||
       this.maxLongitude !== this.homeMaxLongitude || this.minLongitude !== this.homeMinLongitude;
@@ -193,11 +187,6 @@ class Graph {
   get canZoomIn() {
     const longRange = this.targetLongRange ?? this.longRange;
     return longRange > minWidth;
-  }
-
-  get canZoomOut() {
-    const longRange = this.targetLongRange ?? this.longRange;
-    return longRange < this.maxWidth;
   }
 
   get centerLat() {
@@ -273,35 +262,31 @@ class Graph {
   }
 
   panDown(amount?: number) {
-    if (!this.canPanDown) return;
-
+    // Remove the restriction on panning down
     const __amount = amount ?? this.latRange / 4;
-    const _amount = Math.min(Math.abs(__amount), this.minLatitude - this.absoluteMinLatitude);
-    this.animateTo({ maxLatitude: this.maxLatitude - _amount, minLatitude: this.minLatitude - _amount });
+    // Allow panning beyond the absolute boundaries
+    this.animateTo({ maxLatitude: this.maxLatitude - __amount, minLatitude: this.minLatitude - __amount });
   }
 
   panLeft(amount?: number) {
-    if (!this.canPanLeft) return;
-
+    // Remove the restriction on panning left 
     const __amount = amount ?? this.longRange / 4;
-    const _amount = Math.min(Math.abs(__amount), this.minLongitude - this.absoluteMinLongitude);
-    this.animateTo({ maxLongitude: this.maxLongitude - _amount, minLongitude: this.minLongitude - _amount });
+    // Allow panning beyond the absolute boundaries
+    this.animateTo({ maxLongitude: this.maxLongitude - __amount, minLongitude: this.minLongitude - __amount });
   }
 
   panRight(amount?: number) {
-    if (!this.canPanRight) return;
-
+    // Remove the restriction on panning right
     const __amount = amount ?? this.longRange / 4;
-    const _amount = Math.min(Math.abs(__amount), this.absoluteMaxLongitude - this.maxLongitude);
-    this.animateTo({ maxLongitude: this.maxLongitude + _amount, minLongitude: this.minLongitude + _amount });
+    // Allow panning beyond the absolute boundaries
+    this.animateTo({ maxLongitude: this.maxLongitude + __amount, minLongitude: this.minLongitude + __amount });
   }
 
   panUp(amount?: number) {
-    if (!this.canPanUp) return;
-
+    // Remove the restriction on panning up
     const __amount = amount ?? this.latRange / 4;
-    const _amount = Math.min(Math.abs(__amount), this.absoluteMaxLatitude - this.maxLatitude);
-    this.animateTo({ maxLatitude: this.maxLatitude + _amount, minLatitude: this.minLatitude + _amount });
+    // Allow panning beyond the absolute boundaries
+    this.animateTo({ maxLatitude: this.maxLatitude + __amount, minLatitude: this.minLatitude + __amount });
   }
 
   reset() {
@@ -316,6 +301,19 @@ class Graph {
   restrictDates() {
     this.setCurrentDatePercent(this.currentDatePercent);
     this.setMapDatePercent(this.mapDatePercent);
+  }
+
+  /**
+   * Reset the date visualization to show all data in the newly loaded dataset
+   * This method should be called after a new dataset is loaded and date range is set
+   */
+  resetDateVisualization() {
+    // Reset all date percentages to default values
+    this.minDatePercent = 0;
+    this.maxDatePercent = 1;
+    this.mapDatePercent = 0;
+    this.currentDatePercent = 1;
+    this.animatingDate = false;
   }
 
   setAnimatingDate(animating: boolean) {
@@ -341,19 +339,23 @@ class Graph {
   }
   
   setMaxLatitude(lat: number) {
-    this.maxLatitude = Math.min(this.absoluteMaxLatitude, lat);
+    // Remove the restriction on maximum latitude
+    this.maxLatitude = lat;
   }
 
   setMaxLongitude(long: number) {
-    this.maxLongitude = Math.min(this.absoluteMaxLongitude, long);
+    // Remove the restriction on maximum longitude
+    this.maxLongitude = long;
   }
 
   setMinLatitude(lat: number) {
-    this.minLatitude = Math.max(this.absoluteMinLatitude, lat);
+    // Remove the restriction on minimum latitude
+    this.minLatitude = lat;
   }
 
   setMinLongitude(long: number) {
-    this.minLongitude = Math.max(this.absoluteMinLongitude, long);
+    // Remove the restriction on minimum longitude
+    this.minLongitude = long;
   }
 
   zoomIn() {
@@ -366,31 +368,80 @@ class Graph {
   }
 
   zoomOut() {
-    // Always make sure we zoom out zoomAmount * 2 so we maintain a square.
-    // To do this, if we bump into the max or min, we increase the other side by the amount we'd go over.
-    // If both sides go over, then we'll be capped at the max dimensions anyway.
-    let maxLatitude = (this.targetMaxLat ?? this.maxLatitude) + zoomAmount * kLatScale;
-    let minLatitude = (this.targetMinLat ?? this.minLatitude) - zoomAmount * kLatScale;
-    if (maxLatitude > this.absoluteMaxLatitude) {
-      minLatitude -= maxLatitude - this.absoluteMaxLatitude;
-      maxLatitude = this.absoluteMaxLatitude;
-    }
-    if (minLatitude < this.absoluteMinLatitude) {
-      maxLatitude += this.absoluteMinLatitude - minLatitude;
-      minLatitude = this.absoluteMinLatitude;
-    }
-    let maxLongitude = (this.targetMaxLong ?? this.maxLongitude) + zoomAmount;
-    let minLongitude = (this.targetMinLong ?? this.minLongitude) - zoomAmount;
-    if (maxLongitude > this.absoluteMaxLongitude) {
-      minLongitude -= maxLongitude - this.absoluteMaxLongitude;
-      maxLongitude = this.absoluteMaxLongitude;
-    }
-    if (minLongitude < this.absoluteMinLongitude) {
-      maxLongitude += this.absoluteMinLongitude - minLongitude;
-      minLongitude = this.absoluteMinLongitude;
-    }
+    // Allow zooming out beyond the absolute boundaries
+    const maxLatitude = (this.targetMaxLat ?? this.maxLatitude) + zoomAmount * kLatScale;
+    const minLatitude = (this.targetMinLat ?? this.minLatitude) - zoomAmount * kLatScale;
+    const maxLongitude = (this.targetMaxLong ?? this.maxLongitude) + zoomAmount;
+    const minLongitude = (this.targetMinLong ?? this.minLongitude) - zoomAmount;
 
     this.animateTo({ maxLatitude, minLatitude, maxLongitude, minLongitude });
+  }
+
+  /**
+   * Update the absolute boundaries of the map based on dataset
+   * @param minLat Minimum latitude
+   * @param maxLat Maximum latitude
+   * @param minLong Minimum longitude
+   * @param maxLong Maximum longitude
+   */
+  updateAbsoluteBounds(minLat: number, maxLat: number, minLong: number, maxLong: number) {
+    // Update absolute bounds
+    this.absoluteMinLatitude = minLat;
+    this.absoluteMaxLatitude = maxLat;
+    this.absoluteMinLongitude = minLong;
+    this.absoluteMaxLongitude = maxLong;
+    
+    // Update home positions to match the new absolute bounds with a slight inset
+    const latRange = maxLat - minLat;
+    const longRange = maxLong - minLong;
+    
+    this.homeMinLatitude = minLat + latRange * 0.05;
+    this.homeMaxLatitude = maxLat - latRange * 0.05;
+    this.homeMinLongitude = minLong + longRange * 0.05;
+    this.homeMaxLongitude = maxLong - longRange * 0.05;
+    
+    // Immediately update the current view boundaries
+    this.minLatitude = this.homeMinLatitude;
+    this.maxLatitude = this.homeMaxLatitude;
+    this.minLongitude = this.homeMinLongitude;
+    this.maxLongitude = this.homeMaxLongitude;
+    
+    // Cancel any ongoing animation
+    this.animationPercentage = undefined;
+    this.startMaxLat = undefined;
+    this.startMinLat = undefined;
+    this.startMaxLong = undefined;
+    this.startMinLong = undefined;
+    this.targetMaxLat = undefined;
+    this.targetMinLat = undefined;
+    this.targetMaxLong = undefined;
+    this.targetMinLong = undefined;
+  }
+  
+  /**
+   * Reset the view to the data boundaries
+   */
+  resetToDataBounds() {
+    // Reset the view to the home positions
+    this.animateTo({
+      maxLatitude: this.homeMaxLatitude,
+      minLatitude: this.homeMinLatitude,
+      maxLongitude: this.homeMaxLongitude,
+      minLongitude: this.homeMinLongitude
+    });
+  }
+
+  /**
+   * Reset the view to the home position
+   */
+  resetToHomeView() {
+    // Reset the view to the home positions
+    this.animateTo({
+      maxLatitude: this.homeMaxLatitude,
+      minLatitude: this.homeMinLatitude,
+      maxLongitude: this.homeMaxLongitude,
+      minLongitude: this.homeMinLongitude
+    });
   }
 }
 

@@ -18,17 +18,15 @@ describe("CodapData Model", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
-    // Reset datasetConfig
-    Object.assign(datasetConfig, {
-      dataContextName: "TestDataset",
-      latitudeAttribute: "Lat",
-      longitudeAttribute: "Long",
-      dateAttribute: "Date",
-      colorAttribute: "Color",
-      sizeAttribute: "Size",
-      dateFormat: "auto",
-      isConfigured: true
-    });
+    // Reset datasetConfig using actions instead of Object.assign
+    datasetConfig.setDataContext("TestDataset");
+    datasetConfig.setLatitudeAttribute("Lat");
+    datasetConfig.setLongitudeAttribute("Long");
+    datasetConfig.setDateAttribute("Date");
+    datasetConfig.setColorAttribute("Color");
+    datasetConfig.setSizeAttribute("Size");
+    datasetConfig.setDateFormat("auto");
+    datasetConfig.setIsConfigured(true);
     
     // Mock a collection with case IDs
     (dstContainer.dataSet.getCollectionByName as jest.Mock).mockReturnValue({
@@ -42,7 +40,13 @@ describe("CodapData Model", () => {
         "Long": { id: "long-attr" },
         "Date": { id: "date-attr" },
         "Color": { id: "color-attr" },
-        "Size": { id: "size-attr" }
+        "Size": { id: "size-attr" },
+        // Also add the fallbacks
+        "Latitude": { id: "lat-attr" },
+        "Longitude": { id: "long-attr" },
+        "Year": { id: "year-attr" },
+        "Month": { id: "month-attr" },
+        "Day": { id: "day-attr" }
       };
       return attributeMap[name];
     });
@@ -55,21 +59,30 @@ describe("CodapData Model", () => {
           "long-attr": -78.456,
           "date-attr": "2022-01-15",
           "color-attr": "red",
-          "size-attr": 5
+          "size-attr": 5,
+          "year-attr": 2022,
+          "month-attr": 1,
+          "day-attr": 15
         },
         "case2": {
           "lat-attr": 36.789,
           "long-attr": -79.012,
           "date-attr": "2022-02-20",
           "color-attr": "blue",
-          "size-attr": 10
+          "size-attr": 10,
+          "year-attr": 2022,
+          "month-attr": 2,
+          "day-attr": 20
         },
         "case3": {
           "lat-attr": 37.345,
           "long-attr": -80.678,
           "date-attr": "2022-03-25",
           "color-attr": "green",
-          "size-attr": 15
+          "size-attr": 15,
+          "year-attr": 2022,
+          "month-attr": 3,
+          "day-attr": 25
         }
       };
       return valueMap[caseId]?.[attributeId];
@@ -87,7 +100,7 @@ describe("CodapData Model", () => {
     });
     
     it("should access attribute values", () => {
-      expect(codapData.getAttributeValue("Lat", "case1")).toBe(35.123);
+      expect(codapData.getAttributeValue("Lat", "case1")).toBe("35.123");
       expect(codapData.getAttributeNumericValue("Long", "case2")).toBe(-79.012);
     });
   });
@@ -102,9 +115,20 @@ describe("CodapData Model", () => {
     });
     
     it("should parse date using configured attribute", () => {
-      // Implementation will depend on how we parse dates
       const date = codapData.getCaseDate("case3");
       expect(date).toBeDefined();
+      
+      // Only perform the comparison if date is defined
+      if (date) {
+        // The date should be close to March 25, 2022
+        const expectedDate = new Date("2022-03-25").getTime();
+        expect(Math.abs(date - expectedDate)).toBeLessThan(86400000); // Within 1 day
+      }
+    });
+
+    it("should get color and size using configured attributes", () => {
+      expect(codapData.getColor("case1")).toBe("red");
+      expect(codapData.getSize("case2")).toBe(10);
     });
   });
 

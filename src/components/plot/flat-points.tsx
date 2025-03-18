@@ -23,9 +23,17 @@ export const FlatPoints = observer(function FlatPoints() {
         const outlineWidth = 0.01;
 
         // Determine the position of the point in graph space.
-        const convertedLat = graph.convertLat(codapData.getLatitude(caseId));
+        const latitude = codapData.getLatitude(caseId);
+        const longitude = codapData.getLongitude(caseId);
+        
+        // Skip points with missing lat/long/date values
+        if (latitude === undefined || longitude === undefined) {
+          return null;
+        }
+        
+        const convertedLat = graph.convertLat(latitude);
         const convertedDate = graph.convertCaseDate(caseId);
-        const convertedLong = graph.convertLong(codapData.getLongitude(caseId));
+        const convertedLong = graph.convertLong(longitude);
         const position = new THREE.Vector3(convertedLat, convertedDate, convertedLong);
 
         // Project the point slightly towards the camera so it will appear in front of the outline.

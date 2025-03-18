@@ -26,11 +26,23 @@ import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
 const dataContextName = "Tornado_Tracks_2020-2022";
 
 export async function initializeDST() {
+  console.log("Initializing DST plugin...");
+  
   await initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions})
     .catch(reason => {
       // This will happen if not embedded in CODAP
       console.warn("Not embedded in CODAP");
     });
+    
+  // Test CODAP API communication
+  try {
+    // Import the function here to avoid circular dependencies
+    const { getAvailableDatasets } = await import("./codap-dataset-utils");
+    const datasets = await getAvailableDatasets();
+    console.log("Available datasets detected at initialization:", datasets);
+  } catch (error) {
+    console.error("Error testing CODAP API at initialization:", error);
+  }
 
   // Check for existing configuration
   try {
@@ -107,8 +119,15 @@ export async function getData(contextName: string = dataContextName) {
     setDSTCases(cases);
 
     // Update date range
-    const dates = codapData.caseIds.map(caseId => codapData.getCaseDate(caseId));
-    codapData.setAbsoluteDateRange(Math.min(...dates), Math.max(...dates));
+    const dates = codapData.caseIds
+      .map(caseId => codapData.getCaseDate(caseId))
+      .filter((date): date is number => date !== undefined && isFinite(date));
+    
+    if (dates.length > 0) {
+      codapData.setAbsoluteDateRange(Math.min(...dates), Math.max(...dates));
+    } else {
+      console.warn("No valid dates found in the dataset");
+    }
   } catch (error) {
     // This will happen if not embedded in CODAP
     console.warn("Not embedded in CODAP", error);

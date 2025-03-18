@@ -6,7 +6,7 @@ import { Plane, Vector3 } from "three";
 import map from "../../assets/SpaceCubeMap.png";
 import { graph, graphMax, graphMin } from "../../models/graph";
 import {
-  kBackgroundLongRange, kBackgroundHeight, kBackgroundLatMid, kBackgroundLongMid, kBackgroundWidth
+  kBackgroundHeight, kBackgroundWidth
 } from "../../utilities/constants";
 import { halfPi } from "../../utilities/trig-utils";
 
@@ -16,9 +16,15 @@ export const MapPlane = observer(function MapPlane() {
   useFrame((_state, delta) => graph.animate(delta * 1000));
 
   const texture = useTexture(map);
-  const scale = kBackgroundLongRange / graph.longRange;
-  const x = graph.latitudeInGraphSpace(kBackgroundLatMid);
-  const z = graph.longitudeInGraphSpace(kBackgroundLongMid);
+  
+  // Use dynamic values from the graph model instead of constants
+  const longRange = graph.absoluteMaxLongitude - graph.absoluteMinLongitude;
+  const latMid = (graph.absoluteMaxLatitude + graph.absoluteMinLatitude) / 2;
+  const longMid = (graph.absoluteMaxLongitude + graph.absoluteMinLongitude) / 2;
+  
+  const scale = longRange / graph.longRange;
+  const x = graph.latitudeInGraphSpace(latMid);
+  const z = graph.longitudeInGraphSpace(longMid);
 
   const clippingPlanes = useMemo(() => {
     return [
