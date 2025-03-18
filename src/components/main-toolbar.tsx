@@ -10,7 +10,7 @@ import {
 import { observer } from "mobx-react-lite";
 import { ui } from "../models/ui";
 import { graph } from "../models/graph";
-import { updateMapBoundsFromData, focusOnGapPeriodData } from "../utilities/codap-dataset-utils";
+import { updateMapBoundsFromData } from "../utilities/codap-dataset-utils";
 import { datasetConfig } from "../models/dataset-config";
 
 /**
@@ -64,20 +64,6 @@ export const MainToolbar = observer(function MainToolbar() {
             Reset Map View
           </Button>
         </Tooltip>
-        
-        <Tooltip label="Focus on data points from June-November 2005">
-          <Button 
-            colorScheme="purple" 
-            size="sm"
-            onClick={() => {
-              if (datasetConfig.dataContextName) {
-                focusOnGapPeriodData(datasetConfig.dataContextName);
-              }
-            }}
-          >
-            Focus on Gap
-          </Button>
-        </Tooltip>
 
         <Button 
           colorScheme="blue" 
@@ -90,4 +76,5 @@ export const MainToolbar = observer(function MainToolbar() {
     </Flex>
   );
 }); 
+
 

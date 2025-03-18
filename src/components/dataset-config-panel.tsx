@@ -21,23 +21,9 @@ import {
   getAttributesFromItemSearch,
   exploreDataset,
   getDatasetDetails,
-  loadConfiguredData,
-  analyzeDateFormats,
-  checkGapDateRange,
-  updateMapBoundsFromData,
-  analyzeGapPeriodCoordinates,
-  focusOnGapPeriodData
+  loadConfiguredData
 } from "../utilities/codap-dataset-utils";
-import { codapInterface } from "@concord-consortium/codap-plugin-api";
-import { codapData } from "../models/codap-data";
 import { ui } from "../models/ui";
-
-// Import the CodapApiResult interface from the codap-dataset-utils file
-// or directly add the interface here
-interface CodapApiResult {
-  success: boolean;
-  values?: any;
-}
 
 /**
  * Panel for configuring which dataset to use and mapping attributes
@@ -208,26 +194,6 @@ export const DatasetConfigPanel = observer(function DatasetConfigPanel() {
       
       // Auto-detect potential mappings
       autoDetectAttributeMappings(datasetAttributes);
-      
-      // Analyze the dataset for date format issues
-      if (datasetConfig.dateAttribute) {
-        console.log("Analyzing date formats for debugging purposes...");
-        analyzeDateFormats(dataContextName).catch((error: Error) => 
-          console.error("Error during date format analysis:", error)
-        );
-        
-        // Specifically check for the 2005 gap
-        console.log("Checking for the 2005 gap in the data...");
-        analyze2005Gap(dataContextName).catch((error: Error) =>
-          console.error("Error analyzing 2005 gap:", error)
-        );
-        
-        // New detailed gap analysis
-        console.log("Running detailed gap date range check...");
-        checkGapDateRange(dataContextName).catch((error: Error) =>
-          console.error("Error checking gap date range:", error)
-        );
-      }
     } catch (error) {
       console.error("Error fetching dataset attributes:", error);
     }
@@ -373,145 +339,10 @@ export const DatasetConfigPanel = observer(function DatasetConfigPanel() {
               >
                 Apply Configuration
               </Button>
-              
-              <Button
-                colorScheme="teal"
-                onClick={() => updateMapBoundsFromData(datasetConfig.dataContextName || "")}
-                isDisabled={!datasetConfig.isValid}
-                mr={2}
-              >
-                Update Map Bounds
-              </Button>
-              
-              <Button
-                colorScheme="orange"
-                onClick={() => analyzeGapPeriodCoordinates(datasetConfig.dataContextName || "")}
-                isDisabled={!datasetConfig.isValid}
-                mr={2}
-              >
-                Analyze Gap
-              </Button>
-              
-              <Button
-                colorScheme="purple"
-                onClick={() => focusOnGapPeriodData(datasetConfig.dataContextName || "")}
-                isDisabled={!datasetConfig.isValid}
-              >
-                Focus on Gap
-              </Button>
             </Flex>
           </Stack>
         )}
       </VStack>
     </Box>
   );
-});
-
-/**
- * Analyze the specific gap in 2005 data to help diagnose missing points
- * @param dataContextName The dataset name
- */
-async function analyze2005Gap(dataContextName: string): Promise<void> {
-  if (!datasetConfig.dateAttribute) return;
-  
-  try {
-    console.log("Starting 2005 gap analysis...");
-    
-    // Get all cases for 2005
-    const result = await codapInterface.sendRequest({
-      action: "get",
-      resource: `dataContext[${dataContextName}].allCases`
-    }) as CodapApiResult;
-    
-    if (!result.success || !result.values || !Array.isArray(result.values)) {
-      console.warn("Failed to get cases for 2005 gap analysis");
-      return;
-    }
-    
-    console.log(`Analyzing ${result.values.length} total cases for 2005 data`);
-    
-    // Count data points by month for 2005
-    const monthCounts: number[] = Array(12).fill(0);
-    let totalIn2005 = 0;
-    
-    // Get all dates and filter for 2005
-    const allDates: Date[] = [];
-    
-    for (const caseData of result.values) {
-      if (!caseData) continue;
-      
-      const date = codapData.getCaseDate(caseData.id);
-      if (!date) continue;
-      
-      const jsDate = new Date(date);
-      
-      // Add to all dates array for gap analysis
-      allDates.push(jsDate);
-      
-      // Check if in 2005
-      if (jsDate.getFullYear() === 2005) {
-        totalIn2005++;
-        const month = jsDate.getMonth();
-        monthCounts[month]++;
-      }
-    }
-    
-    // Report on 2005 data
-    console.log(`Found ${totalIn2005} data points in 2005`);
-    console.log("Distribution by month in 2005:");
-    
-    // Month names for clearer output
-    const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-    
-    monthNames.forEach((month, index) => {
-      console.log(`  ${month}: ${monthCounts[index]} data points`);
-    });
-    
-    // Check for specific gap between June 30 and November 30
-    console.log("\nAnalyzing gap between June 30 and November 30, 2005...");
-    
-    const gapStart = new Date(2005, 5, 30); // June 30, 2005
-    const gapEnd = new Date(2005, 10, 30); // November 30, 2005
-    
-    // Filter dates within the gap period to see if any exist
-    const datesInGap = allDates.filter(date => 
-      date >= gapStart && date <= gapEnd
-    );
-    
-    if (datesInGap.length > 0) {
-      console.log(`Found ${datesInGap.length} dates within the gap period`);
-      
-      // Show first few dates in the gap
-      const samplesToShow = Math.min(5, datesInGap.length);
-      console.log("Sample dates in the supposed gap:");
-      for (let i = 0; i < samplesToShow; i++) {
-        console.log(`  ${datesInGap[i].toISOString()}`);
-      }
-    } else {
-      console.log("No dates found within the gap period - confirmed gap exists");
-      
-      // Find dates right before and after the gap
-      const beforeGap = allDates
-        .filter(date => date < gapStart)
-        .sort((a, b) => b.getTime() - a.getTime())[0]; // Latest date before gap
-      
-      const afterGap = allDates
-        .filter(date => date > gapEnd)
-        .sort((a, b) => a.getTime() - b.getTime())[0]; // Earliest date after gap
-      
-      if (beforeGap) {
-        console.log(`Last data point before gap: ${beforeGap.toISOString()}`);
-      }
-      
-      if (afterGap) {
-        console.log(`First data point after gap: ${afterGap.toISOString()}`);
-      }
-    }
-    
-  } catch (error) {
-    console.error("Error analyzing 2005 gap:", error);
-  }
-} 
+}); 
