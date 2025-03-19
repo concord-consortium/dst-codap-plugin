@@ -2,14 +2,6 @@ import { PlaywrightCoverageOptions } from "@bgotink/playwright-coverage";
 import { defineConfig, devices, ReporterDescription } from "@playwright/test";
 import path from "path";
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
-
 const collectCoverage = !!process.env.CI;
 const coverageReporter: ReporterDescription = [
   "@bgotink/playwright-coverage",
@@ -17,13 +9,13 @@ const coverageReporter: ReporterDescription = [
     /* Path to the root files should be resolved from */
     sourceRoot: __dirname,
     /* The coverage is reported with a prefix. This is probably because we are 
-       running in an iframe so the coverage of CODAP and the plugin is differenciated
+       running in an iframe so the coverage of CODAP and the plugin is differentiated
        by the two prefixes. */
     exclude: [
-      /* Ingore all coverage of the CODAP application itself. */
+      /* Ignore all coverage of the CODAP application itself. */
       "codap3/src/**", "codap3/webpack/**",
       /* This repository has a copy of many of the CODAP files which it uses like a 
-         library to handle it's dataset and add the legend component. These files are 
+         library to handle its dataset and add the legend component. These files are 
          identical to the files in CODAP and should be tested there not here. So we
          ignore them here. */
       "dst-codap-plugin/src/codap/**"    
@@ -85,7 +77,7 @@ export default defineConfig<PlaywrightCoverageOptions>({
     // baseURL: 'http://127.0.0.1:3000',
 
     /* Collect trace. See https://playwright.dev/docs/trace-viewer 
-       The default value of this is "on-first-retry". This is the recommended because recording traces
+       The default value of this is "on-first-retry". This is recommended because recording traces
        slows down the test. However it is nice to have record of the trace for example when reviewing 
        a PR and you want to see what things look like. We should revisit this in the future. */
     trace: process.env.CI ? "on" : "off",
