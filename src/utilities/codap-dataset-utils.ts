@@ -3,12 +3,38 @@ import { datasetConfig } from "../models/dataset-config";
 import { codapData } from "../models/codap-data";
 import { graph } from "../models/graph";
 import { getData, setupSelectionSynchronization } from "./codap-utils";
-import { analyzeDateString } from "./date-utils";
+import { analyzeDateString, parseDateWithFormat } from "./date-utils";
 
 // Interface for CODAP API responses
 interface CodapApiResult {
   success: boolean;
   values?: any;
+}
+
+/**
+ * Parse a date string using the specified format
+ * @param dateStr The date string to parse
+ * @param format Optional format to use for parsing
+ * @returns Timestamp in milliseconds or undefined if parsing failed
+ */
+function parseDate(dateStr: string, format?: string): number | undefined {
+  try {
+    // If we have a specific format, use it with the existing parseDate function
+    if (format) {
+      const parsedDateResult = parseDateWithFormat(dateStr, format);
+      return parsedDateResult;
+    }
+    
+    // Otherwise analyze the date string
+    const analysis = analyzeDateString(dateStr);
+    if (analysis.isValid && analysis.parsed) {
+      return analysis.parsed.getTime();
+    }
+    return undefined;
+  } catch (error) {
+    console.warn(`Failed to parse date: ${dateStr}`, error);
+    return undefined;
+  }
 }
 
 /**
@@ -140,7 +166,7 @@ export async function getDatasetAttributes(dataContextName: string): Promise<str
       
       const attrResult = await codapInterface.sendRequest({
         action: "get",
-        resource: `dataContext[${dataContextName}].collection[${collection.name}].attribute`
+        resource: `dataContext[${dataContextName}].collection["${collection.name}"].attribute`
       }) as CodapApiResult;
       
       console.log(`Attributes result for collection ${collection.name}:`, 
@@ -170,11 +196,28 @@ export async function getDatasetAttributes(dataContextName: string): Promise<str
  */
 export async function saveInteractiveState(state: any): Promise<any> {
   try {
+    // Create a serializable version of the state
+    const serializableState: Record<string, any> = {};
+    
+    // If datasetConfig is in the state, extract only the serializable properties
+    if (state.datasetConfig) {
+      serializableState.datasetConfig = {
+        dataContextName: state.datasetConfig.dataContextName,
+        latitudeAttribute: state.datasetConfig.latitudeAttribute,
+        longitudeAttribute: state.datasetConfig.longitudeAttribute,
+        dateAttribute: state.datasetConfig.dateAttribute,
+        colorAttribute: state.datasetConfig.colorAttribute,
+        sizeAttribute: state.datasetConfig.sizeAttribute,
+        dateFormat: state.datasetConfig.dateFormat,
+        isConfigured: state.datasetConfig.isConfigured
+      };
+    }
+    
     // Update the interactive state through CODAP API
     return await codapInterface.sendRequest({
       action: "update",
       resource: "interactiveState",
-      values: state
+      values: serializableState
     });
   } catch (error) {
     console.error("Error saving interactive state:", error);
@@ -234,6 +277,72 @@ export async function loadConfiguredData(): Promise<void> {
 }
 
 /**
+ * Directly extract min/max values from items in a dataset
+ * @param dataContextName The dataset context name
+ * @param attributeName The attribute to extract values for
+ * @returns Promise that resolves to min and max values
+ */
+async function getMinMaxFromItems(dataContextName: string, attributeName: string): Promise<{min: number | null, max: number | null}> {
+  try {
+    console.log(`Getting min/max for attribute ${attributeName} directly from items...`);
+    
+    // Get a reasonable number of items to analyze (up to 1000)
+    const itemsResult = await codapInterface.sendRequest({
+      action: "get",
+      resource: `dataContext[${dataContextName}].item[0-999]`
+    }) as CodapApiResult;
+    
+    if (!itemsResult.success || !itemsResult.values || !Array.isArray(itemsResult.values) || !itemsResult.values.length) {
+      console.warn(`No items found for min/max extraction of ${attributeName}`);
+      return { min: null, max: null };
+    }
+    
+    console.log(`Processing ${itemsResult.values.length} items for min/max extraction of ${attributeName}`);
+    
+    // Track min/max values
+    let min: number | null = null;
+    let max: number | null = null;
+    let valuesFound = 0;
+    
+    // Process each item
+    for (const item of itemsResult.values) {
+      // Try different ways to get the value
+      let value = null;
+      
+      // Direct property access
+      if (item[attributeName] !== undefined) {
+        value = item[attributeName];
+      } 
+      // Check values property
+      else if (item.values && item.values[attributeName] !== undefined) {
+        value = item.values[attributeName];
+      }
+      
+      // Convert to number if needed
+      if (value !== null && value !== undefined) {
+        // If it's a string that could be a number, convert it
+        if (typeof value === "string" && !isNaN(Number(value))) {
+          value = Number(value);
+        }
+        
+        // Only process numeric values
+        if (typeof value === "number" && !isNaN(value)) {
+          if (min === null || value < min) min = value;
+          if (max === null || value > max) max = value;
+          valuesFound++;
+        }
+      }
+    }
+    
+    console.log(`Found ${valuesFound} numeric values for ${attributeName}, min: ${min}, max: ${max}`);
+    return { min, max };
+  } catch (error) {
+    console.error(`Error getting min/max for ${attributeName}:`, error);
+    return { min: null, max: null };
+  }
+}
+
+/**
  * Calculate and update the absolute date range based on the actual dataset
  * @param dataContextName The dataset context name
  */
@@ -241,88 +350,432 @@ export async function updateDateRangeFromData(dataContextName: string): Promise<
   try {
     console.log("Calculating date range for dataset:", dataContextName);
     
-    // First try to get all cases to analyze dates
-    const result = await codapInterface.sendRequest({
-      action: "get",
-      resource: `dataContext[${dataContextName}].allCases`
-    }) as CodapApiResult;
-    
-    if (!result.success || !result.values || !Array.isArray(result.values) || !result.values.length) {
-      console.warn("Failed to get cases for date range calculation");
+    // Ensure we have a date attribute configured
+    const dateAttr = datasetConfig.dateAttribute;
+    if (!dateAttr) {
+      console.warn("No date attribute configured, cannot calculate date range");
       return;
     }
-
-    // Log total case count for debugging
-    console.log(`Found ${result.values.length} total cases in dataset`);
     
-    let minDate = Number.MAX_SAFE_INTEGER;
-    let maxDate = Number.MIN_SAFE_INTEGER;
-    let dateCount = 0;
-    let caseCount = 0;
-    let validDateCount = 0;
-    let missingDateCount = 0;
-    let datesByMonth: Record<string, number> = {};
+    console.log(`Using date attribute: ${dateAttr}`);
     
-    // Process each case to find min and max dates
-    for (const caseData of result.values) {
-      caseCount++;
-      if (!caseData) continue;
+    // Initialize date range variables
+    let minDate: number | null = null;
+    let maxDate: number | null = null;
+    let hasValidDates = false;
+    
+    // Method 1: Try to get summary statistics for the date attribute
+    console.log(`Requesting summary for date attribute: ${dateAttr}`);
+    const dateSummaryResult = await codapInterface.sendRequest({
+      action: "get",
+      resource: `dataContext[${dataContextName}].attributeSummary[${dateAttr}]`
+    }) as CodapApiResult;
+    
+    console.log("Date summary result:", dateSummaryResult);
+    
+    if (dateSummaryResult.success && dateSummaryResult.values) {
+      // For date attributes, the min/max might be returned as date strings
+      // or as numbers depending on how CODAP stores them
+      let minDateValue = dateSummaryResult.values.min;
+      let maxDateValue = dateSummaryResult.values.max;
       
-      const date = codapData.getCaseDate(caseData.id || "");
-      if (date && isFinite(date)) {
-        minDate = Math.min(minDate, date);
-        maxDate = Math.max(maxDate, date);
-        dateCount++;
+      // Parse date values if they're strings
+      if (typeof minDateValue === "string") {
+        const parsedDate = parseDate(minDateValue, datasetConfig.dateFormat);
+        minDate = parsedDate !== undefined ? parsedDate : null;
+      } else if (typeof minDateValue === "number") {
+        minDate = minDateValue;
+      }
+      
+      if (typeof maxDateValue === "string") {
+        const parsedDate = parseDate(maxDateValue, datasetConfig.dateFormat);
+        maxDate = parsedDate !== undefined ? parsedDate : null;
+      } else if (typeof maxDateValue === "number") {
+        maxDate = maxDateValue;
+      }
+      
+      if (minDate !== null && maxDate !== null && !isNaN(minDate) && !isNaN(maxDate)) {
+        hasValidDates = true;
+        console.log(`Date range from summary: ${new Date(minDate).toLocaleDateString()} to ${new Date(maxDate).toLocaleDateString()}`);
+      }
+    } else {
+      console.warn("Failed to get date summary statistics");
+    }
+    
+    // Method 2: If attributeSummary failed, try getting attribute details directly
+    if (!hasValidDates) {
+      console.log("Trying to get attribute details directly...");
+      
+      const dateAttrResult = await codapInterface.sendRequest({
+        action: "get",
+        resource: `dataContext[${dataContextName}].attribute[${dateAttr}]`
+      }) as CodapApiResult;
+      
+      console.log("Date attribute details:", dateAttrResult);
+      
+      if (dateAttrResult.success && dateAttrResult.values && dateAttrResult.values.stats) {
+        let minDateValue = dateAttrResult.values.stats.min;
+        let maxDateValue = dateAttrResult.values.stats.max;
         
-        // Log first 3 cases with dates for debugging
-        if (dateCount <= 3) {
-          console.log(`Sample date ${dateCount}: Case ${caseData.id}, Date: ${new Date(date).toISOString()}`);
+        // Parse date values if they're strings
+        if (typeof minDateValue === "string") {
+          const parsedDate = parseDate(minDateValue, datasetConfig.dateFormat);
+          minDate = parsedDate !== undefined ? parsedDate : null;
+        } else if (typeof minDateValue === "number") {
+          minDate = minDateValue;
         }
         
-        // Track dates by month for distribution analysis
-        const monthKey = new Date(date).toISOString().substring(0, 7); // YYYY-MM format
-        datesByMonth[monthKey] = (datesByMonth[monthKey] || 0) + 1;
-        validDateCount++;
-      } else {
-        missingDateCount++;
-        // Log a few cases with missing dates to help diagnose issues
-        if (missingDateCount <= 3) {
-          if (datasetConfig.dateAttribute) {
-            const rawDateValue = codapData.getAttributeValue(datasetConfig.dateAttribute, caseData.id || "");
-            console.log(`Missing date ${missingDateCount}: Case ${caseData.id}, Raw value: "${rawDateValue}"`);
-          } else {
-            console.log(`Missing date ${missingDateCount}: Case ${caseData.id}, No date attribute configured`);
+        if (typeof maxDateValue === "string") {
+          const parsedDate = parseDate(maxDateValue, datasetConfig.dateFormat);
+          maxDate = parsedDate !== undefined ? parsedDate : null;
+        } else if (typeof maxDateValue === "number") {
+          maxDate = maxDateValue;
+        }
+        
+        if (minDate !== null && maxDate !== null && !isNaN(minDate) && !isNaN(maxDate)) {
+          hasValidDates = true;
+          console.log(`Date range from attribute details: ${new Date(minDate).toLocaleDateString()} to ${new Date(maxDate).toLocaleDateString()}`);
+        }
+      }
+    }
+    
+    // Method 3: Try using the collection attribute stats
+    if (!hasValidDates) {
+      console.log("Trying to get date range from collection stats...");
+      
+      const collectionResult = await codapInterface.sendRequest({
+        action: "get",
+        resource: `dataContext[${dataContextName}].collection["Cases"]`
+      }) as CodapApiResult;
+      
+      if (collectionResult.success && collectionResult.values) {
+        console.log("Collection info:", collectionResult.values);
+        
+        // Check if we can find the attributes with stats
+        if (collectionResult.values.attrs) {
+          const dateAttribute = collectionResult.values.attrs.find((attr: any) => 
+            attr.name === dateAttr);
+          
+          if (dateAttribute && dateAttribute.stats) {
+            let minDateValue = dateAttribute.stats.min;
+            let maxDateValue = dateAttribute.stats.max;
+            
+            // Parse date values if they're strings
+            if (typeof minDateValue === "string") {
+              const parsedDate = parseDate(minDateValue, datasetConfig.dateFormat);
+              minDate = parsedDate !== undefined ? parsedDate : null;
+            } else if (typeof minDateValue === "number") {
+              minDate = minDateValue;
+            }
+            
+            if (typeof maxDateValue === "string") {
+              const parsedDate = parseDate(maxDateValue, datasetConfig.dateFormat);
+              maxDate = parsedDate !== undefined ? parsedDate : null;
+            } else if (typeof maxDateValue === "number") {
+              maxDate = maxDateValue;
+            }
+            
+            if (minDate !== null && maxDate !== null && !isNaN(minDate) && !isNaN(maxDate)) {
+              hasValidDates = true;
+              console.log(`Date range from collection stats: ${new Date(minDate).toLocaleDateString()} to ${new Date(maxDate).toLocaleDateString()}`);
+            }
           }
         }
       }
     }
     
-    // Generate date distribution report
-    console.log(`Date distribution summary:
-- Total cases: ${caseCount}
-- Cases with valid dates: ${validDateCount} (${((validDateCount/caseCount)*100).toFixed(1)}%)
-- Cases with missing dates: ${missingDateCount} (${((missingDateCount/caseCount)*100).toFixed(1)}%)
-    `);
+    // Method 4: Direct item extraction
+    if (!hasValidDates) {
+      console.log("Trying to extract date range directly from items...");
+      
+      // If the configured attribute is 'date' but we know from logs that 'day' actually contains the date,
+      // try with 'day' attribute as well
+      let dateValues = await getMinMaxFromItems(dataContextName, dateAttr);
+      
+      // If the original attribute didn't work, try with 'day' if it's different
+      if ((dateValues.min === null || dateValues.max === null) && dateAttr !== "day") {
+        console.log("Original attribute didn't yield values, trying with 'day' attribute instead");
+        dateValues = await getMinMaxFromItems(dataContextName, "day");
+      }
+      
+      // We got numeric values that might be timestamps
+      if (dateValues.min !== null && dateValues.max !== null) {
+        minDate = dateValues.min;
+        maxDate = dateValues.max;
+        
+        // Check if these are valid dates - they should be in milliseconds since epoch
+        if (!isNaN(minDate) && !isNaN(maxDate)) {
+          // Check if these might be days since a reference date (small numbers)
+          if (minDate < 10000) {
+            // Convert days to milliseconds using a reasonable reference date (e.g., Jan 1, 2000)
+            const referenceDate = new Date(2000, 0, 1).getTime();
+            minDate = referenceDate + (minDate * 24 * 60 * 60 * 1000);
+            maxDate = referenceDate + (maxDate * 24 * 60 * 60 * 1000);
+            console.log("Converted day values to milliseconds with reference date Jan 1, 2000");
+          }
+          
+          hasValidDates = true;
+          console.log(`Date range from direct item extraction: ${new Date(minDate).toLocaleDateString()} to ${new Date(maxDate).toLocaleDateString()}`);
+        }
+      }
+    }
     
-    // Log dates by month to check for gaps
-    console.log("Date distribution by month:");
-    const sortedMonths = Object.keys(datesByMonth).sort();
-    for (const month of sortedMonths) {
-      console.log(`  ${month}: ${datesByMonth[month]} cases`);
+    // Method 5: Try the table data endpoint
+    if (!hasValidDates) {
+      console.log("Trying to extract date range from table data...");
+      
+      const tableResult = await codapInterface.sendRequest({
+        action: "get",
+        resource: `dataContext[${dataContextName}].collection["Cases"].allCases`
+      }) as CodapApiResult;
+      
+      console.log("Table cases result:", tableResult.success ? `Success, found ${tableResult.values?.length || 0} cases` : "Failed");
+      
+      if (tableResult.success && tableResult.values && Array.isArray(tableResult.values) && tableResult.values.length > 0) {
+        let tableMinDate: number | null = null;
+        let tableMaxDate: number | null = null;
+        let foundDates = 0;
+        
+        // Find date values in the table data
+        for (const row of tableResult.values) {
+          let dateValue: string | number | undefined;
+          
+          // Try the primary attribute first
+          if (row.values && row.values[dateAttr] !== undefined) {
+            dateValue = row.values[dateAttr];
+          } 
+          // Then try alternative date field if primary not found
+          else if (dateAttr !== "day" && row.values && row.values.day !== undefined) {
+            dateValue = row.values.day;
+          }
+          // Also try case where values aren't nested
+          else if (row[dateAttr] !== undefined) {
+            dateValue = row[dateAttr];
+          }
+          else if (dateAttr !== "day" && row.day !== undefined) {
+            dateValue = row.day;
+          }
+          
+          if (dateValue !== undefined) {
+            let timestamp: number | undefined;
+            
+            if (typeof dateValue === "string") {
+              timestamp = parseDate(dateValue, datasetConfig.dateFormat);
+            } else if (typeof dateValue === "number") {
+              // If it's a small number, it might be days since a reference date
+              if (dateValue < 10000) {
+                const referenceDate = new Date(2000, 0, 1).getTime();
+                timestamp = referenceDate + (dateValue * 24 * 60 * 60 * 1000);
+      } else {
+                timestamp = dateValue;
+              }
+            }
+            
+            if (timestamp !== undefined && !isNaN(timestamp)) {
+              if (tableMinDate === null || timestamp < tableMinDate) {
+                tableMinDate = timestamp;
+              }
+              if (tableMaxDate === null || timestamp > tableMaxDate) {
+                tableMaxDate = timestamp;
+              }
+              foundDates++;
+            }
+          }
+        }
+        
+        if (tableMinDate !== null && tableMaxDate !== null && foundDates > 0) {
+          minDate = tableMinDate;
+          maxDate = tableMaxDate;
+          hasValidDates = true;
+          console.log(`Date range from table data (found ${foundDates} dates): ${new Date(minDate).toLocaleDateString()} to ${new Date(maxDate).toLocaleDateString()}`);
+        }
+      }
+    }
+    
+    // Method 6: Try using caseFormulaSearch to directly get min/max dates
+    if (!hasValidDates) {
+      console.log("Trying to get date range using formula search...");
+      
+      try {
+        // Get case with minimum date
+        const minDateResult = await codapInterface.sendRequest({
+          action: "get",
+          resource: `dataContext[${dataContextName}].collection["Cases"].caseFormulaSearch[${dateAttr}=min(${dateAttr})]`
+        }) as CodapApiResult;
+        
+        // Get case with maximum date
+        const maxDateResult = await codapInterface.sendRequest({
+          action: "get",
+          resource: `dataContext[${dataContextName}].collection["Cases"].caseFormulaSearch[${dateAttr}=max(${dateAttr})]`
+        }) as CodapApiResult;
+        
+        console.log("Date formula search results:", {
+          minDate: minDateResult.success,
+          maxDate: maxDateResult.success
+        });
+        
+        // Process minimum date result
+        if (minDateResult.success && minDateResult.values && minDateResult.values.length > 0) {
+          const dateCase = minDateResult.values[0];
+          let dateValue = null;
+          
+          // Try to extract the date value
+          if (dateCase.values && dateCase.values[dateAttr] !== undefined) {
+            dateValue = dateCase.values[dateAttr];
+          } else if (dateCase[dateAttr] !== undefined) {
+            dateValue = dateCase[dateAttr];
+          }
+          
+          // Parse the date value
+          if (dateValue !== null) {
+            let timestamp: number | undefined;
+            
+            if (typeof dateValue === "string") {
+              timestamp = parseDate(dateValue, datasetConfig.dateFormat);
+            } else if (typeof dateValue === "number") {
+              // If it's a small number, it might be days since a reference date
+              if (dateValue < 10000) {
+                const referenceDate = new Date(2000, 0, 1).getTime();
+                timestamp = referenceDate + (dateValue * 24 * 60 * 60 * 1000);
+          } else {
+                timestamp = dateValue;
+              }
+            }
+            
+            if (timestamp !== undefined && !isNaN(timestamp)) {
+              minDate = timestamp;
+              console.log(`Found min date: ${new Date(minDate).toLocaleDateString()}`);
+            }
+          }
+        }
+        
+        // Process maximum date result
+        if (maxDateResult.success && maxDateResult.values && maxDateResult.values.length > 0) {
+          const dateCase = maxDateResult.values[0];
+          let dateValue = null;
+          
+          // Try to extract the date value
+          if (dateCase.values && dateCase.values[dateAttr] !== undefined) {
+            dateValue = dateCase.values[dateAttr];
+          } else if (dateCase[dateAttr] !== undefined) {
+            dateValue = dateCase[dateAttr];
+          }
+          
+          // Parse the date value
+          if (dateValue !== null) {
+            let timestamp: number | undefined;
+            
+            if (typeof dateValue === "string") {
+              timestamp = parseDate(dateValue, datasetConfig.dateFormat);
+            } else if (typeof dateValue === "number") {
+              // If it's a small number, it might be days since a reference date
+              if (dateValue < 10000) {
+                const referenceDate = new Date(2000, 0, 1).getTime();
+                timestamp = referenceDate + (dateValue * 24 * 60 * 60 * 1000);
+              } else {
+                timestamp = dateValue;
+              }
+            }
+            
+            if (timestamp !== undefined && !isNaN(timestamp)) {
+              maxDate = timestamp;
+              console.log(`Found max date: ${new Date(maxDate).toLocaleDateString()}`);
+            }
+          }
+        }
+        
+        // If we found both min and max dates, consider it successful
+        if (minDate !== null && maxDate !== null && !isNaN(minDate) && !isNaN(maxDate)) {
+          hasValidDates = true;
+          console.log(`Date range from formula search: ${new Date(minDate).toLocaleDateString()} to ${new Date(maxDate).toLocaleDateString()}`);
+        }
+      } catch (error) {
+        console.error("Error using formula search for dates:", error);
+      }
+    }
+    
+    // Method 7: Try accessing the cases endpoint directly
+    if (!hasValidDates) {
+      console.log("Trying to access date range from cases endpoint directly...");
+      
+      try {
+        // Try the direct cases endpoint - this is a last resort
+        const casesResult = await codapInterface.sendRequest({
+          action: "get",
+          resource: `dataContext[${dataContextName}].case`
+        }) as CodapApiResult;
+        
+        console.log("Cases endpoint result:", casesResult.success ? 
+          `Success, found ${casesResult.values?.length || 0} cases` : "Failed");
+        
+        if (casesResult.success && casesResult.values && 
+          Array.isArray(casesResult.values) && casesResult.values.length > 0) {
+          
+          let casesMinDate: number | null = null;
+          let casesMaxDate: number | null = null;
+          let foundDates = 0;
+          
+          // Process each case to find date values
+          for (const caseData of casesResult.values) {
+            let dateValue: string | number | undefined;
+            
+            // Try to extract date from case values
+            if (caseData.values && caseData.values[dateAttr] !== undefined) {
+              dateValue = caseData.values[dateAttr];
+            } else if (caseData[dateAttr] !== undefined) {
+              dateValue = caseData[dateAttr];
+            }
+            
+            if (dateValue !== undefined) {
+              let timestamp: number | undefined;
+              
+              if (typeof dateValue === "string") {
+                timestamp = parseDate(dateValue, datasetConfig.dateFormat);
+              } else if (typeof dateValue === "number") {
+                // Handle small numeric values as days since reference
+                if (dateValue < 10000) {
+                  const referenceDate = new Date(2000, 0, 1).getTime();
+                  timestamp = referenceDate + (dateValue * 24 * 60 * 60 * 1000);
+                } else {
+                  timestamp = dateValue;
+                }
+              }
+              
+              if (timestamp !== undefined && !isNaN(timestamp)) {
+                if (casesMinDate === null || timestamp < casesMinDate) {
+                  casesMinDate = timestamp;
+                }
+                if (casesMaxDate === null || timestamp > casesMaxDate) {
+                  casesMaxDate = timestamp;
+                }
+                foundDates++;
+              }
+            }
+          }
+          
+          if (casesMinDate !== null && casesMaxDate !== null && foundDates > 0) {
+            minDate = casesMinDate;
+            maxDate = casesMaxDate;
+            hasValidDates = true;
+            console.log(`Date range from cases endpoint (found ${foundDates} dates): ${new Date(minDate).toLocaleDateString()} to ${new Date(maxDate).toLocaleDateString()}`);
+          }
+        }
+      } catch (error) {
+        console.error("Error using cases endpoint for dates:", error);
+      }
     }
     
     // Only update if we found valid dates
-    if (dateCount > 0 && minDate < maxDate) {
-      console.log(`Setting date range: ${new Date(minDate).toISOString()} to ${new Date(maxDate).toISOString()}`);
-      
+    if (hasValidDates && minDate! < maxDate!) {
       // Add a small buffer to the range (5% on each side)
-      const buffer = (maxDate - minDate) * 0.05;
-      codapData.setAbsoluteDateRange(minDate - buffer, maxDate + buffer);
+      const buffer = (maxDate! - minDate!) * 0.05;
+      codapData.setAbsoluteDateRange(minDate! - buffer, maxDate! + buffer);
       
       // Reset the graph visualization
       graph.resetDateVisualization();
+      console.log(`Set date range: ${new Date(minDate!).toLocaleDateString()} to ${new Date(maxDate!).toLocaleDateString()}`);
     } else {
-      console.warn("Could not determine date range from dataset");
+      console.warn("Could not determine date range from dataset - no valid dates found");
     }
   } catch (error) {
     console.error("Error calculating date range:", error);
@@ -358,7 +811,7 @@ export async function getDatasetDetails(dataContextName: string): Promise<any> {
     for (const collection of collections) {
       const attrResult = await codapInterface.sendRequest({
         action: "get",
-        resource: `dataContext[${dataContextName}].collection[${collection.name}].attribute`
+        resource: `dataContext[${dataContextName}].collection["${collection.name}"].attribute`
       }) as CodapApiResult;
       
       collectionsWithAttributes.push({
@@ -853,24 +1306,6 @@ export async function updateMapBoundsFromData(dataContextName: string): Promise<
   try {
     console.log("Updating map bounds for dataset:", dataContextName);
     
-    // Get all cases from the dataset
-    const allCases = await codapInterface.sendRequest({
-      action: "get",
-      resource: `dataContext[${dataContextName}].collection[cases].allCases`
-    }) as CodapApiResult;
-    
-    if (!allCases.success || !allCases.values || !allCases.values.length) {
-      console.warn("No cases found for geographic bounds calculation");
-      return;
-    }
-    
-    // Initialize min/max variables
-    let minLat = Infinity;
-    let maxLat = -Infinity;
-    let minLong = Infinity;
-    let maxLong = -Infinity;
-    let hasValidCoordinates = false;
-    
     // Find latitude and longitude attributes
     const latAttr = datasetConfig.latitudeAttribute;
     const longAttr = datasetConfig.longitudeAttribute;
@@ -881,62 +1316,204 @@ export async function updateMapBoundsFromData(dataContextName: string): Promise<
     }
     
     console.log(`Using attributes: latitude=${latAttr}, longitude=${longAttr}`);
-    console.log(`Analyzing ${allCases.values.length} cases for geographic bounds`);
     
-    // Analyze all cases to find the geographic bounds
-    allCases.values.forEach((caseData: Record<string, unknown>) => {
-      const lat = Number(caseData[latAttr]);
-      const long = Number(caseData[longAttr]);
+    // First, try to find the main collection
+    let collectionName = "Cases"; // Default collection name in CODAP
+    
+    // Try to get collection info
+    try {
+      const collectionsResult = await codapInterface.sendRequest({
+        action: "get",
+        resource: `dataContext[${dataContextName}].collection`
+      }) as CodapApiResult;
       
-      if (!isNaN(lat) && !isNaN(long) && isFinite(lat) && isFinite(long)) {
-        hasValidCoordinates = true;
-        minLat = Math.min(minLat, lat);
-        maxLat = Math.max(maxLat, lat);
-        minLong = Math.min(minLong, long);
-        maxLong = Math.max(maxLong, long);
+      if (collectionsResult.success && collectionsResult.values && collectionsResult.values.length) {
+        // Typically, the main collection is named "Cases"
+        // But let's use the first collection if we can't find "Cases"
+        const casesCollection = collectionsResult.values.find((c: any) => c.name === "Cases") || collectionsResult.values[0];
+        collectionName = casesCollection.name;
+        console.log(`Found collection: ${collectionName}`);
+      } else {
+        console.warn("No collections found in data context, using default collection name 'Cases'");
       }
-    });
-    
-    if (!hasValidCoordinates) {
-      console.warn("No valid geographic coordinates found in the dataset");
-      return;
+    } catch (error) {
+      console.warn("Error getting collections, using default collection name 'Cases':", error);
     }
     
-    console.log("Calculated geographic bounds:", { minLat, maxLat, minLong, maxLong });
-    
-    // Add a 50% margin to each side to ensure all points are visible
-    const latRange = maxLat - minLat;
-    const longRange = maxLong - minLong;
-    
-    const expandedMinLat = minLat - (latRange * 0.5);
-    const expandedMaxLat = maxLat + (latRange * 0.5);
-    const expandedMinLong = minLong - (longRange * 0.5);
-    const expandedMaxLong = maxLong + (longRange * 0.5);
-    
-    console.log("Expanded geographic bounds with 50% margin:", {
-      minLat: expandedMinLat,
-      maxLat: expandedMaxLat,
-      minLong: expandedMinLong,
-      maxLong: expandedMaxLong
+    // Now use formula search to get min/max values directly - this is the approach that works
+    console.log("Using caseFormulaSearch to retrieve min/max coordinate values...");
+
+    // Get min latitude
+    const minLatResult = await codapInterface.sendRequest({
+      action: "get",
+      resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${latAttr}=min(${latAttr})]`
+    }) as CodapApiResult;
+
+    // Get max latitude
+    const maxLatResult = await codapInterface.sendRequest({
+      action: "get",
+      resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${latAttr}=max(${latAttr})]`
+    }) as CodapApiResult;
+
+    // Get min longitude
+    const minLongResult = await codapInterface.sendRequest({
+      action: "get",
+      resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${longAttr}=min(${longAttr})]`
+    }) as CodapApiResult;
+
+    // Get max longitude
+    const maxLongResult = await codapInterface.sendRequest({
+      action: "get",
+      resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${longAttr}=max(${longAttr})]`
+    }) as CodapApiResult;
+
+    console.log("Formula search results:", {
+      minLat: minLatResult.success,
+      maxLat: maxLatResult.success,
+      minLong: minLongResult.success,
+      maxLong: maxLongResult.success
     });
+
+    // Helper function to extract numeric value from a case result
+    function extractValue(caseResult: CodapApiResult, attrName: string): number | null {
+      if (!caseResult.success) {
+        console.log(`Failed to get result for ${attrName}`);
+        return null;
+      }
+      
+      let values = caseResult.values;
+      
+      // Handle different response formats
+      if (Array.isArray(values) && values.length > 0) {
+        // Format: { values: [ { values: { attr: value } } ] }
+        const caseData = values[0];
+        let value = null;
+
+        // Check in values object
+        if (caseData.values && caseData.values[attrName] !== undefined) {
+          value = caseData.values[attrName];
+        } 
+        // Check directly on case object
+        else if (caseData[attrName] !== undefined) {
+          value = caseData[attrName];
+        }
+
+        // Convert to number if it's a string
+        if (value !== null && typeof value === "string" && !isNaN(Number(value))) {
+          value = Number(value);
+        }
+
+        console.log(`Extracted ${attrName} value:`, value);
+        return typeof value === "number" && !isNaN(value) ? value : null;
+      } 
+      // Format: { values: { attrName: value } }
+      else if (values && typeof values === "object" && values[attrName] !== undefined) {
+        const value = values[attrName];
+        const numValue = typeof value === "string" ? Number(value) : value;
+        console.log(`Extracted ${attrName} value from direct object:`, numValue);
+        return typeof numValue === "number" && !isNaN(numValue) ? numValue : null;
+      }
+      
+      console.log(`Could not extract ${attrName} from result`, caseResult);
+      return null;
+    }
+
+    // Extract coordinate values
+    const minLat = extractValue(minLatResult, latAttr);
+    const maxLat = extractValue(maxLatResult, latAttr);
+    const minLong = extractValue(minLongResult, longAttr);
+    const maxLong = extractValue(maxLongResult, longAttr);
+
+    // Check if we have all coordinate values
+    const hasValidCoordinates = 
+      minLat !== null && maxLat !== null && 
+      minLong !== null && maxLong !== null &&
+      !isNaN(minLat) && !isNaN(maxLat) && 
+      !isNaN(minLong) && !isNaN(maxLong);
+
+    // APPROACH: Set the view to show the entire world and ensure data point alignment
+    // We'll use the standard geographic coordinate system (-90 to 90 lat, -180 to 180 long)
     
-    // Update the map's absolute bounds
-    graph.updateAbsoluteBounds(
-      expandedMinLat,
-      expandedMaxLat,
-      expandedMinLong,
-      expandedMaxLong
-    );
+    // 1. Set the absolute bounds to full world coordinates
+    const absoluteMinLat = -90;
+    const absoluteMaxLat = 90;
+    const absoluteMinLong = -180;
+    const absoluteMaxLong = 180;
     
-    // Reset to the new data bounds
-    graph.resetToDataBounds();
+    console.log("Setting absolute map boundaries to full world coordinates:");
+    console.log(`Latitude: ${absoluteMinLat} to ${absoluteMaxLat}`);
+    console.log(`Longitude: ${absoluteMinLong} to ${absoluteMaxLong}`);
+
+    // Update absolute boundaries in the graph model - these are the furthest limits
+    graph.absoluteMinLatitude = absoluteMinLat;
+    graph.absoluteMaxLatitude = absoluteMaxLat;
+    graph.absoluteMinLongitude = absoluteMinLong;
+    graph.absoluteMaxLongitude = absoluteMaxLong;
     
-    console.log("Map boundaries updated successfully");
+    // Use slightly tighter bounds for the visible area (to avoid edge distortion)
+    // These give a small margin around the map
+    const visibleMinLat = -85;
+    const visibleMaxLat = 85;
+    const visibleMinLong = -175;
+    const visibleMaxLong = 175;
     
-    // Analyze the gap period coordinates with the new boundaries
-    analyzeGapPeriodCoordinates(dataContextName);
+    // 2. Now set the current view to show the entire world map
+    console.log("Setting current view to show the entire world map:");
+    console.log(`Latitude: ${visibleMinLat} to ${visibleMaxLat}`);
+    console.log(`Longitude: ${visibleMinLong} to ${visibleMaxLong}`);
+    
+    // Set current view directly (to immediately display the entire world)
+    graph.minLatitude = visibleMinLat;
+    graph.maxLatitude = visibleMaxLat;
+    graph.minLongitude = visibleMinLong;
+    graph.maxLongitude = visibleMaxLong;
+    
+    // Set home view to the same - this is what "reset" will return to
+    graph.homeMinLatitude = visibleMinLat;
+    graph.homeMaxLatitude = visibleMaxLat;
+    graph.homeMinLongitude = visibleMinLong;
+    graph.homeMaxLongitude = visibleMaxLong;
+    
+    // If we have valid data coordinates, also set up a data-focused view
+    if (hasValidCoordinates) {
+      console.log("Valid geographic coordinates found in dataset:");
+      console.log(`Latitude: ${minLat} to ${maxLat}`);
+      console.log(`Longitude: ${minLong} to ${maxLong}`);
+      
+      // Calculate the data center point (midpoint of data coordinates)
+      const dataCenterLat = (maxLat! + minLat!) / 2;
+      const dataCenterLong = (maxLong! + minLong!) / 2;
+      
+      // Calculate the data spans with a margin to ensure visibility
+      const dataLatSpan = (maxLat! - minLat!) * 1.5; // 50% margin
+      const dataLongSpan = (maxLong! - minLong!) * 1.5; // 50% margin
+      
+      // Calculate bounds for a data-focused view (with margin)
+      const dataMinLat = Math.max(absoluteMinLat, dataCenterLat - dataLatSpan/2);
+      const dataMaxLat = Math.min(absoluteMaxLat, dataCenterLat + dataLatSpan/2);
+      const dataMinLong = Math.max(absoluteMinLong, dataCenterLong - dataLongSpan/2);
+      const dataMaxLong = Math.min(absoluteMaxLong, dataCenterLong + dataLongSpan/2);
+      
+      console.log("Data-focused view (with 50% margin):");
+      console.log(`Latitude: ${dataMinLat} to ${dataMaxLat}`);
+      console.log(`Longitude: ${dataMinLong} to ${dataMaxLong}`);
+      
+      // Animate to the data-focused view after a delay
+      // This starts with the full world and then zooms to show the data
+      setTimeout(() => {
+        graph.animateTo({
+          minLatitude: dataMinLat,
+          maxLatitude: dataMaxLat,
+          minLongitude: dataMinLong,
+          maxLongitude: dataMaxLong
+        });
+        console.log("Animated to data-focused view");
+      }, 1000);
+    }
+    
+    console.log("Map configured to show the entire world with proper data alignment");
   } catch (error) {
-    console.error("Error updating map bounds from data:", error);
+    console.error("Error updating map bounds:", error);
   }
 }
 

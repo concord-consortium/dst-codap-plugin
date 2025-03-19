@@ -23,6 +23,11 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   // Check if a color legend attribute is set
   const colorLegendId = colorDataConfig.attributeID("legend");
   
+  // Get more detailed information about the attribute and values for debugging
+  const dataset = colorDataConfig.dataset;
+  const legendAttribute = colorLegendId ? dataset?.getAttribute(colorLegendId) : undefined;
+  const legendValue = colorLegendId && dataset ? dataset.getStrValue(id, colorLegendId) : undefined;
+  
   // Use the color from the legend if available, otherwise use default
   // The default color from the spec is: "#e6805bd9" (RGBA)
   // Note: If there is no value for the attribute on this case getLegendColorForCase(id) 
@@ -46,8 +51,8 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   const outlineColor = isSelected ? "#FF0000" : "#FFFFFF";
   const outlineWidth = isSelected ? 3 : 1.5;
 
-  // Debug color assignment
-  console.debug(`Point ${id} color: ${dotColor}, has legend: ${Boolean(colorLegendId)}`);
+  // Enhanced debug color assignment with more details
+  console.debug(`Point ${id} color: ${dotColor}, attribute: ${legendAttribute?.name}, value: ${legendValue}, attribute type: ${colorDataConfig.attributeType("legend")}`);
 
   useFrame((_state, delta) => {
     if (pointSize < targetPointSize) {

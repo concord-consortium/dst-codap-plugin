@@ -18,12 +18,19 @@ import {
   getAvailableDatasets, 
   getDatasetAttributes, 
   saveInteractiveState, 
-  getAttributesFromItemSearch,
-  exploreDataset,
   getDatasetDetails,
   loadConfiguredData
 } from "../utilities/codap-dataset-utils";
 import { ui } from "../models/ui";
+
+// Interface for attribute mappings
+interface AttributeMappings {
+  latitude: string | undefined;
+  longitude: string | undefined;
+  date: string | undefined;
+  color: string | undefined;
+  size: string | undefined;
+}
 
 /**
  * Panel for configuring which dataset to use and mapping attributes
@@ -32,6 +39,9 @@ export const DatasetConfigPanel = observer(function DatasetConfigPanel() {
   const [datasets, setDatasets] = useState<string[]>([]);
   const [attributes, setAttributes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  // Use an ESLint disable comment for this specific state variable
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [datasetDetails, setDatasetDetails] = useState<any>(null);
 
   // Load available datasets when component mounts
   useEffect(() => {
@@ -51,153 +61,157 @@ export const DatasetConfigPanel = observer(function DatasetConfigPanel() {
     fetchDatasets();
   }, []);
 
-  // Auto-detect attribute mappings based on common naming patterns
-  function autoDetectAttributeMappings(attrs: string[]) {
-    console.log("Auto-detecting attribute mappings from:", attrs);
+  /**
+   * Auto-detect attribute mappings based on attribute names
+   * @param attributeList Array of attribute names
+   * @returns Attribute mappings
+   */
+  const autoDetectAttributes = (attributeList: string[]): AttributeMappings => {
+    console.log("Auto-detecting attribute mappings from:", attributeList);
     
-    // Map of common attribute name patterns with expanded patterns
-    const patterns: Record<string, RegExp[]> = {
-      latitude: [
-        /^lat(itude)?$/i,         // lat, latitude
-        /^y$/i,                   // y coordinate
-        /^location[_\s-]?lat/i,   // location lat, location_lat
-        /lat(itude)?[_\s-]?\d*$/i, // latitude, latitude_1, etc.
-        /^coord[_\s-]?y$/i        // coord y, coord_y
-      ],
-      longitude: [
-        /^lon(g(itude)?)?$/i,     // lon, long, longitude
-        /^x$/i,                   // x coordinate
-        /^location[_\s-]?lon/i,   // location lon, location_lon
-        /lon(g(itude)?)?[_\s-]?\d*$/i, // longitude, longitude_1, etc.
-        /^coord[_\s-]?x$/i        // coord x, coord_x
-      ],
-      date: [
-        /^date$/i,                // date
-        /^time$/i,                // time
-        /^timestamp$/i,           // timestamp
-        /^day$/i,                 // day
-        /^year$/i,                // year
-        /^month$/i,               // month
-        /^datetime$/i,            // datetime
-        /date[_\s-]?\w*$/i,       // date_field, date_time, etc.
-        /time[_\s-]?\w*$/i        // time_field, time_stamp, etc.
-      ]
+    const mappings: AttributeMappings = {
+      latitude: undefined,
+      longitude: undefined,
+      date: undefined,
+      color: undefined,
+      size: undefined
     };
-
-    // Check for latitude
-    const latMatch = attrs.find(attr => patterns.latitude.some(pattern => pattern.test(attr)));
-    console.log("Latitude match:", latMatch);
-    if (latMatch) {
-      datasetConfig.setLatitudeAttribute(latMatch);
-    }
-
-    // Check for longitude
-    const longMatch = attrs.find(attr => patterns.longitude.some(pattern => pattern.test(attr)));
-    console.log("Longitude match:", longMatch);
-    if (longMatch) {
-      datasetConfig.setLongitudeAttribute(longMatch);
-    }
-
-    // Check for date
-    const dateMatch = attrs.find(attr => patterns.date.some(pattern => pattern.test(attr)));
-    console.log("Date match:", dateMatch);
-    if (dateMatch) {
-      datasetConfig.setDateAttribute(dateMatch);
+    
+    // Convert to lowercase for case-insensitive matching
+    const lowercaseAttributes = attributeList.map(attr => attr.toLowerCase());
+    
+    // Find latitude attribute
+    const latitudeKeywords = ["lat", "latitude"];
+    for (const keyword of latitudeKeywords) {
+      const match = lowercaseAttributes.find(attr => attr.includes(keyword));
+      if (match) {
+        const index = lowercaseAttributes.indexOf(match);
+        mappings.latitude = attributeList[index];
+        console.log("Latitude match:", mappings.latitude);
+        break;
+      }
     }
     
-    // Log attribute matching results
-    console.log("Attribute mapping results:", {
-      latitude: datasetConfig.latitudeAttribute,
-      longitude: datasetConfig.longitudeAttribute,
-      date: datasetConfig.dateAttribute
-    });
-  }
-
-  // Handler for dataset selection
-  async function handleDatasetChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const dataContextName = e.target.value;
-    console.log("Dataset selected:", dataContextName);
-    datasetConfig.setDataContext(dataContextName);
+    // Find longitude attribute
+    const longitudeKeywords = ["lon", "long", "longitude"];
+    for (const keyword of longitudeKeywords) {
+      const match = lowercaseAttributes.find(attr => attr.includes(keyword));
+      if (match) {
+        const index = lowercaseAttributes.indexOf(match);
+        mappings.longitude = attributeList[index];
+        console.log("Longitude match:", mappings.longitude);
+        break;
+      }
+    }
     
-    // Reset attribute mappings
-    datasetConfig.resetAttributeMappings();
+    // Find date attribute
+    const dateKeywords = ["date", "time", "day"];
+    let dateMatches: string[] = [];
     
-    // Get detailed dataset information for debugging
-    let datasetDetails: any = null;
-    try {
-      const details = await getDatasetDetails(dataContextName);
-      datasetDetails = details; // Store for later use
-      console.log("Dataset details:", JSON.stringify(details, null, 2));
-      
-      // If there are collections, log the attributes in each collection
-      if (details?.collections?.length) {
-        details.collections.forEach((collection: any) => {
-          console.log(`Collection ${collection.name} attributes:`, 
-            collection.attributes.map((attr: any) => attr.name || "unnamed"));
+    for (const keyword of dateKeywords) {
+      const matches = lowercaseAttributes
+        .filter(attr => attr.includes(keyword))
+        .map(attr => {
+          const index = lowercaseAttributes.indexOf(attr);
+          return attributeList[index];
         });
-      } else {
-        console.warn("No collections found in dataset");
+      
+      if (matches.length > 0) {
+        dateMatches = [...dateMatches, ...matches];
       }
-    } catch (error) {
-      console.error("Error getting dataset details:", error);
     }
     
-    // Fetch attributes for this dataset using multiple methods
-    try {
-      // Try multiple approaches to get the attributes, using the first one that succeeds
-      console.log("Attempting to get attributes for dataset using multiple methods...");
-      
-      // Method 1: Main get attributes function (includes direct extraction from context)
-      console.log("Method 1: Using getDatasetAttributes...");
-      let datasetAttributes = await getDatasetAttributes(dataContextName);
-      
-      // Method 2: If that fails, try itemSearch
-      if (!datasetAttributes.length) {
-        console.log("Method 2: Using getAttributesFromItemSearch...");
-        datasetAttributes = await getAttributesFromItemSearch(dataContextName);
-      }
-      
-      // Method 3: If that fails, try direct exploration
-      if (!datasetAttributes.length) {
-        console.log("Method 3: Using exploreDataset...");
-        datasetAttributes = await exploreDataset(dataContextName);
-      }
-      
-      // Method 4: Last resort - try to manually extract from dataset details
-      if (!datasetAttributes.length && datasetDetails?.context?.collections) {
-        console.log("Method 4: Manually extracting from dataset details...");
-        
-        const allAttributes: string[] = [];
-        let collectionCount = 0;
-        
-        try {
-          datasetDetails.context.collections.forEach((collection: any) => {
-            if (collection && collection.attrs && Array.isArray(collection.attrs)) {
-              collectionCount++;
-              collection.attrs.forEach((attr: any) => {
-                if (attr && attr.name) {
-                  allAttributes.push(attr.name);
-                }
-              });
-            }
-          });
-          
-          console.log(`Extracted ${allAttributes.length} attributes from ${collectionCount} collections`);
-          datasetAttributes = allAttributes;
-        } catch (err) {
-          console.error("Error in manual extraction:", err);
+    // Prioritize date attributes: exact "date" match first, then "day", then others
+    if (dateMatches.length > 0) {
+      // Priority 1: Exact "date" match
+      const exactDateMatch = dateMatches.find(attr => attr.toLowerCase() === "date");
+      if (exactDateMatch) {
+        mappings.date = exactDateMatch;
+      } 
+      // Priority 2: Exact "day" match
+      else {
+        const dayMatch = dateMatches.find(attr => attr.toLowerCase() === "day");
+        if (dayMatch) {
+          mappings.date = dayMatch;
+        } 
+        // Priority 3: First match with "date" in the name
+        else {
+          const dateInName = dateMatches.find(attr => attr.toLowerCase().includes("date"));
+          if (dateInName) {
+            mappings.date = dateInName;
+          } 
+          // Priority 4: Just use the first match we found
+          else {
+            mappings.date = dateMatches[0];
+          }
         }
       }
+      console.log("Date match:", mappings.date);
+    }
+    
+    // Look for potential color attributes
+    const colorKeywords = ["color", "category", "type", "species"];
+    for (const keyword of colorKeywords) {
+      const match = lowercaseAttributes.find(attr => attr.includes(keyword));
+      if (match) {
+        const index = lowercaseAttributes.indexOf(match);
+        mappings.color = attributeList[index];
+        console.log("Color match:", mappings.color);
+        break;
+      }
+    }
+    
+    // Look for potential size attributes
+    const sizeKeywords = ["size", "weight", "magnitude", "depth"];
+    for (const keyword of sizeKeywords) {
+      const match = lowercaseAttributes.find(attr => attr.includes(keyword));
+      if (match) {
+        const index = lowercaseAttributes.indexOf(match);
+        mappings.size = attributeList[index];
+        console.log("Size match:", mappings.size);
+        break;
+      }
+    }
+    
+    console.log("Attribute mapping results:", mappings);
+    return mappings;
+  };
+
+  // Handler for dataset selection
+  const handleDatasetChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const dataContextName = event.target.value;
+    console.log(`Selected dataset: ${dataContextName}`);
+    
+    if (!dataContextName) {
+      return;
+    }
+    
+    datasetConfig.setDataContext(dataContextName);
+    
+    try {
+      // Get dataset details first to understand structure
+      setDatasetDetails(await getDatasetDetails(dataContextName));
       
+      // Get attributes for selected dataset
+      const datasetAttributes = await getDatasetAttributes(dataContextName);
       console.log("Final retrieved attributes:", datasetAttributes);
+      
+      // Update available attributes for selection
       setAttributes(datasetAttributes);
       
       // Auto-detect potential mappings
-      autoDetectAttributeMappings(datasetAttributes);
+      const mappings = autoDetectAttributes(datasetAttributes);
+      
+      // Update dataset config with detected mappings
+      if (mappings.latitude) datasetConfig.setLatitudeAttribute(mappings.latitude);
+      if (mappings.longitude) datasetConfig.setLongitudeAttribute(mappings.longitude);
+      if (mappings.date) datasetConfig.setDateAttribute(mappings.date);
+      if (mappings.color) datasetConfig.setColorAttribute(mappings.color);
+      if (mappings.size) datasetConfig.setSizeAttribute(mappings.size);
     } catch (error) {
       console.error("Error fetching dataset attributes:", error);
     }
-  }
+  };
 
   // Handler for applying the configuration
   async function handleSaveConfig() {
@@ -345,4 +359,4 @@ export const DatasetConfigPanel = observer(function DatasetConfigPanel() {
       </VStack>
     </Box>
   );
-}); 
+});

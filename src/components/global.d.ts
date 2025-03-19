@@ -3,6 +3,11 @@ declare module "*.png" {
   const value: string;
   export default value;
 }
+// Add JPG support
+declare module "*.jpg" {
+  const value: string;
+  export default value;
+}
 declare module "*.svg";
 declare module "*.scss";
 declare module "*.csv";

@@ -331,8 +331,6 @@ class Graph {
     this.mapDatePercent = 0;
     this.currentDatePercent = 1;
     this.animatingDate = false;
-    
-    console.log("Date visualization reset to match dataset range");
   }
 
   setAnimatingDate(animating: boolean) {

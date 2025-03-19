@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { Plane, Vector3 } from "three";
-import map from "../../assets/SpaceCubeMap.png";
+import map from "../../assets/WorldMapEquirectangular.png";
 import { graph, graphMax, graphMin } from "../../models/graph";
 import {
   kBackgroundHeight, kBackgroundWidth
@@ -17,14 +17,25 @@ export const MapPlane = observer(function MapPlane() {
 
   const texture = useTexture(map);
   
-  // Use dynamic values from the graph model instead of constants
+  // Calculate the midpoints and ranges for proper positioning
+  // Use absolute bounds for consistent positioning
   const longRange = graph.absoluteMaxLongitude - graph.absoluteMinLongitude;
+  const latRange = graph.absoluteMaxLatitude - graph.absoluteMinLatitude;
   const latMid = (graph.absoluteMaxLatitude + graph.absoluteMinLatitude) / 2;
   const longMid = (graph.absoluteMaxLongitude + graph.absoluteMinLongitude) / 2;
   
+  // Scale factor to fit the map correctly in the 3D space
   const scale = longRange / graph.longRange;
+  
+  // Calculate position in graph space
   const x = graph.latitudeInGraphSpace(latMid);
   const z = graph.longitudeInGraphSpace(longMid);
+  
+  // Adjust aspect ratio to match the equirectangular world map
+  // Standard equirectangular maps have a 2:1 width to height ratio (360° longitude : 180° latitude)
+  const aspectRatio = kBackgroundWidth / kBackgroundHeight;
+  const mapWidth = mapBaseSize * scale;
+  const mapHeight = mapWidth * (latRange / longRange) * aspectRatio;
 
   const clippingPlanes = useMemo(() => {
     return [
@@ -38,8 +49,11 @@ export const MapPlane = observer(function MapPlane() {
   /* eslint-disable react/no-unknown-property */
   return (
     <mesh rotation={[-halfPi, 0, -halfPi]} position={[x, graph.mapPosition, z]}>
-      <planeGeometry args={[mapBaseSize * scale, mapBaseSize * scale * kBackgroundHeight / kBackgroundWidth]} />
-      <meshStandardMaterial clippingPlanes={clippingPlanes} map={texture} />
+      <planeGeometry args={[mapWidth, mapHeight]} />
+      <meshStandardMaterial 
+        clippingPlanes={clippingPlanes} 
+        map={texture} 
+      />
     </mesh>
   );
   /* eslint-enable react/no-unknown-property */

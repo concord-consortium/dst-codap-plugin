@@ -6,8 +6,12 @@ import { kAboutTabLabel, kGraphTabLabel } from "../utilities/constants";
 import { AboutTab } from "./about-tab";
 import { GraphTab } from "./graph-tab";
 import { DatasetConfigPanel } from "./dataset-config-panel";
+import { CoordinateExplorer } from "./coordinate-explorer";
 import { ui } from "../models/ui";
 import "./App.css";
+
+// Label for the Coordinate Explorer tab
+const kCoordinateExplorerLabel = "Coordinate Explorer";
 
 export const App = observer(() => {
   useEffect(() => {
@@ -26,12 +30,18 @@ export const App = observer(() => {
                 {kGraphTabLabel}
               </Tab>
               <Tab>
+                {kCoordinateExplorerLabel}
+              </Tab>
+              <Tab>
                 {kAboutTabLabel}
               </Tab>
             </TabList>
             <TabPanels>
               <TabPanel>
                 <GraphTab />
+              </TabPanel>
+              <TabPanel>
+                <CoordinateExplorer />
               </TabPanel>
               <TabPanel>
                 <AboutTab />

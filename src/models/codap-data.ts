@@ -62,10 +62,8 @@ class CodapData {
     if (datasetConfig.dateAttribute) {
       const dateStr = this.getAttributeValue(datasetConfig.dateAttribute, caseId);
       if (dateStr) {
-        console.log(`Parsing date "${dateStr}" from case ${caseId} with format ${datasetConfig.dateFormat || "auto"}`);
         const timestamp = parseDate(dateStr, datasetConfig.dateFormat);
         if (timestamp) {
-          console.log(`Parsed timestamp: ${timestamp}, date: ${new Date(timestamp).toISOString()}`);
           return timestamp;
         } else {
           console.warn(`Failed to parse date from "${dateStr}"`);
@@ -79,10 +77,9 @@ class CodapData {
     const day = this.getAttributeNumericValue("Day", caseId);
     
     if (year !== undefined || month !== undefined || day !== undefined) {
-      console.log(`Using Year/Month/Day components: ${year}/${month}/${day}`);
       const timestamp = createDateFromComponents(year, month, day);
       if (timestamp) {
-        console.log(`Created timestamp from components: ${timestamp}, date: ${new Date(timestamp).toISOString()}`);
+        return timestamp;
       } else {
         console.warn(`Failed to create date from components ${year}/${month}/${day}`);
       }
@@ -169,16 +166,7 @@ class CodapData {
     this.absoluteMinDate = minDate;
     this.absoluteMaxDate = maxDate;
     
-    // Debug log for date range
-    console.log("SETTING DATE RANGE:", {
-      minDate,
-      maxDate,
-      absoluteMinDate: this.absoluteMinDate,
-      absoluteMaxDate: this.absoluteMaxDate,
-      absoluteDateRange: this.absoluteDateRange,
-      minDateFormatted: new Date(minDate).toISOString(),
-      maxDateFormatted: new Date(maxDate).toISOString()
-    });
+    // Debug log removed to reduce clutter
   }
 
   /**
