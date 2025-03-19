@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Outlines } from "@react-three/drei";
 import { ThreeEvent, useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
@@ -7,6 +7,10 @@ import { codapData } from "../../models/codap-data";
 import { dstContainer } from "../../models/dst-container";
 import { ui } from "../../models/ui";
 
+// Colors from the choropleth scale
+const colors = ["#eff3ff", "#b5cbe6", "#7ca2ce", "#427ab5", "#08519c"];
+const DEFAULT_COLOR = "#e6805b";
+
 interface IPointProps {
   id: string;
   visible?: boolean;
@@ -14,6 +18,7 @@ interface IPointProps {
   y: number;
   z: number;
 }
+
 export const Point = observer(function Point({ id, visible, x, y, z }: IPointProps) {
   const [isPointerOver, setPointerOver] = useState(false);
   
@@ -25,22 +30,99 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   
   // Get more detailed information about the attribute and values for debugging
   const dataset = colorDataConfig.dataset;
-  const legendAttribute = colorLegendId ? dataset?.getAttribute(colorLegendId) : undefined;
   const legendValue = colorLegendId && dataset ? dataset.getStrValue(id, colorLegendId) : undefined;
+  const legendType = colorLegendId ? colorDataConfig.attributeType("legend") : undefined;
   
-  // Use the color from the legend if available, otherwise use default
-  // The default color from the spec is: "#e6805bd9" (RGBA)
-  // Note: If there is no value for the attribute on this case getLegendColorForCase(id) 
-  // will return "#888888". Showing this color for points that can't colored by the
-  // legend is the same behavior as CODAP.
-  const dotColor = colorLegendId ? colorDataConfig.getLegendColorForCase(id) : "#e6805b";
+  // Calculate the thresholds for the current legend attribute once per render
+  // This ensures all points use the same thresholds
+  const thresholds = useMemo(() => {
+    if (!dataset || !colorLegendId || legendType !== "numeric") {
+      return [];
+    }
+    
+    const numericValues = Array.from(colorDataConfig.numericValuesForAttrRole("legend") || []);
+    if (numericValues.length === 0) {
+      return [];
+    }
+    
+    // Sort the values to determine quantile thresholds
+    const sortedValues = [...numericValues].sort((a, b) => a - b);
+    const valueCount = sortedValues.length;
+    
+    // Calculate threshold indices for approximately equal groups
+    const step = Math.max(1, Math.floor(valueCount / colors.length));
+    const result = [];
+    
+    for (let i = 1; i < colors.length; i++) {
+      const thresholdIndex = Math.min(i * step, valueCount - 1);
+      result.push(sortedValues[thresholdIndex]);
+    }
+    
+    return result;
+  }, [dataset, colorLegendId, legendType, colorDataConfig]);
+  
+  // Dynamic color assignment that will respond to legend changes
+  let dotColor = DEFAULT_COLOR; // Default color
+  
+  if (colorLegendId && legendValue) {
+    // Try the standard CODAP color first
+    const standardColor = colorDataConfig.getLegendColorForCase(id);
+    
+    if (standardColor && standardColor !== "#888888") {
+      // If the standard system provides a non-missing color, use it
+      dotColor = standardColor;
+    } else if (legendType === "numeric") {
+      // Otherwise fall back to our manual color calculation
+      const numValue = parseFloat(legendValue);
+      
+      if (!isNaN(numValue)) {
+        if (thresholds.length > 0) {
+          // Determine which color to use based on thresholds
+          let colorIndex = 0;
+          for (let i = 0; i < thresholds.length; i++) {
+            if (numValue >= thresholds[i]) {
+              colorIndex = i + 1;
+            }
+          }
+          
+          dotColor = colors[colorIndex];
+        } else {
+          // If for some reason we don't have thresholds, use a linear scale based on the value
+          // Find min and max values in the dataset for this attribute
+          const allValues = dataset && colorLegendId ? 
+            Array.from(colorDataConfig.numericValuesForAttrRole("legend") || []) : [];
+          
+          if (allValues.length > 0) {
+            const min = Math.min(...allValues);
+            const max = Math.max(...allValues);
+            const range = max - min;
+            
+            if (range > 0) {
+              // Normalize the value to 0-1 range
+              const normalizedValue = Math.max(0, Math.min(1, (numValue - min) / range));
+              // Map to color index
+              const colorIndex = Math.min(colors.length - 1, Math.floor(normalizedValue * colors.length));
+              dotColor = colors[colorIndex];
+            } else {
+              // All values are the same, use middle color
+              dotColor = colors[Math.floor(colors.length / 2)];
+            }
+          } else {
+            dotColor = DEFAULT_COLOR;
+          }
+        }
+      } else {
+        // Not a valid number
+        dotColor = DEFAULT_COLOR;
+      }
+    } else if (legendType === "categorical") {
+      // For categorical values, try to get a computed color or use default
+      const categoryColor = colorDataConfig.getLegendColorForCase(id);
+      dotColor = (categoryColor && categoryColor !== "#888888") ? categoryColor : DEFAULT_COLOR;
+    }
+  }
   
   const dotDiameterInPixels = sizeDataConfig.getLegendSizeForCase(id);
-  // TODO: replace this hardcoded 0.026 with an actual calculation
-  // It should be possible to compute it from the camera settings.
-  // The basePointSize was originally 0.12
-  // The pointSize is a radius so if we had a conversion from pixels to 
-  // 3d units we also have to divide by 2.
   const basePointSize = dotDiameterInPixels * 0.026;
   const isSelected = codapData.isSelected(id);
   const selectedExtra = isSelected ? .02 : 0;
@@ -50,9 +132,6 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   const [pointSize, setPointSize] = useState(targetPointSize);
   const outlineColor = isSelected ? "#FF0000" : "#FFFFFF";
   const outlineWidth = isSelected ? 3 : 1.5;
-
-  // Enhanced debug color assignment with more details
-  console.debug(`Point ${id} color: ${dotColor}, attribute: ${legendAttribute?.name}, value: ${legendValue}, attribute type: ${colorDataConfig.attributeType("legend")}`);
 
   useFrame((_state, delta) => {
     if (pointSize < targetPointSize) {

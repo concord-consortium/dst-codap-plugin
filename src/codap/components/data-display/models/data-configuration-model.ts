@@ -498,9 +498,10 @@ export const DataConfigurationModel = types
       // perhaps by renaming it PlottableCases and then apply the displayOnlySelectedCases
       // criteria further up chain of filters.
       const values = self.numericValuesForAttrRole("legend") ?? []
-
+      
       const legendAttrId = self.attributeID("legend")
       const binningType = self.metadata?.getAttributeBinningType(legendAttrId)
+      
       switch (binningType) {
         case "quantize": {
           const extents = extent(values)
@@ -524,7 +525,27 @@ export const DataConfigurationModel = types
       },
 
       getLegendColorForNumericValue(value: number): string {
-        return self.legendNumericColorScale(value)
+        try {
+          const scale = self.legendNumericColorScale
+          const scaleFunction = typeof scale === "function" ? scale : null
+          
+          if (!scaleFunction) {
+            console.error("Scale is not a function:", scale)
+            return missingColor
+          }
+          
+          const result = scaleFunction(value)
+          
+          if (!result) {
+            console.error("Scale returned a falsy value for", value)
+            return missingColor
+          }
+          
+          return result
+        } catch (error) {
+          console.error("Error in getLegendColorForNumericValue:", error)
+          return missingColor
+        }
       },
 
       getLegendColorForDateValue(value: string): string {
