@@ -11,7 +11,8 @@ import { halfPi, normalizeRadian2Pi, normalizeRadianMinusPi, twoPi } from "../ut
 export const defaultDistance = 40;
 export const defaultRotation = .65;
 export const defaultPivot = .4;
-export const defaultZoom = 18;
+// Increased default zoom to make the cube appear larger in the doubled container
+export const defaultZoom = 35; // Increased from original 18 to scale with doubled container
 export const { x: defaultCameraX, y: defaultCameraY, z: defaultCameraZ } =
   getPositionFromCameraFormat(defaultDistance, defaultPivot, defaultRotation);
 
@@ -20,7 +21,7 @@ export const distanceMin = 1;
 export const pivotMax = halfPi;
 export const pivotMin = -halfPi;
 const pivotOffset = .05;
-export const zoomMax = 200;
+export const zoomMax = 400; // Increased to allow for higher zoom levels
 export const zoomMin = 10;
 
 const legalDistance = (distance: number) => Math.max(distanceMin, Math.min(distanceMax, distance));

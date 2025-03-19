@@ -18,13 +18,16 @@
   height: 100%;
   width: 100%;
   overflow: hidden; /* Prevent scrollbars */
+  padding-left: 10px; /* Reduced padding with new layout */
+  padding-right: 10px; /* Added right padding for balance */
 }
 
 .map-area {
-  flex: 1 0 400px; /* Set a fixed basis but allow growing */
+  flex: 1 0 680px; /* Doubled from original to accommodate larger cube */
   position: relative;
   overflow: hidden;
-  max-height: 60%; /* Limit maximum height to ensure space for legend */
+  max-height: 60%; /* Increased to provide more space for the larger cube */
+  min-width: 1150px; /* Ensure enough horizontal space for the cube and controls */
 }
 
 .legend-area {
@@ -34,7 +37,7 @@
   background-color: white;
   border-top: 1px solid #ddd;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  min-height: 320px; /* Set to match the desired height for two legends plus spacing */
+  min-height: 320px; /* Maintained to ensure adequate space for legends */
   height: auto;
   overflow: visible; /* Allow legend content to be visible if needed */
 }

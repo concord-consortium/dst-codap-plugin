@@ -2,18 +2,19 @@
   background-color: #f9f9f9;
   border: 1px solid #e3e3e3;
   display: flex;
-  height: 354px;
+  height: 728px;
   justify-content: flex-end;
-  left: 62.5px;
+  left: -60px;
   position: absolute;
-  top: 10px;
-  width: 470px;
+  top: -60px;
+  width: 1080px;
+  z-index: 0;
 
   .scatter-plot {
-    height: 354px;
-    margin-right: -20px;
+    height: 708px;
+    margin-right: 40px;
     position: relative;
-    width: 416px;
+    width: 832px;
 
     &.pointer-mode {
       cursor: pointer;

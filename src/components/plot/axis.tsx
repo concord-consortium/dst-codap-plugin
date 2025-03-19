@@ -56,7 +56,7 @@ export function Axis({
             anchorX="center"
             anchorY="top"
             color="black"
-            fontSize={.7}
+            fontSize={.45}
             fontWeight={600}
             rotation={labelRotation}
           >
