@@ -5,11 +5,11 @@ import { CaseData } from "../codap/components/data-display/d3-types";
 import { dataDisplayGetNumericValue } from "../codap/components/data-display/data-display-value-utils";
 
 // These are diameters
-const minDiameter = 3;
-const maxDiameter = 21;
+const minDiameter = 2.25;
+const maxDiameter = 15.75;
 
 // The spec has this at 12, but it is little big with our default data
-export const defaultPointDiameter = 8;
+export const defaultPointDiameter = 6;
 
 export const DstDataConfigurationModel = DataConfigurationModel.named("DstDataConfiguration")
   .props({

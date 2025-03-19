@@ -29,6 +29,12 @@ describe('ScatterPlot CSS Size Changes', () => {
     // - Axis labels: 0.45 (reduced from 0.9)
     // - Tick labels: 0.35 (reduced from 0.7)
     
+    // Point sizes reduced to 75% of original size:
+    // - Point scale factor: 0.0195 (reduced from 0.026)
+    // - Min diameter: 2.25 (reduced from 3)
+    // - Max diameter: 15.75 (reduced from 21)
+    // - Default diameter: 6 (reduced from 8)
+    
     // This test will always pass and serves as documentation
     expect(true).toBe(true);
   });

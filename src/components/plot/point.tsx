@@ -123,7 +123,7 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   }
   
   const dotDiameterInPixels = sizeDataConfig.getLegendSizeForCase(id);
-  const basePointSize = dotDiameterInPixels * 0.026;
+  const basePointSize = dotDiameterInPixels * 0.0195;
   const isSelected = codapData.isSelected(id);
   const selectedExtra = isSelected ? .02 : 0;
   const hoverMultiplier = isPointerOver ? 1.5 : 1;
