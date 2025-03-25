@@ -13,6 +13,11 @@ const os = require('os');
 //   https://github.com/concord-consortium/s3-deploy-action/blob/main/README.md#top-branch-example
 const DEPLOY_PATH = process.env.DEPLOY_PATH;
 
+// PLAYWRIGHT_CI is set to a truthy value when we're running playwright in 
+// GitHub actions, this is used to handle the https certificates. 
+// See the readme in playwright/certificate/
+const PLAYWRIGHT_CI = process.env.PLAYWRIGHT_CI;
+
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
 
@@ -27,8 +32,12 @@ module.exports = (env, argv) => {
       server: {
         type: 'https',
         options: {
-          key: path.resolve(os.homedir(), '.localhost-ssl/localhost.key'),
-          cert: path.resolve(os.homedir(), '.localhost-ssl/localhost.pem'),
+          key: PLAYWRIGHT_CI 
+            ? 'playwright/certificate/localhost.key'
+            : path.resolve(os.homedir(), '.localhost-ssl/localhost.key'),
+          cert: PLAYWRIGHT_CI
+            ? 'playwright/certificate/localhost.pem'
+            : path.resolve(os.homedir(), '.localhost-ssl/localhost.pem'),
         }
       },
     },

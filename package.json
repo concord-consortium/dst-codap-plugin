@@ -26,7 +26,8 @@
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/cypress/"
+      "/cypress/",
+      "/playwright/"
     ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
@@ -48,7 +49,7 @@
   "scripts": {
     "start": "webpack serve --server-type http",
     "start:secure": "webpack serve",
-    "start:secure:no-certs": "webpack serve --no-https-request-cert",
+    "start:secure:no-certs": "webpack serve --server-options-cert-reset --server-options-key-reset",
     "build": "npm-run-all lint:build build:webpack",
     "build:webpack": "webpack --mode production",
     "build:top-test": "cross-env DEPLOY_PATH=specific/release/ webpack --mode production --output-path top-test/specific/release && cp top-test/specific/release/index-top.html top-test/",
@@ -86,6 +87,7 @@
     "report-dir": "coverage-cypress"
   },
   "devDependencies": {
+    "@bgotink/playwright-coverage": "^0.3.2",
     "@concord-consortium/codap-plugin-api": "^0.1.9",
     "@cypress/code-coverage": "^3.13.10",
     "@cypress/webpack-preprocessor": "^6.0.2",
@@ -93,6 +95,7 @@
     "@eslint/js": "^9.17.0",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@jsdevtools/coverage-istanbul-loader": "^3.0.5",
+    "@playwright/test": "^1.51.0",
     "@stylistic/eslint-plugin": "^2.12.1",
     "@stylistic/eslint-plugin-js": "^2.12.1",
     "@stylistic/eslint-plugin-jsx": "^2.12.1",
@@ -102,6 +105,7 @@
     "@testing-library/react": "^16.1.0",
     "@types/d3": "^7.4.3",
     "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.9",
     "@types/pluralize": "^0.0.33",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",

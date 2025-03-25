@@ -15,3 +15,11 @@ cypress/screenshots/
 # Logs
 npm-debug.log*
 npm-error.log*
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+results/e2e-coverage/
