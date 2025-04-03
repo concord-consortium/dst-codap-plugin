@@ -1,6 +1,6 @@
 import {
   addDataContextChangeListener, createDataContextFromURL, getCaseByFormulaSearch, getDataContext,
-  getSelectionList, initializePlugin, selectCases
+  getSelectionList, initializePlugin, selectCases, sendMessage
 } from "@concord-consortium/codap-plugin-api";
 import { comparer, reaction } from "mobx";
 import { applySnapshot, getSnapshot } from "mobx-state-tree";
@@ -181,4 +181,8 @@ export function setDSTCases(cases: ICaseCreation[]) {
   const {dataDisplayModel} = dstContainer;
   updateConfiguration(dataDisplayModel.colorDataConfiguration);
   updateConfiguration(dataDisplayModel.sizeDataConfiguration);
+}
+
+export function resizePlugin(height: number, width: number) {
+  sendMessage("update", "interactiveFrame", { dimensions: { height, width } });
 }
