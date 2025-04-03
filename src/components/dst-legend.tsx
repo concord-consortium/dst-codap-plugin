@@ -59,7 +59,7 @@ const dataDisplayLayout = new DataDisplayLayout({
 });
 
 // Initialize layout with default legend height to prevent jumping on load
-dataDisplayLayout.setDesiredExtent("legend", 320); // Default height for two legends (150px each) plus spacing
+dataDisplayLayout.setDesiredExtent("legend", 180);
 
 export const DstLegend = observer(function DstLegend() {
   // Disable Drag and Drop

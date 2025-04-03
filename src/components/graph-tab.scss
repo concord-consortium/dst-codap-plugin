@@ -23,11 +23,11 @@
 }
 
 .map-area {
-  flex: 1 0 680px; /* Doubled from original to accommodate larger cube */
+  flex: 1 0 700px; /* Adjusted for the new window height */
   position: relative;
   overflow: hidden;
-  max-height: 60%; /* Increased to provide more space for the larger cube */
-  min-width: 1150px; /* Ensure enough horizontal space for the cube and controls */
+  max-height: 70%; /* Adjusted for the new window proportions */
+  min-width: 1075px; /* Adjusted to match the new window width */
 }
 
 .legend-area {
@@ -37,9 +37,11 @@
   background-color: white;
   border-top: 1px solid #ddd;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  min-height: 320px; /* Maintained to ensure adequate space for legends */
+  min-height: 180px; /* Maintained for adequate space for legends */
+  max-height: 30%; /* Increased to provide more vertical space for legends */
   height: auto;
   overflow: visible; /* Allow legend content to be visible if needed */
+  padding-top: 10px; /* Add padding at the top */
 }
 
 /* Make sure portal content is visible */
