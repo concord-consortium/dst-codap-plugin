@@ -43,6 +43,10 @@
           font-weight: 500;
           height: 25px;
           margin-top: 2px;
+
+          &:hover {
+            background-color: #dbeff1;
+          }
         }
       }
     }
