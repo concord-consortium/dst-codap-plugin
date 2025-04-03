@@ -15,12 +15,11 @@ import { observer } from "mobx-react-lite";
 import { datasetConfig } from "../models/dataset-config";
 import { graph } from "../models/graph";
 import { 
-  getAvailableDatasets, 
   getDatasetAttributes, 
-  saveInteractiveState, 
   getDatasetDetails,
   loadConfiguredData
 } from "../utilities/codap-dataset-utils";
+import { getAvailableDatasets, saveInteractiveState } from "../utilities/codap-interface-helpers";
 import { ui } from "../models/ui";
 
 // Interface for attribute mappings

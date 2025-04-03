@@ -16,7 +16,7 @@ import { DstContainer, dstContainer } from "../models/dst-container";
 import { IDstDataConfigurationModel } from "../models/dst-data-configuration-model";
 import { ui } from "../models/ui";
 import { kCollectionName, kInitialDimensions, kPluginName, kVersion } from "./constants";
-import { loadInteractiveState } from "./codap-dataset-utils";
+import { getAvailableDatasets, loadInteractiveState } from "./codap-interface-helpers";
 import { datasetConfig } from "../models/dataset-config";
 
 // This alternative dataset is easier to debug because it only has 2 cases
@@ -36,8 +36,7 @@ export async function initializeDST() {
     
   // Test CODAP API communication
   try {
-    // Import the function here to avoid circular dependencies
-    const { getAvailableDatasets } = await import("./codap-dataset-utils");
+    // Get available datasets directly from the helpers
     const datasets = await getAvailableDatasets();
     console.log("Available datasets detected at initialization:", datasets);
   } catch (error) {

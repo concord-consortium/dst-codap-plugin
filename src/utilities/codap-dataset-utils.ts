@@ -4,12 +4,7 @@ import { codapData } from "../models/codap-data";
 import { graph } from "../models/graph";
 import { getData, setupSelectionSynchronization } from "./codap-utils";
 import { analyzeDateString, parseDateWithFormat } from "./date-utils";
-
-// Interface for CODAP API responses
-interface CodapApiResult {
-  success: boolean;
-  values?: any;
-}
+import { CodapApiResult } from "./codap-interface-helpers";
 
 /**
  * Parse a date string using the specified format
@@ -34,27 +29,6 @@ function parseDate(dateStr: string, format?: string): number | undefined {
   } catch (error) {
     console.warn(`Failed to parse date: ${dateStr}`, error);
     return undefined;
-  }
-}
-
-/**
- * Get a list of available datasets in CODAP
- * @returns An array of dataset names
- */
-export async function getAvailableDatasets(): Promise<string[]> {
-  try {
-    const result = await codapInterface.sendRequest({
-      action: "get",
-      resource: "dataContextList"
-    }) as CodapApiResult;
-    
-    if (result.success && result.values) {
-      return result.values.map((context: any) => context.name);
-    }
-    return [];
-  } catch (error) {
-    console.error("Error getting available datasets:", error);
-    return [];
   }
 }
 
@@ -186,63 +160,6 @@ export async function getDatasetAttributes(dataContextName: string): Promise<str
   } catch (error) {
     console.error("Error getting dataset attributes:", error);
     return [];
-  }
-}
-
-/**
- * Save the interactive state to CODAP
- * @param state The state to save
- * @returns The result of the save operation
- */
-export async function saveInteractiveState(state: any): Promise<any> {
-  try {
-    // Create a serializable version of the state
-    const serializableState: Record<string, any> = {};
-    
-    // If datasetConfig is in the state, extract only the serializable properties
-    if (state.datasetConfig) {
-      serializableState.datasetConfig = {
-        dataContextName: state.datasetConfig.dataContextName,
-        latitudeAttribute: state.datasetConfig.latitudeAttribute,
-        longitudeAttribute: state.datasetConfig.longitudeAttribute,
-        dateAttribute: state.datasetConfig.dateAttribute,
-        colorAttribute: state.datasetConfig.colorAttribute,
-        sizeAttribute: state.datasetConfig.sizeAttribute,
-        dateFormat: state.datasetConfig.dateFormat,
-        isConfigured: state.datasetConfig.isConfigured
-      };
-    }
-    
-    // Update the interactive state through CODAP API
-    return await codapInterface.sendRequest({
-      action: "update",
-      resource: "interactiveState",
-      values: serializableState
-    });
-  } catch (error) {
-    console.error("Error saving interactive state:", error);
-    return { success: false, error };
-  }
-}
-
-/**
- * Load the interactive state from CODAP
- * @returns The loaded state or undefined if not found
- */
-export async function loadInteractiveState(): Promise<any> {
-  try {
-    const result = await codapInterface.sendRequest({
-      action: "get",
-      resource: "interactiveState"
-    }) as CodapApiResult;
-    
-    if (result.success && result.values) {
-      return result.values;
-    }
-    return undefined;
-  } catch (error) {
-    console.error("Error loading interactive state:", error);
-    return undefined;
   }
 }
 

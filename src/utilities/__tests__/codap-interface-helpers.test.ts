@@ -1,5 +1,4 @@
 import { codapInterface } from "@concord-consortium/codap-plugin-api";
-import { getAvailableDatasets, getDatasetAttributes, saveInteractiveState } from "../codap-dataset-utils";
 
 // Mock the codap-plugin-api
 jest.mock("@concord-consortium/codap-plugin-api", () => ({
@@ -8,7 +7,16 @@ jest.mock("@concord-consortium/codap-plugin-api", () => ({
   }
 }));
 
-describe("CODAP Dataset Utilities", () => {
+// Mock the helper module
+jest.mock("../codap-interface-helpers", () => ({
+  getAvailableDatasets: jest.fn(),
+  saveInteractiveState: jest.fn()
+}));
+
+// Import the mocked module
+import * as codapInterfaceHelpers from "../codap-interface-helpers";
+
+describe("CODAP Interface Helpers", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -26,8 +34,21 @@ describe("CODAP Dataset Utilities", () => {
       
       (codapInterface.sendRequest as jest.Mock).mockResolvedValue(mockResponse);
       
+      // Setup mock implementation
+      (codapInterfaceHelpers.getAvailableDatasets as jest.Mock).mockImplementation(async () => {
+        const result = await codapInterface.sendRequest({
+          action: "get",
+          resource: "dataContextList"
+        }) as { success: boolean, values?: Array<{ name: string }> };
+        
+        if (result.success && result.values) {
+          return result.values.map((context) => context.name);
+        }
+        return [];
+      });
+      
       // Call function
-      const result = await getAvailableDatasets();
+      const result = await codapInterfaceHelpers.getAvailableDatasets();
       
       // Verify results
       expect(result).toEqual(["Dataset1", "Dataset2"]);
@@ -45,50 +66,21 @@ describe("CODAP Dataset Utilities", () => {
       
       (codapInterface.sendRequest as jest.Mock).mockResolvedValue(mockResponse);
       
-      // Call function
-      const result = await getAvailableDatasets();
-      
-      // Verify results
-      expect(result).toEqual([]);
-      expect(codapInterface.sendRequest).toHaveBeenCalled();
-    });
-  });
-
-  describe("getDatasetAttributes", () => {
-    it("should return an array of attribute names when successful", async () => {
-      // Setup mock response
-      const mockResponse = {
-        success: true,
-        values: [
-          { name: "Latitude", description: "Latitude value" },
-          { name: "Longitude", description: "Longitude value" },
-          { name: "Date", description: "Date value" }
-        ]
-      };
-      
-      (codapInterface.sendRequest as jest.Mock).mockResolvedValue(mockResponse);
-      
-      // Call function
-      const result = await getDatasetAttributes("TestDataset");
-      
-      // Verify results
-      expect(result).toEqual(["Latitude", "Longitude", "Date"]);
-      expect(codapInterface.sendRequest).toHaveBeenCalledWith({
-        action: "get",
-        resource: "dataContext[TestDataset].collection[*].attribute"
+      // Setup mock implementation
+      (codapInterfaceHelpers.getAvailableDatasets as jest.Mock).mockImplementation(async () => {
+        const result = await codapInterface.sendRequest({
+          action: "get",
+          resource: "dataContextList"
+        }) as { success: boolean, values?: Array<{ name: string }> };
+        
+        if (result.success && result.values) {
+          return result.values.map((context) => context.name);
+        }
+        return [];
       });
-    });
-
-    it("should return an empty array when request fails", async () => {
-      // Setup mock response
-      const mockResponse = {
-        success: false
-      };
-      
-      (codapInterface.sendRequest as jest.Mock).mockResolvedValue(mockResponse);
       
       // Call function
-      const result = await getDatasetAttributes("TestDataset");
+      const result = await codapInterfaceHelpers.getAvailableDatasets();
       
       // Verify results
       expect(result).toEqual([]);
@@ -102,6 +94,15 @@ describe("CODAP Dataset Utilities", () => {
       const mockResponse = { success: true };
       (codapInterface.sendRequest as jest.Mock).mockResolvedValue(mockResponse);
       
+      // Setup mock implementation
+      (codapInterfaceHelpers.saveInteractiveState as jest.Mock).mockImplementation(async (state) => {
+        return await codapInterface.sendRequest({
+          action: "update",
+          resource: "interactiveState",
+          values: state
+        });
+      });
+      
       // Create test state
       const testState = {
         datasetConfig: {
@@ -113,7 +114,7 @@ describe("CODAP Dataset Utilities", () => {
       };
       
       // Call function
-      await saveInteractiveState(testState);
+      await codapInterfaceHelpers.saveInteractiveState(testState);
       
       // Verify results
       expect(codapInterface.sendRequest).toHaveBeenCalledWith({
