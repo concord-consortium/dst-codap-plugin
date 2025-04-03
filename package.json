@@ -65,6 +65,8 @@
     "test:debug": "node --nolazy --inspect-brk ./node_modules/.bin/jest --runInBand --no-cache",
     "test:watch": "jest --watch",
     "test:coverage:watch": "jest --coverage --watchAll",
+    "test:playwright": "playwright test",
+    "test:playwright:open": "playwright test --ui",
     "test:cypress": "cypress run",
     "test:cypress:open": "cypress open",
     "test:coverage:cypress:open": "cypress open --env coverage=true",
