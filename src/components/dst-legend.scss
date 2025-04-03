@@ -4,7 +4,7 @@
   overflow: visible; /* Prevent scrollbars */
   display: flex;
   flex-direction: column;
-  margin-top: 10px; /* Reduced to maximize vertical space */
+  margin-top: 2px; /* Further reduced from 5px */
   padding-top: 0; /* Removed to maximize vertical space */
 }
 
@@ -15,14 +15,15 @@
   flex-direction: column;
   position: relative; /* Ensure proper stacking context */
   overflow: visible; /* Prevent scrollbars and allow expansion */
-  gap: 10px; /* Maintain the spacing between elements */
-  justify-content: space-between; /* Distribute space evenly between legends */
+  gap: 30px; /* Further reduced from 5px */
+  justify-content: flex-start; /* Changed from space-between to stack legends closer */
   
   .legend {
-    padding: 10px;
+    padding: 3px; /* Further reduced from 5px */
     border-bottom: 1px solid #eee;
-    min-height: 75px; /* Maintain minimum height */
-    flex: 1; /* Allow each legend to grow equally */
+    height: 110px; /* Changed from min-height to exact height */
+    min-height: unset; /* Remove min-height */
+    flex: 0 0 100px; /* Fixed height, don't grow or shrink */
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -44,16 +45,16 @@
 
 /* Ensure each color and size section has its own area */
 .legend-section {
-  margin-bottom: 8px; /* Reduced from 15px */
+  margin-bottom: 2px; /* Further reduced from 5px */
   width: 100%;
 }
 
 /* Style the legend display area */
 .legend-display {
-  margin-top: 5px; /* Reduced from 10px */
-  padding: 5px 0; /* Reduced from 8px 0 */
+  margin-top: 2px; /* Reduced from 3px */
+  padding: 2px 0; /* Reduced from 3px */
   border-top: 1px dotted #eee;
-  min-height: 50px; /* Reduced from 100px */
+  min-height: 40px; /* Reduced from 40px */
   width: 100%;
   position: relative; /* Create stacking context */
   overflow: visible; /* Allow content to expand as needed */

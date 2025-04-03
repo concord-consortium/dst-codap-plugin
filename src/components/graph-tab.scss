@@ -23,11 +23,14 @@
 }
 
 .map-area {
-  flex: 1 0 700px; /* Adjusted for the new window height */
+  flex: 1 0 700px; /* Maintain current height */
   position: relative;
   overflow: hidden;
-  max-height: 70%; /* Adjusted for the new window proportions */
-  min-width: 1075px; /* Adjusted to match the new window width */
+  max-height: 75%; /* Increased from 70% to provide more vertical space */
+  min-width: 1090px; /* Maintain current width */
+  display: flex; /* Add flex display to help with centering */
+  align-items: center; /* Center children vertically */
+  justify-content: center; /* Center children horizontally */
 }
 
 .legend-area {
@@ -37,11 +40,11 @@
   background-color: white;
   border-top: 1px solid #ddd;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  min-height: 180px; /* Maintained for adequate space for legends */
-  max-height: 30%; /* Increased to provide more vertical space for legends */
-  height: auto;
+  min-height: 250px; /* Set to match 2 legends at 100px each + 8px spacing/borders */
+  height: 250px; /* Fixed height for 2 legends exactly */
+  max-height: none; /* Remove max height constraint */
   overflow: visible; /* Allow legend content to be visible if needed */
-  padding-top: 10px; /* Add padding at the top */
+  padding-top: 2px; /* Keep minimal padding */
 }
 
 /* Make sure portal content is visible */

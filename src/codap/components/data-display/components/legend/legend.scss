@@ -5,7 +5,7 @@
   width: 100%;
   height: 100%;
   padding: 5px 0; /* Add padding to ensure content isn't obscured */
-  min-height: 100px; /* Provide minimum height for legend component */
+  min-height: 50px; /* Provide minimum height for legend component */
   overflow: visible; /* Ensure content isn't cut off */
 
   .legend-background {
@@ -43,7 +43,7 @@
   background-color: vars.$background-fill;
   overflow: visible; /* Allow content to expand */
   height: auto; /* Allow container to grow with content */
-  gap: 20px; /* Match the 20px gap in dst-legend.scss */
+  gap: 10px; /* Match the 20px gap in dst-legend.scss */
   
   /* Ensure each legend is properly spaced */
   .legend {
@@ -52,7 +52,7 @@
     flex: 0 0 auto; /* Don't grow or shrink, use exact size */
     overflow: visible;
     margin: 0; /* Remove any default margins */
-    min-height: 150px; /* Match the height in dst-legend.scss */
+    min-height: 60px; /* Match the height in dst-legend.scss */
   }
 }
 
