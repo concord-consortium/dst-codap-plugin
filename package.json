@@ -72,14 +72,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/concord-consortium/starter-projects.git"
+    "url": "git+https://github.com/chaddorsey/dst-codap-plugin"
   },
   "author": "Concord Consortium",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/concord-consortium/starter-projects/issues"
+    "url": "https://github.com/chaddorsey/dst-codap-plugin/issues"
   },
-  "homepage": "https://github.com/concord-consortium/starter-projects#readme",
+  "homepage": "https://chaddorsey.github.io/dst-codap-plugin",
   "nyc": {
     "extends": "@istanbuljs/nyc-config-typescript",
     "all": true,

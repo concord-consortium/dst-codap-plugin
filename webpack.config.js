@@ -13,6 +13,10 @@ const os = require('os');
 //   https://github.com/concord-consortium/s3-deploy-action/blob/main/README.md#top-branch-example
 const DEPLOY_PATH = process.env.DEPLOY_PATH;
 
+// For GitHub Pages deployment
+const isGitHubPages = process.env.GITHUB_PAGES === 'true';
+const publicPath = isGitHubPages ? '/dst-codap-plugin/' : DEPLOY_PATH || '.';
+
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
 
@@ -172,7 +176,7 @@ module.exports = (env, argv) => {
         filename: 'index.html',
         template: 'src/index.html',
         favicon: 'src/public/favicon.ico',
-        publicPath: '.',
+        publicPath: publicPath,
       }),
       ...(DEPLOY_PATH ? [new HtmlWebpackPlugin({
         filename: 'index-top.html',
