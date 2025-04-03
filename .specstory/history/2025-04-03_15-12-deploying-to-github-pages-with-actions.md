@@ -331,6 +331,103 @@ You can also manually trigger a deployment anytime by:
 
 ---
 
+_**User**_
+
+My branch is feature/expand-cube-size. What URL will my app be at?
+
+---
+
+_**Assistant**_
+
+Your app won't be automatically deployed to GitHub Pages from the `feature/expand-cube-size` branch because the GitHub Actions workflow is configured to only deploy from the `main` branch.
+
+Looking at your `.github/workflows/github-pages-deploy.yml` file, the workflow is triggered on:
+```yaml
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+```
+
+If you want to see your changes live without merging to main, you have two options:
+
+1. Run the app locally with `npm start`
+2. Manually trigger a build and deployment after pushing to your feature branch by using a temporary branch name in the workflow file
+
+If you do merge your feature branch to `main`, your app will be deployed to:
+https://chaddorsey.github.io/dst-codap-plugin/
+
+---
+
+_**User**_
+
+What happened here?
+
+
+
+---
+
+_**Assistant**_
+
+You have a typo in your git push command. Your branch is named `feature/expand-cube-size` but you tried to push to `feature/expand-cube/size` (with an extra slash between "cube" and "size").
+
+The correct command should be:
+
+```
+git push origin feature/expand-cube-size
+```
+
+The error "src refspec feature/expand-cube/size does not match any" means Git couldn't find a local branch with that name to push.
+
+---
+
+_**User**_
+
+OK — now where will my app show up?
+
+---
+
+_**Assistant**_
+
+Since you've pushed to the `feature/expand-cube-size` branch, your app won't be automatically deployed to GitHub Pages because the GitHub Actions workflow is configured to only deploy from the `main` branch.
+
+If you want to see your changes live, you need to either:
+
+1. Merge your `feature/expand-cube-size` branch into `main`, which will trigger the deployment to https://chaddorsey.github.io/dst-codap-plugin/
+
+2. Or if you want to test before merging to main, run the app locally with `npm start`
+
+The current GitHub Pages workflow will not deploy feature branches automatically.
+
+---
+
+_**User**_
+
+Look again at @github-pages-deploy.yml 
+
+---
+
+_**Assistant**_
+
+I see now! I missed that you already updated the workflow file. Looking at the `.github/workflows/github-pages-deploy.yml` file, it's configured to run on pushes to the `feature/expand-cube-size` branch:
+
+```yaml
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["feature/expand-cube-size"]
+```
+
+Since you've pushed to this branch, the GitHub Actions workflow should have been triggered, and your app will be deployed to:
+
+https://chaddorsey.github.io/dst-codap-plugin/
+
+The deployment URL is determined by your GitHub username and repository name, not the branch name. The branch name only determines when the deployment is triggered.
+
+You can check the status of the deployment in the Actions tab of your repository on GitHub.
+
+---
+
 
 
 ---
