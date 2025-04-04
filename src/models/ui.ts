@@ -82,6 +82,12 @@ class UI {
    */
   toggleSeeThroughMode() {
     this.seeThroughMode = !this.seeThroughMode;
+    
+    // When enabling see-through mode, set opacity to 0.3 as a default
+    // to make the effect immediately visible
+    if (this.seeThroughMode) {
+      this.unselectedPointsOpacity = 0.3;
+    }
   }
 
   /**
@@ -90,9 +96,7 @@ class UI {
    */
   setUnselectedPointsOpacity(opacity: number) {
     // Ensure opacity is between 0 and 1
-    const newOpacity = Math.max(0, Math.min(1, opacity));
-    console.log("Setting opacity in UI model:", newOpacity);
-    this.unselectedPointsOpacity = newOpacity;
+    this.unselectedPointsOpacity = Math.max(0, Math.min(1, opacity));
   }
 }
 

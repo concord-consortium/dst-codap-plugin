@@ -414,10 +414,7 @@ export const GraphUI = observer(function GraphUI() {
                 max={1}
                 step={0.01}
                 value={ui.unselectedPointsOpacity}
-                onChange={(val) => {
-                  console.log("Slider onChange fired with value:", val);
-                  ui.setUnselectedPointsOpacity(val);
-                }}
+                onChange={(val) => ui.setUnselectedPointsOpacity(val)}
                 colorScheme="blue"
                 size="sm"
               >

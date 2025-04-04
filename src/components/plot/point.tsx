@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Outlines } from "@react-three/drei";
 import { ThreeEvent, useFrame } from "@react-three/fiber";
-import { Vector3, NormalBlending, Color } from "three";
+import { Vector3 } from "three";
 import { observer } from "mobx-react-lite";
 import { codapData } from "../../models/codap-data";
 import { dstContainer } from "../../models/dst-container";
@@ -131,7 +131,7 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   const pointSizeSpeed = 0.5;
   const [pointSize, setPointSize] = useState(targetPointSize);
   const outlineColor = isSelected ? "#FF0000" : "#FFFFFF";
-  const outlineWidth = isSelected ? 3 : 1.5;
+  const outlineWidth = isSelected ? 2 : 1;
   
   // Directly calculate if we should show this point and with what opacity
   const pointOpacity = useMemo(() => {
@@ -210,42 +210,26 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   }
 
   /* eslint-disable react/no-unknown-property */
-  // Calculate outline thickness in world units based on the point size and outline width
-  const outlineSize = pointSize + (outlineWidth * 0.005);
-  
   return (
-    <group>
-      {/* Draw the inner sphere with the data-driven color first */}
-      <mesh
-        position={position}
-        onClick={handleClick}
-        onPointerEnter={handlePointerEnter}
-        onPointerLeave={handlePointerLeave}
-        renderOrder={1} 
-      >
-        <sphereGeometry args={[pointSize, 16, 16]} />
-        <meshBasicMaterial 
-          color={dotColor}
-          transparent={pointOpacity < 1}
-          opacity={pointOpacity}
-          depthWrite={pointOpacity === 1}
-        />
-      </mesh>
-      
-      {/* Then draw the outline sphere on top with proper stacking */}
-      {pointOpacity > 0 && (
-        <mesh position={position} renderOrder={2}>
-          <sphereGeometry args={[outlineSize, 16, 16]} />
-          <meshBasicMaterial 
-            color={outlineColor}
-            transparent={true}
-            opacity={isSelected ? Math.min(1, pointOpacity + 0.2) : pointOpacity * 0.7}
-            depthWrite={false}
-            wireframe={true}
-          />
-        </mesh>
-      )}
-    </group>
+    <mesh
+      position={position}
+      onClick={handleClick}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+      visible={visible}
+    >
+      <sphereGeometry args={[pointSize, 16, 16]} />
+      <meshBasicMaterial 
+        color={dotColor}
+        transparent={true}
+        opacity={pointOpacity}
+      />
+      <Outlines 
+        color={outlineColor}
+        thickness={outlineWidth * 0.4}
+        visible={pointOpacity > 0.1}
+      />
+    </mesh>
   );
   /* eslint-enable react/no-unknown-property */
 });
