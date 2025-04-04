@@ -22,3 +22,42 @@
   left: 114px;
   top: 328px;
 }
+
+.graph-ui {
+  pointer-events: none;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.config-button-container {
+  position: absolute;
+  padding: 4px;
+  border-radius: 50%;
+  height: 20px;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  svg {
+    height: 12px;
+    width: 12px;
+  }
+}
+
+.load-data-button {
+  height: 20px;
+  font-size: 10px !important;
+  padding: 0px 8px !important;
+  border-radius: 3px !important;
+  
+  // Match size of spinner to button text
+  .chakra-spinner {
+    font-size: 10px;
+    width: 10px;
+    height: 10px;
+  }
+}
