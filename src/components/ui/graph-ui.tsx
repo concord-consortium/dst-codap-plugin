@@ -65,55 +65,93 @@ export const GraphUI = observer(function GraphUI() {
       if (match) {
         const index = lowercaseAttributes.indexOf(match);
         mappings.latitude = attributeList[index];
+        console.log("Latitude match:", mappings.latitude);
         break;
       }
     }
     
     // Find longitude attribute
-    const longitudeKeywords = ["long", "longitude"];
+    const longitudeKeywords = ["lon", "long", "longitude"];
     for (const keyword of longitudeKeywords) {
       const match = lowercaseAttributes.find(attr => attr.includes(keyword));
       if (match) {
         const index = lowercaseAttributes.indexOf(match);
         mappings.longitude = attributeList[index];
+        console.log("Longitude match:", mappings.longitude);
         break;
       }
     }
     
     // Find date attribute
-    const dateKeywords = ["date", "time", "timestamp"];
+    const dateKeywords = ["date", "time", "day"];
+    let dateMatches: string[] = [];
+    
     for (const keyword of dateKeywords) {
-      const match = lowercaseAttributes.find(attr => attr.includes(keyword));
-      if (match) {
-        const index = lowercaseAttributes.indexOf(match);
-        mappings.date = attributeList[index];
-        break;
+      const matches = lowercaseAttributes
+        .filter(attr => attr.includes(keyword))
+        .map(attr => {
+          const index = lowercaseAttributes.indexOf(attr);
+          return attributeList[index];
+        });
+      
+      if (matches.length > 0) {
+        dateMatches = [...dateMatches, ...matches];
       }
     }
     
-    // Find color attribute (using common tornado data attributes)
-    const colorKeywords = ["f_scale", "intensity", "category", "magnitude", "strength", "type", "color"];
+    // Prioritize date attributes: exact "date" match first, then "day", then others
+    if (dateMatches.length > 0) {
+      // Priority 1: Exact "date" match
+      const exactDateMatch = dateMatches.find(attr => attr.toLowerCase() === "date");
+      if (exactDateMatch) {
+        mappings.date = exactDateMatch;
+      } 
+      // Priority 2: Exact "day" match
+      else {
+        const dayMatch = dateMatches.find(attr => attr.toLowerCase() === "day");
+        if (dayMatch) {
+          mappings.date = dayMatch;
+        } 
+        // Priority 3: First match with "date" in the name
+        else {
+          const dateInName = dateMatches.find(attr => attr.toLowerCase().includes("date"));
+          if (dateInName) {
+            mappings.date = dateInName;
+          } 
+          // Priority 4: Just use the first match we found
+          else {
+            mappings.date = dateMatches[0];
+          }
+        }
+      }
+      console.log("Date match:", mappings.date);
+    }
+    
+    // Look for potential color attributes - prefer categorical attributes for color
+    const colorKeywords = ["color", "category", "type", "species", "f_scale", "intensity"];
     for (const keyword of colorKeywords) {
       const match = lowercaseAttributes.find(attr => attr.includes(keyword));
       if (match) {
         const index = lowercaseAttributes.indexOf(match);
         mappings.color = attributeList[index];
+        console.log("Color match:", mappings.color);
         break;
       }
     }
     
-    // Find size attribute
-    const sizeKeywords = ["width", "size", "radius", "diameter", "length", "area", "magnitude"];
+    // Look for potential size attributes
+    const sizeKeywords = ["size", "weight", "magnitude", "depth", "width", "radius", "diameter", "length", "area"];
     for (const keyword of sizeKeywords) {
       const match = lowercaseAttributes.find(attr => attr.includes(keyword));
       if (match) {
         const index = lowercaseAttributes.indexOf(match);
         mappings.size = attributeList[index];
+        console.log("Size match:", mappings.size);
         break;
       }
     }
     
-    console.log("Auto-detected attribute mappings:", mappings);
+    console.log("Attribute mapping results:", mappings);
     return mappings;
   };
   

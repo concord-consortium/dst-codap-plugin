@@ -17,6 +17,13 @@ interface IMultiLegendProps {
   onChangeAttribute: (dataSet: IDataSet, attrId: string, layer: IBaseLayerModel) => void
 }
 
+// Define simpler attribute interface to avoid MobX issues
+interface SafeAttribute {
+  id: string;
+  name: string;
+  isTemporary?: boolean;
+}
+
 export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAttribute}: IMultiLegendProps) {
   const dataDisplayModel = useDstDataDisplayModelContext(),
     layout = useDataDisplayLayout(),
@@ -27,112 +34,106 @@ export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAtt
     dataset = firstDataConfiguration.dataset,
     metadata = firstDataConfiguration.metadata;
   
-  // State for available attributes from the dataset
-  const [availableAttributes, setAvailableAttributes] = useState<IAttribute[]>([]);
+  // Use our safe attribute format to avoid MobX state tree issues
+  const [availableAttributes, setAvailableAttributes] = useState<SafeAttribute[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Keep track of selected attributes separately from MobX to avoid detached object errors
+  const [selectedColorAttribute, setSelectedColorAttribute] = useState<SafeAttribute | null>(null);
+  const [selectedSizeAttribute, setSelectedSizeAttribute] = useState<SafeAttribute | null>(null);
 
-  // Load available attributes from the dataset when it changes
+  // Load attributes from the dataset when component mounts or dataset changes
   useEffect(() => {
-    if (dataset) {
-      console.log("Dataset available in DstMultiLegend, loading attributes");
-      console.log("Initial dataset attributes:", dataset.attributes.map(a => a.name));
-      setAvailableAttributes(dataset.attributes);
+    const loadAttributes = async () => {
+      if (!dataset) return;
       
-      // Also load attribute names from the current CODAP dataset
-      const loadAttributeNames = async () => {
+      setIsLoading(true);
+      console.log("Loading attributes from dataset");
+      
+      try {
+        // Create safe copies of the dataset attributes to avoid MobX issues
+        const safeAttributes: SafeAttribute[] = dataset.attributes.map(attr => ({
+          id: attr.id,
+          name: attr.name,
+          isTemporary: false
+        }));
+        
+        console.log("Dataset attributes:", safeAttributes.map(a => a.name));
+        
+        // Load attributes from CODAP
         if (datasetConfig.dataContextName) {
-          setIsLoading(true);
           try {
-            console.log("Getting dataset attributes for:", datasetConfig.dataContextName);
-            const names = await getDatasetAttributes(datasetConfig.dataContextName);
-            console.log("Loaded attribute names from CODAP:", names);
+            const codapAttrNames = await getDatasetAttributes(datasetConfig.dataContextName);
+            console.log("CODAP attributes:", codapAttrNames);
             
-            // Create attribute objects for any attributes from CODAP not already in the dataset
-            const existingAttrNames = new Set(dataset.attributes.map(attr => attr.name));
-            console.log("Existing attribute names in dataset:", Array.from(existingAttrNames));
+            // Create attribute objects for any attributes in CODAP not already in our list
+            const existingAttrNames = new Set(safeAttributes.map(attr => attr.name));
             
-            // First create a map of all existing attributes by name
-            const attrMap = new Map<string, IAttribute>();
-            dataset.attributes.forEach(attr => {
-              attrMap.set(attr.name, attr);
-            });
-            
-            // Check for any new attributes from CODAP that aren't in our dataset
-            let hasNewAttributes = false;
-            
-            // For each name from CODAP
-            for (const name of names) {
-              // If we don't already have this attribute
-              if (!existingAttrNames.has(name)) {
-                console.log("Found new attribute from CODAP:", name);
-                
-                // First try to get the attribute by name
-                const attrObj = dataset.getAttributeByName(name);
-                
-                if (attrObj) {
-                  console.log("Successfully found attribute object for:", name);
-                  attrMap.set(name, attrObj);
-                  hasNewAttributes = true;
-                } else {
-                  // If getAttributeByName fails, create a new attribute object
-                  // This handles the case where an attribute exists in CODAP but not in our dataset
-                  try {
-                    // Create a new temporary attribute - we just need the ID and name for the dropdown
-                    const newAttr = {
-                      id: `temp_${name.replace(/\s+/g, "_")}`,
-                      name
-                    };
-                    
-                    console.log("Created temporary attribute object:", newAttr);
-                    
-                    // Add this new attribute to our map 
-                    // This will be used for display in the dropdown
-                    attrMap.set(name, newAttr as IAttribute);
-                    hasNewAttributes = true;
-                  } catch (error) {
-                    console.error("Error creating attribute for:", name, error);
-                  }
-                }
-              }
-            }
-            
-            // If we found any new attributes, update the available attributes
-            if (hasNewAttributes) {
-              const allAttributes = Array.from(attrMap.values());
-              console.log("Updating available attributes:", allAttributes.map(a => a.name));
-              setAvailableAttributes(allAttributes);
-            } else {
-              console.log("No new attributes found to add");
-            }
-            
-            // Find and select the color and size attributes if they're set in the datasetConfig
-            if (datasetConfig.colorAttribute && !dataDisplayModel.colorDataConfiguration.attributeID("legend")) {
-              const colorAttr = dataset.attributes.find(attr => attr.name === datasetConfig.colorAttribute);
-              if (colorAttr) {
-                console.log("Setting color attribute from config:", colorAttr.name);
-                dataDisplayModel.colorDataConfiguration.setAttribute("legend", {attributeID: colorAttr.id});
-              }
-            }
-            
-            if (datasetConfig.sizeAttribute && !dataDisplayModel.sizeDataConfiguration.attributeID("legend")) {
-              const sizeAttr = dataset.attributes.find(attr => attr.name === datasetConfig.sizeAttribute);
-              if (sizeAttr) {
-                console.log("Setting size attribute from config:", sizeAttr.name);
-                dataDisplayModel.sizeDataConfiguration.setAttribute("legend", {attributeID: sizeAttr.id});
+            for (const attrName of codapAttrNames) {
+              if (!existingAttrNames.has(attrName) && attrName) {
+                // Create a temporary attribute object for display
+                const tempAttr: SafeAttribute = {
+                  id: `temp_${attrName.replace(/\s+/g, "_")}`,
+                  name: attrName,
+                  isTemporary: true
+                };
+                safeAttributes.push(tempAttr);
+                console.log(`Added temporary attribute: ${attrName}`);
               }
             }
           } catch (error) {
-            console.error("Error loading attribute names:", error);
-          } finally {
-            setIsLoading(false);
+            console.error("Error loading CODAP attributes:", error);
           }
         }
-      };
-      
-      loadAttributeNames();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataset, datasetConfig.dataContextName]);
+        
+        // Sort attributes by name for better usability
+        safeAttributes.sort((a, b) => a.name.localeCompare(b.name));
+        
+        // Update state with all available attributes
+        setAvailableAttributes(safeAttributes);
+        
+        // Attempt to find and set the currently selected color attribute
+        const colorId = dataDisplayModel.colorDataConfiguration.attributeID("legend");
+        if (colorId) {
+          const foundAttr = safeAttributes.find(attr => attr.id === colorId);
+          if (foundAttr) {
+            setSelectedColorAttribute(foundAttr);
+          } else if (datasetConfig.colorAttribute) {
+            // Try to find by name if ID doesn't match (for temporary attributes)
+            const attrByName = safeAttributes.find(attr => attr.name === datasetConfig.colorAttribute);
+            if (attrByName) {
+              setSelectedColorAttribute(attrByName);
+              // Update the configuration with this attribute
+              dataDisplayModel.colorDataConfiguration.setAttribute("legend", {attributeID: attrByName.id});
+            }
+          }
+        }
+        
+        // Attempt to find and set the currently selected size attribute
+        const sizeId = dataDisplayModel.sizeDataConfiguration.attributeID("legend");
+        if (sizeId) {
+          const foundAttr = safeAttributes.find(attr => attr.id === sizeId);
+          if (foundAttr) {
+            setSelectedSizeAttribute(foundAttr);
+          } else if (datasetConfig.sizeAttribute) {
+            // Try to find by name if ID doesn't match (for temporary attributes)
+            const attrByName = safeAttributes.find(attr => attr.name === datasetConfig.sizeAttribute);
+            if (attrByName) {
+              setSelectedSizeAttribute(attrByName);
+              // Update the configuration with this attribute
+              dataDisplayModel.sizeDataConfiguration.setAttribute("legend", {attributeID: attrByName.id});
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error loading attributes:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadAttributes();
+  }, [dataset, datasetConfig.dataContextName, datasetConfig.colorAttribute, datasetConfig.sizeAttribute, dataDisplayModel]);
 
   // Update layout when component mounts to ensure proper initial spacing
   useEffect(() => {
@@ -142,7 +143,7 @@ export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAtt
       layout.setDesiredExtent("legend", totalHeight);
     } else {
       // Set a default initial height if no extents are calculated yet
-      layout.setDesiredExtent("legend", 180); // Adjusted for the new window size
+      layout.setDesiredExtent("legend", 180);
     }
     
     // When unmounting, reset the layout
@@ -172,7 +173,7 @@ export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAtt
   }, [layout]);
 
   const handleAttributeChange = (label: string, attributeId: string) => {
-    if (!dataset) return;
+    if (!dataset || !availableAttributes.length) return;
 
     let dataConfiguration: Maybe<IDstDataConfigurationModel>;
     switch (label) {
@@ -187,86 +188,59 @@ export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAtt
     if (!dataConfiguration) return;
 
     if (attributeId) {
+      // Find the attribute in our safe list
+      const selectedAttr = availableAttributes.find(attr => attr.id === attributeId);
+      if (!selectedAttr) return;
+      
       console.log(`Setting ${label} attribute ID: ${attributeId}`);
       
-      // Check if this is a temporary attribute (created for display purposes)
-      const isTempAttribute = attributeId.startsWith("temp_");
-      
-      if (isTempAttribute) {
-        console.log(`Selected a temporary attribute: ${attributeId}`);
-        
-        // Get the attribute name from the available attributes
-        const attribute = availableAttributes.find(attr => attr.id === attributeId);
-        
-        if (attribute) {
-          console.log(`Handling temporary attribute with name: ${attribute.name}`);
-          
-          // For temporary attributes, we store the name not the ID
-          if (label === "Color") {
-            datasetConfig.setColorAttribute(attribute.name);
-            console.log(`Updated datasetConfig.colorAttribute to ${attribute.name}`);
-          } else if (label === "Size") {
-            datasetConfig.setSizeAttribute(attribute.name);
-            console.log(`Updated datasetConfig.sizeAttribute to ${attribute.name}`);
-          }
-          
-          // Still set the attribute on the configuration to show the legend
-          dataConfiguration.setAttribute("legend", {attributeID: attributeId});
-        }
-        return;
+      // Update our internal state
+      if (label === "Color") {
+        setSelectedColorAttribute(selectedAttr);
+      } else if (label === "Size") {
+        setSelectedSizeAttribute(selectedAttr);
       }
       
-      // Regular attribute handling for non-temporary attributes
-      // Set attribute and ensure proper binning type
-      if (metadata) {
-        metadata.setAttributeBinningType(attributeId, "quantile");
-      }
+      // Set it in the data configuration
       dataConfiguration.setAttribute("legend", {attributeID: attributeId});
       
-      // If this is a color selection, update the datasetConfig color attribute
+      // Save the name in the datasetConfig
       if (label === "Color") {
-        const attribute = dataset.getAttribute(attributeId);
-        if (attribute) {
-          datasetConfig.setColorAttribute(attribute.name);
-          console.log(`Updated datasetConfig.colorAttribute to ${attribute.name}`);
-        }
+        datasetConfig.setColorAttribute(selectedAttr.name);
+      } else if (label === "Size") {
+        datasetConfig.setSizeAttribute(selectedAttr.name);
       }
       
-      // If this is a size selection, update the datasetConfig size attribute
-      if (label === "Size") {
-        const attribute = dataset.getAttribute(attributeId);
-        if (attribute) {
-          datasetConfig.setSizeAttribute(attribute.name);
-          console.log(`Updated datasetConfig.sizeAttribute to ${attribute.name}`);
-        }
+      // Set binning type for non-temporary attributes
+      if (!selectedAttr.isTemporary && metadata) {
+        metadata.setAttributeBinningType(attributeId, "quantile");
       }
     } else {
       console.log(`Clearing ${label} attribute`);
       // Reset the attribute when "None" is selected
       dataConfiguration.setAttribute("legend", undefined);
       
-      // Reset the corresponding attribute in datasetConfig
+      // Clear our internal state
       if (label === "Color") {
+        setSelectedColorAttribute(null);
         datasetConfig.setColorAttribute(undefined);
       } else if (label === "Size") {
+        setSelectedSizeAttribute(null);
         datasetConfig.setSizeAttribute(undefined);
       }
     }
   };
 
   const renderLegend = (label: string, index: number, dataConfiguration?: IDstDataConfigurationModel) => {
-    // Create a dropdown with available attributes
-    const legendAttributeId = dataConfiguration?.attributeID("legend");
-    const isTempAttribute = legendAttributeId ? legendAttributeId.startsWith("temp_") : false;
-    const selectedAttribute = legendAttributeId && !isTempAttribute ? dataset?.getAttribute(legendAttributeId) : undefined;
-    
-    // For temp attributes, we need to find it in the availableAttributes
-    const selectedTempAttribute = isTempAttribute && legendAttributeId 
-      ? availableAttributes.find(attr => attr.id === legendAttributeId) 
-      : undefined;
+    const selectedAttribute = label === "Color" 
+      ? selectedColorAttribute 
+      : (label === "Size" ? selectedSizeAttribute : null);
     
     const divRef = divRefs.current[index] || createRef<HTMLDivElement>();
     divRefs.current[index] = divRef;
+    
+    // Get current attribute ID safely from configuration
+    const legendAttributeId = dataConfiguration?.attributeID("legend") || "";
     
     return (
       <div className="legend" key={index} ref={divRef}>
@@ -291,21 +265,8 @@ export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAtt
             )}
           </Flex>
           
-          {/* Show attribute name for temporary attributes */}
-          {selectedTempAttribute && (
-            <div className="legend-display">
-              <Text fontSize="xs" mt={1}>
-                Using attribute: {selectedTempAttribute.name}
-                <br />
-                <Text as="em" fontSize="10px" color="gray.500">
-                  (Full legend visualization not available for this attribute)
-                </Text>
-              </Text>
-            </div>
-          )}
-          
-          {/* For regular attributes, show the full legend */}
-          {selectedAttribute && !isTempAttribute && (
+          {/* For regular attributes, we can safely show the full legend */}
+          {selectedAttribute && !selectedAttribute.isTemporary && (
             <div className="legend-display">
               <DataConfigurationContext.Provider value={dataConfiguration}>
                 <Legend layerIndex={index}
@@ -313,6 +274,19 @@ export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAtt
                        onDropAttribute={(place, dataSet, attributeID) => onChangeAttribute(dataSet, attributeID, dataDisplayModel.layers[index])}
                 />
               </DataConfigurationContext.Provider>
+            </div>
+          )}
+          
+          {/* For temporary attributes, just show a message */}
+          {selectedAttribute && selectedAttribute.isTemporary && (
+            <div className="legend-display">
+              <Text fontSize="xs" mt={1}>
+                Using attribute: {selectedAttribute.name}
+                <br />
+                <Text as="em" fontSize="10px" color="gray.500">
+                  (Legend preview not available for this attribute)
+                </Text>
+              </Text>
             </div>
           )}
         </div>
