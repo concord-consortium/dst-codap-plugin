@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { HStack, Button, IconButton, Spinner } from "@chakra-ui/react";
+import { HStack, Button, IconButton, Spinner, Checkbox, VStack, Box, Text } from "@chakra-ui/react";
 import { SettingsIcon } from "@chakra-ui/icons";
 import LegendIcon from "../../assets/icons/display-hide-legend-icon.svg";
 import HomeIcon from "../../assets/icons/home-icon.svg";
@@ -326,6 +326,7 @@ export const GraphUI = observer(function GraphUI() {
           Icon={HomeIcon}
           onClick={() => dstCamera.resetHome()}
           testId="button-home"
+          tooltip="Reset Camera Position"
         />
       </UIButtonContainer>
       <UIButtonContainer className="map-zoom-container">
@@ -335,6 +336,7 @@ export const GraphUI = observer(function GraphUI() {
           Icon={MapZoomInIcon}
           onClick={() => graph.zoomIn()}
           testId="button-map-zoom-in"
+          tooltip="Zoom In"
         />
         <UIButton
           className="bottom"
@@ -342,6 +344,7 @@ export const GraphUI = observer(function GraphUI() {
           Icon={MapZoomOutIcon}
           onClick={() => graph.zoomOut()}
           testId="button-map-zoom-out"
+          tooltip="Zoom Out"
         />
       </UIButtonContainer>
       <MapPanControls />
@@ -352,6 +355,7 @@ export const GraphUI = observer(function GraphUI() {
           Icon={MapResetIcon}
           onClick={() => graph.reset()}
           testId="button-map-reset"
+          tooltip="Reset Map View"
         />
       </UIButtonContainer>
       <UIButtonContainer className="legend-container">
@@ -361,8 +365,32 @@ export const GraphUI = observer(function GraphUI() {
           Icon={LegendIcon}
           onClick={() => ui.setDisplayLegend(!ui.displayLegend)}
           testId="button-legend"
+          tooltip={ui.displayLegend ? "Hide Legend" : "Show Legend"}
         />
       </UIButtonContainer>
+      <Box className="visibility-controls">
+        <VStack align="start" spacing={0.5}>
+          <Text fontSize="xs" fontWeight="bold" mb={0.5}>Show Points:</Text>
+          <Checkbox 
+            isChecked={ui.showSelectedPoints}
+            onChange={() => ui.toggleShowSelectedPoints()}
+            data-testid="checkbox-selected-points"
+            colorScheme="blue"
+            size="sm"
+          >
+            <Text fontSize="xs">Selected</Text>
+          </Checkbox>
+          <Checkbox 
+            isChecked={ui.showUnselectedPoints}
+            onChange={() => ui.toggleShowUnselectedPoints()}
+            data-testid="checkbox-unselected-points"
+            colorScheme="blue"
+            size="sm"
+          >
+            <Text fontSize="xs">Unselected</Text>
+          </Checkbox>
+        </VStack>
+      </Box>
       <UIButtonContainer className="mode-container horizontal">
         <UIButton
           active={ui.mode === "pointer"}
@@ -371,6 +399,7 @@ export const GraphUI = observer(function GraphUI() {
           onClick={() => ui.setMode("pointer")}
           noActiveHover={true}
           testId="button-pointer-mode"
+          tooltip="Point Selection Mode"
         />
         <UIButton
           active={ui.mode === "marquee"}
@@ -379,6 +408,7 @@ export const GraphUI = observer(function GraphUI() {
           onClick={() => ui.setMode("marquee")}
           noActiveHover={true}
           testId="button-marquee-mode"
+          tooltip="Marquee Selection Mode"
         />
       </UIButtonContainer>
       <TimeSlider />

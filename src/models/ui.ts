@@ -14,6 +14,9 @@ class UI {
   displayLegend = true;
   // Whether to show the dataset configuration panel
   showDatasetConfig = false;
+  // Whether to show selected and unselected points in the visualization
+  showSelectedPoints = true;
+  showUnselectedPoints = true;
 
   constructor() {
     makeAutoObservable(this);
@@ -40,6 +43,34 @@ class UI {
    */
   setShowDatasetConfig(show: boolean) {
     this.showDatasetConfig = show;
+  }
+
+  /**
+   * Sets whether to show selected points in the visualization
+   */
+  setShowSelectedPoints(show: boolean) {
+    this.showSelectedPoints = show;
+  }
+
+  /**
+   * Sets whether to show unselected points in the visualization
+   */
+  setShowUnselectedPoints(show: boolean) {
+    this.showUnselectedPoints = show;
+  }
+
+  /**
+   * Toggles whether to show selected points in the visualization
+   */
+  toggleShowSelectedPoints() {
+    this.showSelectedPoints = !this.showSelectedPoints;
+  }
+
+  /**
+   * Toggles whether to show unselected points in the visualization
+   */
+  toggleShowUnselectedPoints() {
+    this.showUnselectedPoints = !this.showUnselectedPoints;
   }
 }
 

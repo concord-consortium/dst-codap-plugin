@@ -6,6 +6,7 @@ import {
 import { formatDateString, datePercentInRange } from "../utilities/date-utils";
 import { halfPi } from "../utilities/trig-utils";
 import { codapData } from "./codap-data";
+import { ui } from "./ui";
 
 export const graphMin = -5;
 export const graphMax = 5;
@@ -116,6 +117,11 @@ class Graph {
   }
 
   caseIsVisible(caseId: string) {
+    // First check if points are globally visible based on selection state
+    const isSelected = codapData.isSelected(caseId);
+    if (isSelected && !ui.showSelectedPoints) return false;
+    if (!isSelected && !ui.showUnselectedPoints) return false;
+    
     const latitude = codapData.getLatitude(caseId);
     const longitude = codapData.getLongitude(caseId);
     if (latitude == null || longitude == null) return false;

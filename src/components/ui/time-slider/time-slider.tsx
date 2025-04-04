@@ -77,6 +77,8 @@ export const TimeSlider = observer(function TimeSlider() {
           Icon={graph.animatingDate ? PauseIcon : PlayIcon}
           onClick={() => graph.setAnimatingDate(!graph.animatingDate)}
           testId="button-play"
+          tooltip={graph.animatingDate ? "Pause Animation" : "Play Animation"}
+          tooltipPlacement="top"
         />
       </UIButtonContainer>
       <div className={clsx("play-button-label", { disabled: !graph.canAnimateDate })}>
