@@ -148,7 +148,7 @@ export const DatasetConfigPanel = observer(function DatasetConfigPanel() {
       console.log("Date match:", mappings.date);
     }
     
-    // Look for potential color attributes
+    // Look for potential color attributes - still detect for internal use
     const colorKeywords = ["color", "category", "type", "species"];
     for (const keyword of colorKeywords) {
       const match = lowercaseAttributes.find(attr => attr.includes(keyword));
@@ -160,7 +160,7 @@ export const DatasetConfigPanel = observer(function DatasetConfigPanel() {
       }
     }
     
-    // Look for potential size attributes
+    // Look for potential size attributes - still detect for internal use
     const sizeKeywords = ["size", "weight", "magnitude", "depth"];
     for (const keyword of sizeKeywords) {
       const match = lowercaseAttributes.find(attr => attr.includes(keyword));
@@ -205,9 +205,10 @@ export const DatasetConfigPanel = observer(function DatasetConfigPanel() {
       if (mappings.latitude) datasetConfig.setLatitudeAttribute(mappings.latitude);
       if (mappings.longitude) datasetConfig.setLongitudeAttribute(mappings.longitude);
       if (mappings.date) datasetConfig.setDateAttribute(mappings.date);
-      // Explicitly set color and size to undefined (None) regardless of auto-detection
-      datasetConfig.setColorAttribute(undefined);
-      datasetConfig.setSizeAttribute(undefined);
+      
+      // Set color and size attributes if auto-detected, although not shown in UI
+      if (mappings.color) datasetConfig.setColorAttribute(mappings.color);
+      if (mappings.size) datasetConfig.setSizeAttribute(mappings.size);
     } catch (error) {
       console.error("Error fetching dataset attributes:", error);
     }
@@ -308,40 +309,6 @@ export const DatasetConfigPanel = observer(function DatasetConfigPanel() {
                 ))}
               </Select>
               <FormHelperText>Attribute containing date or time values</FormHelperText>
-            </FormControl>
-            
-            <FormControl>
-              <FormLabel htmlFor="color-select">Color Attribute (Optional)</FormLabel>
-              <Select
-                id="color-select"
-                data-testid="color-select"
-                value={datasetConfig.colorAttribute || ""}
-                onChange={e => datasetConfig.setColorAttribute(e.target.value || undefined)}
-                placeholder="Select color attribute"
-              >
-                <option value="">None</option>
-                {attributes.map(name => (
-                  <option key={name} value={name}>{name}</option>
-                ))}
-              </Select>
-              <FormHelperText>Attribute to use for coloring points</FormHelperText>
-            </FormControl>
-            
-            <FormControl>
-              <FormLabel htmlFor="size-select">Size Attribute (Optional)</FormLabel>
-              <Select
-                id="size-select"
-                data-testid="size-select"
-                value={datasetConfig.sizeAttribute || ""}
-                onChange={evt => datasetConfig.setSizeAttribute(evt.target.value || undefined)}
-                placeholder="Select size attribute"
-              >
-                <option value="">None</option>
-                {attributes.map(name => (
-                  <option key={name} value={name}>{name}</option>
-                ))}
-              </Select>
-              <FormHelperText>Attribute to use for sizing points</FormHelperText>
             </FormControl>
             
             <Flex justify="flex-end" mt={4}>

@@ -169,6 +169,10 @@ describe("DatasetConfigPanel", function () {
                             expect(react_2.screen.getByTestId("latitude-select")).toBeInTheDocument();
                             expect(react_2.screen.getByTestId("longitude-select")).toBeInTheDocument();
                             expect(react_2.screen.getByTestId("date-select")).toBeInTheDocument();
+                            
+                            // Verify color and size selectors are NOT shown
+                            expect(react_2.screen.queryByTestId("color-select")).not.toBeInTheDocument();
+                            expect(react_2.screen.queryByTestId("size-select")).not.toBeInTheDocument();
                         })];
                 case 2:
                     // Verify attribute selectors are shown
@@ -213,6 +217,10 @@ describe("DatasetConfigPanel", function () {
                             expect(dataset_config_1.datasetConfig.setLatitudeAttribute).toHaveBeenCalled();
                             expect(dataset_config_1.datasetConfig.setLongitudeAttribute).toHaveBeenCalled();
                             expect(dataset_config_1.datasetConfig.setDateAttribute).toHaveBeenCalled();
+                            
+                            // Verify color and size selectors don't exist
+                            expect(react_2.screen.queryByTestId("color-select")).not.toBeInTheDocument();
+                            expect(react_2.screen.queryByTestId("size-select")).not.toBeInTheDocument();
                         })];
                 case 2:
                     // Verify the calls were made
@@ -287,6 +295,11 @@ describe("DatasetConfigPanel", function () {
                     expect(dataset_config_1.datasetConfig.setLatitudeAttribute).toHaveBeenCalledWith("Latitude");
                     expect(dataset_config_1.datasetConfig.setLongitudeAttribute).toHaveBeenCalledWith("Longitude");
                     expect(dataset_config_1.datasetConfig.setDateAttribute).toHaveBeenCalledWith("Date");
+                    
+                    // Verify color and size are also auto-detected and set even though not visible in UI
+                    expect(dataset_config_1.datasetConfig.setColorAttribute).toHaveBeenCalledWith("Color");
+                    expect(dataset_config_1.datasetConfig.setSizeAttribute).toHaveBeenCalledWith("Size");
+                    
                     return [2 /*return*/];
             }
         });
