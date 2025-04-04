@@ -205,8 +205,9 @@ export const DatasetConfigPanel = observer(function DatasetConfigPanel() {
       if (mappings.latitude) datasetConfig.setLatitudeAttribute(mappings.latitude);
       if (mappings.longitude) datasetConfig.setLongitudeAttribute(mappings.longitude);
       if (mappings.date) datasetConfig.setDateAttribute(mappings.date);
-      if (mappings.color) datasetConfig.setColorAttribute(mappings.color);
-      if (mappings.size) datasetConfig.setSizeAttribute(mappings.size);
+      // Explicitly set color and size to undefined (None) regardless of auto-detection
+      datasetConfig.setColorAttribute(undefined);
+      datasetConfig.setSizeAttribute(undefined);
     } catch (error) {
       console.error("Error fetching dataset attributes:", error);
     }
