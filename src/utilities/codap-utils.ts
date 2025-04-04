@@ -28,17 +28,24 @@ const dataContextName = "Tornado_Tracks_2020-2022";
 export async function initializeDST() {
   console.log("Initializing DST plugin...");
   
-  await initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions})
-    .catch(reason => {
-      // This will happen if not embedded in CODAP
-      console.warn("Not embedded in CODAP");
-    });
+  try {
+    // Try to initialize the plugin
+    await initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
+    console.log("Successfully initialized plugin in CODAP");
+  } catch (reason) {
+    // This will happen if not embedded in CODAP
+    console.warn("Warning: Not embedded in CODAP", reason);
+  }
     
   // Test CODAP API communication
   try {
     // Get available datasets directly from the helpers
     const datasets = await getAvailableDatasets();
     console.log("Available datasets detected at initialization:", datasets);
+    
+    if (datasets.length === 0) {
+      console.warn("No datasets available in CODAP. The user may need to create one.");
+    }
   } catch (error) {
     console.error("Error testing CODAP API at initialization:", error);
   }

@@ -17,28 +17,27 @@ export const App = observer(() => {
   return (
     <ChakraProvider>
       <div className="App">
-        {ui.showDatasetConfig ? (
-          <DatasetConfigPanel />
-        ) : (
-          <Tabs variant="enclosed">
-            <TabList>
-              <Tab>
-                {kGraphTabLabel}
-              </Tab>
-              <Tab>
-                {kAboutTabLabel}
-              </Tab>
-            </TabList>
-            <TabPanels>
-              <TabPanel>
-                <GraphTab />
-              </TabPanel>
-              <TabPanel>
-                <AboutTab />
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
-        )}
+        <Tabs variant="enclosed">
+          <TabList>
+            <Tab>
+              {kGraphTabLabel}
+            </Tab>
+            <Tab>
+              {kAboutTabLabel}
+            </Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel>
+              <GraphTab />
+            </TabPanel>
+            <TabPanel>
+              <AboutTab />
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
+        
+        {/* DatasetConfigPanel is now always rendered, but only shown as a modal when needed */}
+        <DatasetConfigPanel />
       </div>
     </ChakraProvider>
   );

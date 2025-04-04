@@ -12,15 +12,28 @@ export interface CodapApiResult {
  */
 export async function getAvailableDatasets(): Promise<string[]> {
   try {
+    console.log("Sending request to get dataContextList...");
+    
+    if (!codapInterface) {
+      console.error("codapInterface is not available");
+      return [];
+    }
+    
     const result = await codapInterface.sendRequest({
       action: "get",
       resource: "dataContextList"
     }) as CodapApiResult;
     
+    console.log("dataContextList response:", result);
+    
     if (result.success && result.values) {
-      return result.values.map((context: any) => context.name);
+      const datasets = result.values.map((context: any) => context.name);
+      console.log("Extracted dataset names:", datasets);
+      return datasets;
+    } else {
+      console.warn("dataContextList request was unsuccessful:", result);
+      return [];
     }
-    return [];
   } catch (error) {
     console.error("Error getting available datasets:", error);
     return [];
