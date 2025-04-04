@@ -28,7 +28,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   pointer-events: auto;
   z-index: 10;
-  width: 100px;
+  width: 160px;
   
   /* Add some spacing between checkboxes */
   .chakra-checkbox {
@@ -38,6 +38,22 @@
   /* Make the checkbox text smaller */
   .chakra-checkbox__label {
     line-height: 1.2;
+  }
+  
+  /* Style the divider */
+  .chakra-divider {
+    border-color: rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Smaller padding for slider container */
+  .chakra-slider {
+    padding: 0;
+  }
+  
+  /* Make the slider thumb stand out */
+  .chakra-slider__thumb {
+    background-color: #3182CE;
+    border: 1px solid #E2E8F0;
   }
 }
 

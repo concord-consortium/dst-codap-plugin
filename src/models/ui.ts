@@ -17,6 +17,10 @@ class UI {
   // Whether to show selected and unselected points in the visualization
   showSelectedPoints = true;
   showUnselectedPoints = true;
+  // See-through mode for unselected points
+  seeThroughMode = false;
+  // Opacity level for unselected points (0-1) when in see-through mode
+  unselectedPointsOpacity = 0.5;
 
   constructor() {
     makeAutoObservable(this);
@@ -71,6 +75,24 @@ class UI {
    */
   toggleShowUnselectedPoints() {
     this.showUnselectedPoints = !this.showUnselectedPoints;
+  }
+
+  /**
+   * Toggles see-through mode for unselected points
+   */
+  toggleSeeThroughMode() {
+    this.seeThroughMode = !this.seeThroughMode;
+  }
+
+  /**
+   * Sets the opacity level for unselected points when in see-through mode
+   * @param opacity Opacity value between 0 and 1
+   */
+  setUnselectedPointsOpacity(opacity: number) {
+    // Ensure opacity is between 0 and 1
+    const newOpacity = Math.max(0, Math.min(1, opacity));
+    console.log("Setting opacity in UI model:", newOpacity);
+    this.unselectedPointsOpacity = newOpacity;
   }
 }
 

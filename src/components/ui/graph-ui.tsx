@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { HStack, Button, IconButton, Spinner, Checkbox, VStack, Box, Text } from "@chakra-ui/react";
+import { HStack, Button, IconButton, Spinner, Checkbox, VStack, Box, Text, Slider, SliderTrack, SliderFilledTrack, SliderThumb, Divider, Switch } from "@chakra-ui/react";
 import { SettingsIcon } from "@chakra-ui/icons";
 import LegendIcon from "../../assets/icons/display-hide-legend-icon.svg";
 import HomeIcon from "../../assets/icons/home-icon.svg";
@@ -377,6 +377,7 @@ export const GraphUI = observer(function GraphUI() {
             data-testid="checkbox-selected-points"
             colorScheme="blue"
             size="sm"
+            isDisabled={ui.seeThroughMode}
           >
             <Text fontSize="xs">Selected</Text>
           </Checkbox>
@@ -386,9 +387,52 @@ export const GraphUI = observer(function GraphUI() {
             data-testid="checkbox-unselected-points"
             colorScheme="blue"
             size="sm"
+            isDisabled={ui.seeThroughMode}
           >
             <Text fontSize="xs">Unselected</Text>
           </Checkbox>
+          
+          <Divider my={1} />
+          
+          <HStack width="100%" justify="space-between">
+            <Text fontSize="xs" fontWeight="medium">See-Through Mode:</Text>
+            <Switch 
+              size="sm"
+              colorScheme="blue"
+              isChecked={ui.seeThroughMode}
+              onChange={() => ui.toggleSeeThroughMode()}
+              data-testid="switch-see-through-mode"
+            />
+          </HStack>
+          
+          {ui.seeThroughMode && (
+            <Box pt={1} width="100%">
+              <Text fontSize="xs" mb={1}>Unselected Points Opacity:</Text>
+              <Slider
+                aria-label="opacity-slider"
+                min={0}
+                max={1}
+                step={0.01}
+                value={ui.unselectedPointsOpacity}
+                onChange={(val) => {
+                  console.log("Slider onChange fired with value:", val);
+                  ui.setUnselectedPointsOpacity(val);
+                }}
+                colorScheme="blue"
+                size="sm"
+              >
+                <SliderTrack>
+                  <SliderFilledTrack />
+                </SliderTrack>
+                <SliderThumb boxSize={3} />
+              </Slider>
+              <HStack justify="space-between" mt={1}>
+                <Text fontSize="9px">0%</Text>
+                <Text fontSize="9px">{Math.round(ui.unselectedPointsOpacity * 100)}%</Text>
+                <Text fontSize="9px">100%</Text>
+              </HStack>
+            </Box>
+          )}
         </VStack>
       </Box>
       <UIButtonContainer className="mode-container horizontal">

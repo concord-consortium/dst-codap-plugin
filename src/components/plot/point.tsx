@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Outlines } from "@react-three/drei";
 import { ThreeEvent, useFrame } from "@react-three/fiber";
-import { Vector3 } from "three";
+import { Vector3, NormalBlending, Color } from "three";
 import { observer } from "mobx-react-lite";
 import { codapData } from "../../models/codap-data";
 import { dstContainer } from "../../models/dst-container";
@@ -132,6 +132,37 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   const [pointSize, setPointSize] = useState(targetPointSize);
   const outlineColor = isSelected ? "#FF0000" : "#FFFFFF";
   const outlineWidth = isSelected ? 3 : 1.5;
+  
+  // Directly calculate if we should show this point and with what opacity
+  const pointOpacity = useMemo(() => {
+    // Selected points are always fully opaque
+    if (isSelected) return 1;
+    
+    // In see-through mode, use the slider opacity for unselected points
+    if (ui.seeThroughMode) {
+      return ui.unselectedPointsOpacity;
+    }
+    
+    // In normal mode, respect the checkbox setting
+    return ui.showUnselectedPoints ? 1 : 0;
+  }, [isSelected, ui.seeThroughMode, ui.unselectedPointsOpacity, ui.showUnselectedPoints]);
+  
+  // Determine if the point should be visible at all
+  const pointVisible = useMemo(() => {
+    if (isSelected) {
+      // Selected points visibility is controlled by the selected checkbox
+      return ui.showSelectedPoints;
+    }
+    
+    // For unselected points in see-through mode, they're visible
+    // if opacity > 0 (controlled by slider)
+    if (ui.seeThroughMode) {
+      return ui.unselectedPointsOpacity > 0;
+    }
+    
+    // In normal mode, visibility is controlled by the unselected checkbox
+    return ui.showUnselectedPoints;
+  }, [isSelected, ui.seeThroughMode, ui.unselectedPointsOpacity, ui.showSelectedPoints, ui.showUnselectedPoints]);
 
   useFrame((_state, delta) => {
     if (pointSize < targetPointSize) {
@@ -173,19 +204,48 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
     }
   };
 
+  // Don't render anything if point shouldn't be visible
+  if (!pointVisible || !visible) {
+    return null;
+  }
+
   /* eslint-disable react/no-unknown-property */
+  // Calculate outline thickness in world units based on the point size and outline width
+  const outlineSize = pointSize + (outlineWidth * 0.005);
+  
   return (
-    <mesh
-      position={position}
-      onClick={handleClick}
-      onPointerEnter={handlePointerEnter}
-      onPointerLeave={handlePointerLeave}
-      visible={visible}
-    >
-      <sphereGeometry args={[pointSize, 16, 16]} />
-      <meshStandardMaterial color={dotColor} />
-      <Outlines color={outlineColor} thickness={outlineWidth} />
-    </mesh>
+    <group>
+      {/* Draw the inner sphere with the data-driven color first */}
+      <mesh
+        position={position}
+        onClick={handleClick}
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={handlePointerLeave}
+        renderOrder={1} 
+      >
+        <sphereGeometry args={[pointSize, 16, 16]} />
+        <meshBasicMaterial 
+          color={dotColor}
+          transparent={pointOpacity < 1}
+          opacity={pointOpacity}
+          depthWrite={pointOpacity === 1}
+        />
+      </mesh>
+      
+      {/* Then draw the outline sphere on top with proper stacking */}
+      {pointOpacity > 0 && (
+        <mesh position={position} renderOrder={2}>
+          <sphereGeometry args={[outlineSize, 16, 16]} />
+          <meshBasicMaterial 
+            color={outlineColor}
+            transparent={true}
+            opacity={isSelected ? Math.min(1, pointOpacity + 0.2) : pointOpacity * 0.7}
+            depthWrite={false}
+            wireframe={true}
+          />
+        </mesh>
+      )}
+    </group>
   );
   /* eslint-enable react/no-unknown-property */
 });
