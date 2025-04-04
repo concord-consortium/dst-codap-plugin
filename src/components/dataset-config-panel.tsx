@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Box,
   Button,
@@ -29,8 +29,7 @@ import {
 } from "../utilities/codap-dataset-utils";
 import { getAvailableDatasets, saveInteractiveState } from "../utilities/codap-interface-helpers";
 import { ui } from "../models/ui";
-import { codapInterface } from "@concord-consortium/codap-plugin-api";
-import { createDataContextFromURL } from "@concord-consortium/codap-plugin-api";
+import { codapInterface, createDataContextFromURL } from "@concord-consortium/codap-plugin-api";
 import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
 
 // Interface for attribute mappings
@@ -55,15 +54,15 @@ export const DatasetConfigPanel = observer(function DatasetConfigPanel() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [datasetDetails, setDatasetDetails] = useState<any>(null);
 
-  // Define fetchDatasets function in broader scope
-  const fetchDatasets = async () => {
+  // Define fetchDatasets function with useCallback
+  const fetchDatasets = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
     setAutoSelectedDataset(null);
     try {
       console.log("Fetching available datasets...");
       // Diagnostic log before API call
-      console.log("CODAP plugin API available:", typeof codapInterface !== 'undefined');
+      console.log("CODAP plugin API available:", typeof codapInterface !== "undefined");
       
       const availableDatasets = await getAvailableDatasets();
       console.log("Available datasets:", availableDatasets);
@@ -107,7 +106,7 @@ export const DatasetConfigPanel = observer(function DatasetConfigPanel() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);  // Empty dependency array since this doesn't depend on any props or state directly
 
   // Function to create a sample dataset
   const createSampleDataset = async () => {
@@ -168,7 +167,8 @@ export const DatasetConfigPanel = observer(function DatasetConfigPanel() {
     if (ui.showDatasetConfig) {
       fetchDatasets();
     }
-  }, [ui.showDatasetConfig]); // Re-run when modal visibility changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ui.showDatasetConfig, fetchDatasets]); // Keep this dependency array - MobX observables need special handling
 
   /**
    * Auto-detect attribute mappings based on attribute names
@@ -395,9 +395,9 @@ export const DatasetConfigPanel = observer(function DatasetConfigPanel() {
                 <Text mt={2}>{loadError}</Text>
                 <Box mt={4} p={4} bg="gray.100" borderRadius="md" fontSize="sm" color="gray.700">
                   <Text fontWeight="bold">Diagnostic Information:</Text>
-                  <Text>CODAP Integration Status: {typeof codapInterface !== 'undefined' ? 'Available' : 'Not Available'}</Text>
-                  <Text>Running in iframe: {window.self !== window.top ? 'Yes' : 'No'}</Text>
-                  <Text>Plugin initialized: {ui ? 'Yes' : 'No'}</Text>
+                  <Text>CODAP Integration Status: {typeof codapInterface !== "undefined" ? "Available" : "Not Available"}</Text>
+                  <Text>Running in iframe: {window.self !== window.top ? "Yes" : "No"}</Text>
+                  <Text>Plugin initialized: {ui ? "Yes" : "No"}</Text>
                 </Box>
                 <HStack spacing={4} mt={4} justify="center">
                   <Button 
@@ -463,7 +463,7 @@ export const DatasetConfigPanel = observer(function DatasetConfigPanel() {
                     mt={3}
                   >
                     <Text fontWeight="medium">
-                      Dataset "{autoSelectedDataset}" was automatically selected and configured.
+                      Dataset &quot;{autoSelectedDataset}&quot; was automatically selected and configured.
                     </Text>
                     <Button 
                       mt={2} 

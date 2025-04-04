@@ -6,6 +6,7 @@ import { kAboutTabLabel, kGraphTabLabel } from "../utilities/constants";
 import { AboutTab } from "./about-tab";
 import { GraphTab } from "./graph-tab";
 import { DatasetConfigPanel } from "./dataset-config-panel";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ui } from "../models/ui";
 import "./App.css";
 
