@@ -63,8 +63,8 @@ export async function initializeDST() {
         await getData(datasetConfig.dataContextName);
         setupSelectionSynchronization(datasetConfig.dataContextName);
       } else {
-        // Show configuration panel if not fully configured
-        ui.setShowDatasetConfig(true);
+        // Don't automatically show config panel - let user click the button instead
+        console.log("Dataset not configured, but waiting for user to click 'Configure Dataset' button");
       }
     } else {
       // No previous configuration, check if default dataset exists
@@ -75,14 +75,14 @@ export async function initializeDST() {
         await getData();
         setupSelectionSynchronization(dataContextName);
       } else {
-        // No default dataset, show configuration panel
-        ui.setShowDatasetConfig(true);
+        // Don't automatically show config panel - let user click the button instead
+        console.log("No default dataset, but waiting for user to click 'Configure Dataset' button");
       }
     }
   } catch (error) {
     console.warn("Error initializing plugin:", error);
-    // Show configuration panel on error
-    ui.setShowDatasetConfig(true);
+    // Don't automatically show config panel on error - let user click the button instead
+    console.log("Error during initialization, but waiting for user to click 'Configure Dataset' button");
   }
 }
 
