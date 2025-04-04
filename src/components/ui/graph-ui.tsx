@@ -254,10 +254,10 @@ export const GraphUI = observer(function GraphUI() {
       >
         <Button
           size="xs"
-          colorScheme="blue"
+          colorScheme={datasetConfig.isConfigured ? "blue" : "teal"}
           onClick={handleLoadData}
           data-testid="button-load-data"
-          variant="outline"
+          variant={datasetConfig.isConfigured ? "outline" : "solid"}
           className="load-data-button"
           isDisabled={isLoading}
           leftIcon={isLoading ? <Spinner size="xs" /> : undefined}
