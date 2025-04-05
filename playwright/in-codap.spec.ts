@@ -22,7 +22,7 @@ test("Test app inside of CODAP", async ({ page }) => {
 
 test("Test tabs", async ({ page }) => {
   await page.setViewportSize({width: 1400, height: 800});
-  await page.goto("https://codap3.concord.org/?mouseSensor&di=https://localhost:8080");
+  await page.goto("https://codap3.concord.org/?mouseSensor&di=https://localhost:8080?testing");
 
   // We should start on the graph tab
   const graphText = "To create a Color Legend click here";
