@@ -1,9 +1,13 @@
 export const kPluginName = "Space-Time Cube";
 export const kVersion = "0.0.1";
+export const kGraphTabHeight = 542;
+export const kGraphTabWidth = 685;
 export const kInitialDimensions = {
-  width: 685,
-  height: 542
+  width: kGraphTabWidth,
+  height: kGraphTabHeight
 };
+export const kAboutTabHeight = 542;
+export const kAboutTabWidth = 340;
 
 export const kCollectionName = "Cases";
 
