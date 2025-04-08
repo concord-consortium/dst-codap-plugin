@@ -1,6 +1,6 @@
 import {
   addDataContextChangeListener, createDataContextFromURL, getCaseByFormulaSearch, getDataContext,
-  getSelectionList, initializePlugin, selectCases
+  getSelectionList, initializePlugin, selectCases, sendMessage
 } from "@concord-consortium/codap-plugin-api";
 import { comparer, reaction } from "mobx";
 import { applySnapshot, getSnapshot } from "mobx-state-tree";
@@ -18,12 +18,22 @@ import { ui } from "../models/ui";
 import { kCollectionName, kInitialDimensions, kPluginName, kVersion } from "./constants";
 
 // This alternative dataset is easier to debug because it only has 2 cases
-// import dataURL from "../data/Tornado_Tracks_2.csv";
-// const dataContextName = "Tornado_Tracks_2";
-import dataURL from "../data/Tornado_Tracks_2020-2022.csv";
-const dataContextName = "Tornado_Tracks_2020-2022";
+import testDataURL from "../data/Tornado_Tracks_2.csv";
+const testDataContextName = "Tornado_Tracks_2";
+import realDataURL from "../data/Tornado_Tracks_2020-2022.csv";
+const realDataContextName = "Tornado_Tracks_2020-2022";
+
+const urlParams = new URLSearchParams(window.location.search);
+const testing = urlParams.has("testing");
+const dataURL = testing ? testDataURL : realDataURL;
+const dataContextName = testing ? testDataContextName : realDataContextName;
 
 export async function initializeDST() {
+  // Check for noEmbed parameter
+  if (urlParams.has("noEmbed")) {
+    return; // Skip initialization if noEmbed parameter exists
+  }
+
   initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions})
     .catch(reason => {
       // This will happen if not embedded in CODAP
@@ -181,4 +191,8 @@ export function setDSTCases(cases: ICaseCreation[]) {
   const {dataDisplayModel} = dstContainer;
   updateConfiguration(dataDisplayModel.colorDataConfiguration);
   updateConfiguration(dataDisplayModel.sizeDataConfiguration);
+}
+
+export function resizePlugin(height: number, width: number) {
+  sendMessage("update", "interactiveFrame", { dimensions: { height, width } });
 }
