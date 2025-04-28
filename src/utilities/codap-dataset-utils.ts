@@ -1257,40 +1257,8 @@ export async function updateMapBoundsFromData(dataContextName: string): Promise<
       console.warn("Error getting collections, using default collection name 'Cases':", error);
     }
     
-    // Now use formula search to get min/max values directly - this is the approach that works
-    console.log("Using caseFormulaSearch to retrieve min/max coordinate values...");
-
-    // Get min latitude
-    const minLatResult = await codapInterface.sendRequest({
-      action: "get",
-      resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${latAttr}=min(${latAttr})]`
-    }) as CodapApiResult;
-
-    // Get max latitude
-    const maxLatResult = await codapInterface.sendRequest({
-      action: "get",
-      resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${latAttr}=max(${latAttr})]`
-    }) as CodapApiResult;
-
-    // Get min longitude
-    const minLongResult = await codapInterface.sendRequest({
-      action: "get",
-      resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${longAttr}=min(${longAttr})]`
-    }) as CodapApiResult;
-
-    // Get max longitude
-    const maxLongResult = await codapInterface.sendRequest({
-      action: "get",
-      resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${longAttr}=max(${longAttr})]`
-    }) as CodapApiResult;
-
-    console.log("Formula search results:", {
-      minLat: minLatResult.success,
-      maxLat: maxLatResult.success,
-      minLong: minLongResult.success,
-      maxLong: maxLongResult.success
-    });
-
+    // Try different approaches to get min/max coordinate values, with fallbacks for large datasets
+    
     // Helper function to extract numeric value from a case result
     function extractValue(caseResult: CodapApiResult, attrName: string): number | null {
       if (!caseResult.success) {
@@ -1334,76 +1302,190 @@ export async function updateMapBoundsFromData(dataContextName: string): Promise<
       console.log(`Could not extract ${attrName} from result`, caseResult);
       return null;
     }
-
-    // Extract coordinate values
-    const minLat = extractValue(minLatResult, latAttr);
-    const maxLat = extractValue(maxLatResult, latAttr);
-    const minLong = extractValue(minLongResult, longAttr);
-    const maxLong = extractValue(maxLongResult, longAttr);
-
-    // Check if we have all coordinate values
-    const hasValidCoordinates = 
-      minLat !== null && maxLat !== null && 
-      minLong !== null && maxLong !== null &&
-      !isNaN(minLat) && !isNaN(maxLat) && 
-      !isNaN(minLong) && !isNaN(maxLong);
-
-    // APPROACH: Set the view to show the entire world and ensure data point alignment
-    // We'll use the standard geographic coordinate system (-90 to 90 lat, -180 to 180 long)
     
-    // 1. Set the absolute bounds to full world coordinates
+    // Initialize coordinates
+    let minLat: number | null = null;
+    let maxLat: number | null = null;
+    let minLong: number | null = null;
+    let maxLong: number | null = null;
+    let hasValidCoordinates = false;
+    
+    // APPROACH 1: First try using caseFormulaSearch with a timeout safety
+    console.log("APPROACH 1: Using caseFormulaSearch to retrieve min/max coordinate values...");
+    
+    try {
+      // Create a promise with timeout for formula search
+      const timeoutDuration = 3000; // 3 seconds timeout
+      
+      const getValueWithTimeout = async (request: any): Promise<CodapApiResult> => {
+        // Create a timeout promise
+        const timeoutPromise = new Promise<CodapApiResult>((_, reject) => {
+          setTimeout(() => reject(new Error("Request timed out")), timeoutDuration);
+        });
+        
+        // Race the actual request against the timeout
+        return Promise.race([
+          codapInterface.sendRequest(request),
+          timeoutPromise
+        ]) as Promise<CodapApiResult>;
+      };
+      
+      // Get min latitude with timeout
+      const minLatResult = await getValueWithTimeout({
+        action: "get",
+        resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${latAttr}=min(${latAttr})]`
+      });
+      
+      // Get max latitude with timeout
+      const maxLatResult = await getValueWithTimeout({
+        action: "get",
+        resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${latAttr}=max(${latAttr})]`
+      });
+      
+      // Get min longitude with timeout
+      const minLongResult = await getValueWithTimeout({
+        action: "get",
+        resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${longAttr}=min(${longAttr})]`
+      });
+      
+      // Get max longitude with timeout
+      const maxLongResult = await getValueWithTimeout({
+        action: "get",
+        resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${longAttr}=max(${longAttr})]`
+      });
+      
+      // Extract coordinate values
+      minLat = extractValue(minLatResult, latAttr);
+      maxLat = extractValue(maxLatResult, latAttr);
+      minLong = extractValue(minLongResult, longAttr);
+      maxLong = extractValue(maxLongResult, longAttr);
+      
+      // Check if we have all coordinate values
+      hasValidCoordinates = 
+        minLat !== null && maxLat !== null && 
+        minLong !== null && maxLong !== null &&
+        !isNaN(minLat) && !isNaN(maxLat) && 
+        !isNaN(minLong) && !isNaN(maxLong);
+      
+      if (hasValidCoordinates) {
+        console.log("Successfully retrieved coordinates using caseFormulaSearch");
+      } else {
+        console.log("Failed to get complete coordinates using caseFormulaSearch");
+      }
+    } catch (error) {
+      console.warn("caseFormulaSearch approach failed:", error);
+    }
+    
+    // APPROACH 2: Try using a sampling approach for large datasets
+    if (!hasValidCoordinates) {
+      console.log("APPROACH 2: Using cases sampling approach...");
+      
+      try {
+        // Get a sample of cases (first 200 cases should be enough for most datasets)
+        const sampleSize = 200;
+        const sampleResult = await codapInterface.sendRequest({
+          action: "get",
+          resource: `dataContext[${dataContextName}].collection[${collectionName}].caseCount[0:${sampleSize}]`
+        }) as CodapApiResult;
+        
+        if (sampleResult.success && sampleResult.values) {
+          const cases = Array.isArray(sampleResult.values) ? sampleResult.values : [sampleResult.values];
+          
+          // Scan through the sample cases to find min/max values
+          cases.forEach((caseData: any) => {
+            let latValue: number | null = null;
+            let longValue: number | null = null;
+            
+            // Try to extract latitude value
+            if (caseData.values && caseData.values[latAttr] !== undefined) {
+              const rawLat = caseData.values[latAttr];
+              latValue = typeof rawLat === "string" ? Number(rawLat) : rawLat;
+            }
+            
+            // Try to extract longitude value
+            if (caseData.values && caseData.values[longAttr] !== undefined) {
+              const rawLong = caseData.values[longAttr];
+              longValue = typeof rawLong === "string" ? Number(rawLong) : rawLong;
+            }
+            
+            // Update min/max values if we found valid coordinates
+            if (latValue !== null && !isNaN(latValue) && 
+                longValue !== null && !isNaN(longValue)) {
+              
+              if (minLat === null || latValue < minLat) minLat = latValue;
+              if (maxLat === null || latValue > maxLat) maxLat = latValue;
+              if (minLong === null || longValue < minLong) minLong = longValue;
+              if (maxLong === null || longValue > maxLong) maxLong = longValue;
+            }
+          });
+          
+          // Check if we found valid coordinates from sampling
+          hasValidCoordinates = 
+            minLat !== null && maxLat !== null && 
+            minLong !== null && maxLong !== null;
+          
+          if (hasValidCoordinates) {
+            console.log("Successfully retrieved coordinates using case sampling");
+          }
+        }
+      } catch (error) {
+        console.warn("Case sampling approach failed:", error);
+      }
+    }
+    
+    // APPROACH 3: If all else fails, set default world map bounds
+    if (!hasValidCoordinates) {
+      console.log("APPROACH 3: Using default world map bounds...");
+      
+      // Default to full globe coordinates
+      minLat = -85;
+      maxLat = 85;
+      minLong = -175;
+      maxLong = 175;
+      hasValidCoordinates = true;
+      
+      console.log("Using default world map bounds as fallback");
+    }
+    
+    console.log("Final map coordinates:");
+    console.log(`Latitude: ${minLat} to ${maxLat}`);
+    console.log(`Longitude: ${minLong} to ${maxLong}`);
+    
+    // Set the absolute bounds to full world coordinates
     const absoluteMinLat = -90;
     const absoluteMaxLat = 90;
     const absoluteMinLong = -180;
     const absoluteMaxLong = 180;
     
-    console.log("Setting absolute map boundaries to full world coordinates:");
-    console.log(`Latitude: ${absoluteMinLat} to ${absoluteMaxLat}`);
-    console.log(`Longitude: ${absoluteMinLong} to ${absoluteMaxLong}`);
-
     // Update absolute boundaries in the graph model - these are the furthest limits
     graph.absoluteMinLatitude = absoluteMinLat;
     graph.absoluteMaxLatitude = absoluteMaxLat;
     graph.absoluteMinLongitude = absoluteMinLong;
     graph.absoluteMaxLongitude = absoluteMaxLong;
     
-    // Use slightly tighter bounds for the visible area (to avoid edge distortion)
-    // These give a small margin around the map
-    const visibleMinLat = -85;
-    const visibleMaxLat = 85;
-    const visibleMinLong = -175;
-    const visibleMaxLong = 175;
-    
-    // 2. Now set the current view to show the entire world map
-    console.log("Setting current view to show the entire world map:");
-    console.log(`Latitude: ${visibleMinLat} to ${visibleMaxLat}`);
-    console.log(`Longitude: ${visibleMinLong} to ${visibleMaxLong}`);
-    
-    // Set current view directly (to immediately display the entire world)
-    graph.minLatitude = visibleMinLat;
-    graph.maxLatitude = visibleMaxLat;
-    graph.minLongitude = visibleMinLong;
-    graph.maxLongitude = visibleMaxLong;
-    
-    // Set home view to the same - this is what "reset" will return to
-    graph.homeMinLatitude = visibleMinLat;
-    graph.homeMaxLatitude = visibleMaxLat;
-    graph.homeMinLongitude = visibleMinLong;
-    graph.homeMaxLongitude = visibleMaxLong;
-    
-    // If we have valid data coordinates, also set up a data-focused view
-    if (hasValidCoordinates) {
-      console.log("Valid geographic coordinates found in dataset:");
-      console.log(`Latitude: ${minLat} to ${maxLat}`);
-      console.log(`Longitude: ${minLong} to ${maxLong}`);
+    // If we're using the default world map bounds, set view to entire world
+    if (minLat === -85 && maxLat === 85 && minLong === -175 && maxLong === 175) {
+      // Set current view directly to show the entire world
+      graph.minLatitude = minLat;
+      graph.maxLatitude = maxLat;
+      graph.minLongitude = minLong;
+      graph.maxLongitude = maxLong;
       
+      // Set home view to the same
+      graph.homeMinLatitude = minLat;
+      graph.homeMaxLatitude = maxLat;
+      graph.homeMinLongitude = minLong;
+      graph.homeMaxLongitude = maxLong;
+      
+      console.log("Map configured to show the entire world");
+    } else {
       // Calculate the data center point (midpoint of data coordinates)
       const dataCenterLat = (maxLat! + minLat!) / 2;
       const dataCenterLong = (maxLong! + minLong!) / 2;
       
       // Calculate the data spans with a margin to ensure visibility
-      const dataLatSpan = (maxLat! - minLat!) * 1.5; // 50% margin
-      const dataLongSpan = (maxLong! - minLong!) * 1.5; // 50% margin
+      const dataLatSpan = Math.max(0.1, (maxLat! - minLat!) * 1.5); // 50% margin
+      const dataLongSpan = Math.max(0.1, (maxLong! - minLong!) * 1.5); // 50% margin
       
       // Calculate bounds for a data-focused view (with margin)
       const dataMinLat = Math.max(absoluteMinLat, dataCenterLat - dataLatSpan/2);
@@ -1411,26 +1493,48 @@ export async function updateMapBoundsFromData(dataContextName: string): Promise<
       const dataMinLong = Math.max(absoluteMinLong, dataCenterLong - dataLongSpan/2);
       const dataMaxLong = Math.min(absoluteMaxLong, dataCenterLong + dataLongSpan/2);
       
-      console.log("Data-focused view (with 50% margin):");
+      console.log("Data-focused view (with margin):");
       console.log(`Latitude: ${dataMinLat} to ${dataMaxLat}`);
       console.log(`Longitude: ${dataMinLong} to ${dataMaxLong}`);
       
-      // Animate to the data-focused view after a delay
-      // This starts with the full world and then zooms to show the data
-      setTimeout(() => {
-        graph.animateTo({
-          minLatitude: dataMinLat,
-          maxLatitude: dataMaxLat,
-          minLongitude: dataMinLong,
-          maxLongitude: dataMaxLong
-        });
-        console.log("Animated to data-focused view");
-      }, 1000);
+      // Animate to the data-focused view
+      graph.animateTo({
+        minLatitude: dataMinLat,
+        maxLatitude: dataMaxLat,
+        minLongitude: dataMinLong,
+        maxLongitude: dataMaxLong
+      });
+      
+      console.log("Map configured to focus on data points");
     }
-    
-    console.log("Map configured to show the entire world with proper data alignment");
   } catch (error) {
     console.error("Error updating map bounds:", error);
+    
+    // Fallback to full world map in case of any error
+    const fallbackMinLat = -85;
+    const fallbackMaxLat = 85;
+    const fallbackMinLong = -175;
+    const fallbackMaxLong = 175;
+    
+    // Set absolute bounds
+    graph.absoluteMinLatitude = -90;
+    graph.absoluteMaxLatitude = 90;
+    graph.absoluteMinLongitude = -180;
+    graph.absoluteMaxLongitude = 180;
+    
+    // Set current view
+    graph.minLatitude = fallbackMinLat;
+    graph.maxLatitude = fallbackMaxLat;
+    graph.minLongitude = fallbackMinLong;
+    graph.maxLongitude = fallbackMaxLong;
+    
+    // Set home view
+    graph.homeMinLatitude = fallbackMinLat;
+    graph.homeMaxLatitude = fallbackMaxLat;
+    graph.homeMinLongitude = fallbackMinLong;
+    graph.homeMaxLongitude = fallbackMaxLong;
+    
+    console.log("Fallback to world map view due to error");
   }
 }
 
