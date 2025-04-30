@@ -153,19 +153,26 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   const outlineColor = isSelected ? "#FF0000" : "#FFFFFF";
   const outlineWidth = isSelected ? 2 : 1;
   
-  // Directly calculate if we should show this point and with what opacity
+  // Update opacity calculation to use OpacityManager
   const pointOpacity = useMemo(() => {
     // Selected points are always fully opaque
     if (isSelected) return 1;
     
-    // In see-through mode, use the slider opacity for unselected points
+    // In see-through mode, use the slider opacity directly
     if (ui.seeThroughMode) {
       return ui.unselectedPointsOpacity;
     }
     
     // In normal mode, respect the checkbox setting
     return ui.showUnselectedPoints ? 1 : 0;
-  }, [isSelected, ui.seeThroughMode, ui.unselectedPointsOpacity, ui.showUnselectedPoints]);
+  }, [isSelected, ui.seeThroughMode, ui.showUnselectedPoints, ui.unselectedPointsOpacity]);
+
+  // Effect to handle selection changes
+  useEffect(() => {
+    if (!isSelected && ui.seeThroughMode) {
+      ui.opacityManager.handleSelectionChange(false);
+    }
+  }, [isSelected]);
   
   // Determine if the point should be visible at all
   const pointVisible = useMemo(() => {

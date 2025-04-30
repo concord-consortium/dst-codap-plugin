@@ -1,8 +1,9 @@
 import { makeAutoObservable } from "mobx";
+import { OpacityManager } from "./opacity-manager";
 
 export type modeType = "pointer" | "marquee";
 
-class UI {
+export class UI {
   // The name of the orbit controls currently being used.
   // This prevents other orbit controls from updating the camera position.
   activeControls: string | null = null;
@@ -20,10 +21,12 @@ class UI {
   // See-through mode for unselected points
   seeThroughMode = false;
   // Opacity level for unselected points (0-1) when in see-through mode
-  unselectedPointsOpacity = 0.5;
+  unselectedPointsOpacity = 0.2;
+  opacityManager: OpacityManager;
 
   constructor() {
     makeAutoObservable(this);
+    this.opacityManager = new OpacityManager();
   }
 
   setActiveControls(name: string) {
@@ -61,6 +64,13 @@ class UI {
    */
   setShowUnselectedPoints(show: boolean) {
     this.showUnselectedPoints = show;
+    if (!show) {
+      this.opacityManager.setTargetOpacity(0);
+    } else if (this.seeThroughMode) {
+      this.opacityManager.setTargetOpacity(this.unselectedPointsOpacity);
+    } else {
+      this.opacityManager.setTargetOpacity(1);
+    }
   }
 
   /**
@@ -82,11 +92,10 @@ class UI {
    */
   toggleSeeThroughMode() {
     this.seeThroughMode = !this.seeThroughMode;
-    
-    // When enabling see-through mode, set opacity to 0.3 as a default
-    // to make the effect immediately visible
     if (this.seeThroughMode) {
-      this.unselectedPointsOpacity = 0.3;
+      this.opacityManager.setTargetOpacity(this.unselectedPointsOpacity);
+    } else {
+      this.opacityManager.setTargetOpacity(1);
     }
   }
 
@@ -97,6 +106,14 @@ class UI {
   setUnselectedPointsOpacity(opacity: number) {
     // Ensure opacity is between 0 and 1
     this.unselectedPointsOpacity = Math.max(0, Math.min(1, opacity));
+    if (this.seeThroughMode && this.showUnselectedPoints) {
+      this.opacityManager.setTargetOpacity(this.unselectedPointsOpacity);
+    }
+  }
+
+  // Cleanup method
+  dispose() {
+    this.opacityManager.dispose();
   }
 }
 
