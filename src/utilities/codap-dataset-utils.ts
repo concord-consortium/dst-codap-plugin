@@ -4,7 +4,8 @@ import { codapData } from "../models/codap-data";
 import { graph } from "../models/graph";
 import { getData, setupSelectionSynchronization } from "./codap-utils";
 import { analyzeDateString, parseDateWithFormat } from "./date-utils";
-import { CodapApiResult } from "./codap-interface-helpers";
+import { CodapApiResult, CodapAttribute, CodapDataContext, isCollectionResponse, isDataContextArray } from "./codap-types";
+import { MapBoundsManager } from './map-bounds-manager';
 
 /**
  * Parse a date string using the specified format
@@ -79,86 +80,25 @@ function extractAttributesFromContext(dataContextResult: any): string[] {
  */
 export async function getDatasetAttributes(dataContextName: string): Promise<string[]> {
   try {
-    console.log(`Sending request to get attributes for dataset: ${dataContextName}`);
-    
-    // First try to get the data context info
-    const contextResult = await codapInterface.sendRequest({
-      action: "get",
-      resource: `dataContext[${dataContextName}]`
+    const result = await codapInterface.sendRequest({
+      action: 'get',
+      resource: `dataContext[${dataContextName}].collection[Cases]`
     }) as CodapApiResult;
-    
-    console.log("Data context result:", JSON.stringify(contextResult, null, 2));
-    
-    if (!contextResult.success) {
-      console.error(`Failed to get data context info for ${dataContextName}`);
+
+    if (!result.success || !result.values || !isCollectionResponse(result.values)) {
+      console.warn('Failed to get attributes from data context');
       return [];
     }
-    
-    // Try to directly extract attributes from the context result first
-    // This is often more reliable than using collection queries
-    const attributesFromContext = extractAttributesFromContext(contextResult);
-    if (attributesFromContext.length > 0) {
-      console.log("Successfully extracted attributes from context:", attributesFromContext);
-      return attributesFromContext;
-    }
-    
-    // Continue with the original approaches if direct extraction failed
-    
-    // Try to get collections
-    const collectionsResult = await codapInterface.sendRequest({
-      action: "get",
-      resource: `dataContext[${dataContextName}].collection`
-    }) as CodapApiResult;
-    
-    console.log("Collections result:", JSON.stringify(collectionsResult, null, 2));
-    
-    if (!collectionsResult.success || !collectionsResult.values || !collectionsResult.values.length) {
-      console.warn("Failed to get collections or no collections found");
-      
-      // Fallback: try to get all attributes directly
-      const allAttrsResult = await codapInterface.sendRequest({
-        action: "get",
-        resource: `dataContext[${dataContextName}].attribute`
-      }) as CodapApiResult;
-      
-      console.log("Fallback direct attributes result:", JSON.stringify(allAttrsResult, null, 2));
-      
-      if (allAttrsResult.success && allAttrsResult.values) {
-        const attributeNames = allAttrsResult.values.map((attr: any) => attr.name);
-        console.log("Extracted attribute names from fallback:", attributeNames);
-        return attributeNames;
-      }
-      
+
+    const attrs = result.values.attrs;
+    if (!attrs || !Array.isArray(attrs)) {
+      console.warn('Attributes are not in expected format');
       return [];
     }
-    
-    // Get attributes for each collection
-    const allAttributes: string[] = [];
-    
-    for (const collection of collectionsResult.values) {
-      console.log(`Getting attributes for collection: ${collection.name}`);
-      
-      const attrResult = await codapInterface.sendRequest({
-        action: "get",
-        resource: `dataContext[${dataContextName}].collection["${collection.name}"].attribute`
-      }) as CodapApiResult;
-      
-      console.log(`Attributes result for collection ${collection.name}:`, 
-                  JSON.stringify(attrResult, null, 2));
-      
-      if (attrResult.success && attrResult.values) {
-        const collectionAttributes = attrResult.values.map((attr: any) => attr.name);
-        console.log(`Attributes for collection ${collection.name}:`, collectionAttributes);
-        allAttributes.push(...collectionAttributes);
-      } else {
-        console.warn(`Failed to get attributes for collection ${collection.name}`);
-      }
-    }
-    
-    console.log("Combined attributes from all collections:", allAttributes);
-    return allAttributes;
+
+    return attrs.map((attr: CodapAttribute) => attr.name);
   } catch (error) {
-    console.error("Error getting dataset attributes:", error);
+    console.error('Error getting dataset attributes:', error);
     return [];
   }
 }
@@ -1210,332 +1150,28 @@ export async function checkGapDateRange(dataContextName: string): Promise<void> 
 }
 
 /**
- * Update map boundaries based on the geographic range of the dataset
- * @param dataContextName Name of the data context to analyze
- * @returns Promise that resolves when map boundaries are updated
+ * Updates the map bounds based on the geographic coordinates in the dataset
+ * Uses an optimized approach that provides immediate feedback while calculating precise bounds
  */
 export async function updateMapBoundsFromData(dataContextName: string): Promise<void> {
   if (!dataContextName) {
-    console.warn("Cannot update map bounds: no data context name provided");
+    console.warn('No data context name provided for map bounds update');
     return;
   }
 
-  try {
-    console.log("Updating map bounds for dataset:", dataContextName);
-    
-    // Find latitude and longitude attributes
-    const latAttr = datasetConfig.latitudeAttribute;
-    const longAttr = datasetConfig.longitudeAttribute;
-    
-    if (!latAttr || !longAttr) {
-      console.warn("Latitude or longitude attributes not configured");
-      return;
-    }
-    
-    console.log(`Using attributes: latitude=${latAttr}, longitude=${longAttr}`);
-    
-    // First, try to find the main collection
-    let collectionName = "Cases"; // Default collection name in CODAP
-    
-    // Try to get collection info
-    try {
-      const collectionsResult = await codapInterface.sendRequest({
-        action: "get",
-        resource: `dataContext[${dataContextName}].collection`
-      }) as CodapApiResult;
-      
-      if (collectionsResult.success && collectionsResult.values && collectionsResult.values.length) {
-        // Typically, the main collection is named "Cases"
-        // But let's use the first collection if we can't find "Cases"
-        const casesCollection = collectionsResult.values.find((c: any) => c.name === "Cases") || collectionsResult.values[0];
-        collectionName = casesCollection.name;
-        console.log(`Found collection: ${collectionName}`);
-      } else {
-        console.warn("No collections found in data context, using default collection name 'Cases'");
-      }
-    } catch (error) {
-      console.warn("Error getting collections, using default collection name 'Cases':", error);
-    }
-    
-    // Try different approaches to get min/max coordinate values, with fallbacks for large datasets
-    
-    // Helper function to extract numeric value from a case result
-    function extractValue(caseResult: CodapApiResult, attrName: string): number | null {
-      if (!caseResult.success) {
-        console.log(`Failed to get result for ${attrName}`);
-        return null;
-      }
-      
-      let values = caseResult.values;
-      
-      // Handle different response formats
-      if (Array.isArray(values) && values.length > 0) {
-        // Format: { values: [ { values: { attr: value } } ] }
-        const caseData = values[0];
-        let value = null;
+  const latAttr = datasetConfig.latitudeAttribute;
+  const longAttr = datasetConfig.longitudeAttribute;
 
-        // Check in values object
-        if (caseData.values && caseData.values[attrName] !== undefined) {
-          value = caseData.values[attrName];
-        } 
-        // Check directly on case object
-        else if (caseData[attrName] !== undefined) {
-          value = caseData[attrName];
-        }
-
-        // Convert to number if it's a string
-        if (value !== null && typeof value === "string" && !isNaN(Number(value))) {
-          value = Number(value);
-        }
-
-        console.log(`Extracted ${attrName} value:`, value);
-        return typeof value === "number" && !isNaN(value) ? value : null;
-      } 
-      // Format: { values: { attrName: value } }
-      else if (values && typeof values === "object" && values[attrName] !== undefined) {
-        const value = values[attrName];
-        const numValue = typeof value === "string" ? Number(value) : value;
-        console.log(`Extracted ${attrName} value from direct object:`, numValue);
-        return typeof numValue === "number" && !isNaN(numValue) ? numValue : null;
-      }
-      
-      console.log(`Could not extract ${attrName} from result`, caseResult);
-      return null;
-    }
-    
-    // Initialize coordinates
-    let minLat: number | null = null;
-    let maxLat: number | null = null;
-    let minLong: number | null = null;
-    let maxLong: number | null = null;
-    let hasValidCoordinates = false;
-    
-    // APPROACH 1: First try using caseFormulaSearch with a timeout safety
-    console.log("APPROACH 1: Using caseFormulaSearch to retrieve min/max coordinate values...");
-    
-    try {
-      // Create a promise with timeout for formula search
-      const timeoutDuration = 3000; // 3 seconds timeout
-      
-      const getValueWithTimeout = async (request: any): Promise<CodapApiResult> => {
-        // Create a timeout promise
-        const timeoutPromise = new Promise<CodapApiResult>((_, reject) => {
-          setTimeout(() => reject(new Error("Request timed out")), timeoutDuration);
-        });
-        
-        // Race the actual request against the timeout
-        return Promise.race([
-          codapInterface.sendRequest(request),
-          timeoutPromise
-        ]) as Promise<CodapApiResult>;
-      };
-      
-      // Get min latitude with timeout
-      const minLatResult = await getValueWithTimeout({
-        action: "get",
-        resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${latAttr}=min(${latAttr})]`
-      });
-      
-      // Get max latitude with timeout
-      const maxLatResult = await getValueWithTimeout({
-        action: "get",
-        resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${latAttr}=max(${latAttr})]`
-      });
-      
-      // Get min longitude with timeout
-      const minLongResult = await getValueWithTimeout({
-        action: "get",
-        resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${longAttr}=min(${longAttr})]`
-      });
-      
-      // Get max longitude with timeout
-      const maxLongResult = await getValueWithTimeout({
-        action: "get",
-        resource: `dataContext[${dataContextName}].collection[${collectionName}].caseFormulaSearch[${longAttr}=max(${longAttr})]`
-      });
-      
-      // Extract coordinate values
-      minLat = extractValue(minLatResult, latAttr);
-      maxLat = extractValue(maxLatResult, latAttr);
-      minLong = extractValue(minLongResult, longAttr);
-      maxLong = extractValue(maxLongResult, longAttr);
-      
-      // Check if we have all coordinate values
-      hasValidCoordinates = 
-        minLat !== null && maxLat !== null && 
-        minLong !== null && maxLong !== null &&
-        !isNaN(minLat) && !isNaN(maxLat) && 
-        !isNaN(minLong) && !isNaN(maxLong);
-      
-      if (hasValidCoordinates) {
-        console.log("Successfully retrieved coordinates using caseFormulaSearch");
-      } else {
-        console.log("Failed to get complete coordinates using caseFormulaSearch");
-      }
-    } catch (error) {
-      console.warn("caseFormulaSearch approach failed:", error);
-    }
-    
-    // APPROACH 2: Try using a sampling approach for large datasets
-    if (!hasValidCoordinates) {
-      console.log("APPROACH 2: Using cases sampling approach...");
-      
-      try {
-        // Get a sample of cases (first 200 cases should be enough for most datasets)
-        const sampleSize = 200;
-        const sampleResult = await codapInterface.sendRequest({
-          action: "get",
-          resource: `dataContext[${dataContextName}].collection[${collectionName}].caseCount[0:${sampleSize}]`
-        }) as CodapApiResult;
-        
-        if (sampleResult.success && sampleResult.values) {
-          const cases = Array.isArray(sampleResult.values) ? sampleResult.values : [sampleResult.values];
-          
-          // Scan through the sample cases to find min/max values
-          cases.forEach((caseData: any) => {
-            let latValue: number | null = null;
-            let longValue: number | null = null;
-            
-            // Try to extract latitude value
-            if (caseData.values && caseData.values[latAttr] !== undefined) {
-              const rawLat = caseData.values[latAttr];
-              latValue = typeof rawLat === "string" ? Number(rawLat) : rawLat;
-            }
-            
-            // Try to extract longitude value
-            if (caseData.values && caseData.values[longAttr] !== undefined) {
-              const rawLong = caseData.values[longAttr];
-              longValue = typeof rawLong === "string" ? Number(rawLong) : rawLong;
-            }
-            
-            // Update min/max values if we found valid coordinates
-            if (latValue !== null && !isNaN(latValue) && 
-                longValue !== null && !isNaN(longValue)) {
-              
-              if (minLat === null || latValue < minLat) minLat = latValue;
-              if (maxLat === null || latValue > maxLat) maxLat = latValue;
-              if (minLong === null || longValue < minLong) minLong = longValue;
-              if (maxLong === null || longValue > maxLong) maxLong = longValue;
-            }
-          });
-          
-          // Check if we found valid coordinates from sampling
-          hasValidCoordinates = 
-            minLat !== null && maxLat !== null && 
-            minLong !== null && maxLong !== null;
-          
-          if (hasValidCoordinates) {
-            console.log("Successfully retrieved coordinates using case sampling");
-          }
-        }
-      } catch (error) {
-        console.warn("Case sampling approach failed:", error);
-      }
-    }
-    
-    // APPROACH 3: If all else fails, set default world map bounds
-    if (!hasValidCoordinates) {
-      console.log("APPROACH 3: Using default world map bounds...");
-      
-      // Default to full globe coordinates
-      minLat = -85;
-      maxLat = 85;
-      minLong = -175;
-      maxLong = 175;
-      hasValidCoordinates = true;
-      
-      console.log("Using default world map bounds as fallback");
-    }
-    
-    console.log("Final map coordinates:");
-    console.log(`Latitude: ${minLat} to ${maxLat}`);
-    console.log(`Longitude: ${minLong} to ${maxLong}`);
-    
-    // Set the absolute bounds to full world coordinates
-    const absoluteMinLat = -90;
-    const absoluteMaxLat = 90;
-    const absoluteMinLong = -180;
-    const absoluteMaxLong = 180;
-    
-    // Update absolute boundaries in the graph model - these are the furthest limits
-    graph.absoluteMinLatitude = absoluteMinLat;
-    graph.absoluteMaxLatitude = absoluteMaxLat;
-    graph.absoluteMinLongitude = absoluteMinLong;
-    graph.absoluteMaxLongitude = absoluteMaxLong;
-    
-    // If we're using the default world map bounds, set view to entire world
-    if (minLat === -85 && maxLat === 85 && minLong === -175 && maxLong === 175) {
-      // Set current view directly to show the entire world
-      graph.minLatitude = minLat;
-      graph.maxLatitude = maxLat;
-      graph.minLongitude = minLong;
-      graph.maxLongitude = maxLong;
-      
-      // Set home view to the same
-      graph.homeMinLatitude = minLat;
-      graph.homeMaxLatitude = maxLat;
-      graph.homeMinLongitude = minLong;
-      graph.homeMaxLongitude = maxLong;
-      
-      console.log("Map configured to show the entire world");
-    } else {
-      // Calculate the data center point (midpoint of data coordinates)
-      const dataCenterLat = (maxLat! + minLat!) / 2;
-      const dataCenterLong = (maxLong! + minLong!) / 2;
-      
-      // Calculate the data spans with a margin to ensure visibility
-      const dataLatSpan = Math.max(0.1, (maxLat! - minLat!) * 1.5); // 50% margin
-      const dataLongSpan = Math.max(0.1, (maxLong! - minLong!) * 1.5); // 50% margin
-      
-      // Calculate bounds for a data-focused view (with margin)
-      const dataMinLat = Math.max(absoluteMinLat, dataCenterLat - dataLatSpan/2);
-      const dataMaxLat = Math.min(absoluteMaxLat, dataCenterLat + dataLatSpan/2);
-      const dataMinLong = Math.max(absoluteMinLong, dataCenterLong - dataLongSpan/2);
-      const dataMaxLong = Math.min(absoluteMaxLong, dataCenterLong + dataLongSpan/2);
-      
-      console.log("Data-focused view (with margin):");
-      console.log(`Latitude: ${dataMinLat} to ${dataMaxLat}`);
-      console.log(`Longitude: ${dataMinLong} to ${dataMaxLong}`);
-      
-      // Animate to the data-focused view
-      graph.animateTo({
-        minLatitude: dataMinLat,
-        maxLatitude: dataMaxLat,
-        minLongitude: dataMinLong,
-        maxLongitude: dataMaxLong
-      });
-      
-      console.log("Map configured to focus on data points");
-    }
-  } catch (error) {
-    console.error("Error updating map bounds:", error);
-    
-    // Fallback to full world map in case of any error
-    const fallbackMinLat = -85;
-    const fallbackMaxLat = 85;
-    const fallbackMinLong = -175;
-    const fallbackMaxLong = 175;
-    
-    // Set absolute bounds
-    graph.absoluteMinLatitude = -90;
-    graph.absoluteMaxLatitude = 90;
-    graph.absoluteMinLongitude = -180;
-    graph.absoluteMaxLongitude = 180;
-    
-    // Set current view
-    graph.minLatitude = fallbackMinLat;
-    graph.maxLatitude = fallbackMaxLat;
-    graph.minLongitude = fallbackMinLong;
-    graph.maxLongitude = fallbackMaxLong;
-    
-    // Set home view
-    graph.homeMinLatitude = fallbackMinLat;
-    graph.homeMaxLatitude = fallbackMaxLat;
-    graph.homeMinLongitude = fallbackMinLong;
-    graph.homeMaxLongitude = fallbackMaxLong;
-    
-    console.log("Fallback to world map view due to error");
+  if (!latAttr || !longAttr) {
+    console.warn('Latitude or longitude attributes not configured');
+    return;
   }
+
+  console.log(`Updating map bounds for dataset: ${dataContextName}`);
+  console.log(`Using attributes: latitude=${latAttr}, longitude=${longAttr}`);
+
+  const mapBoundsManager = new MapBoundsManager();
+  await mapBoundsManager.updateMapBounds(dataContextName, latAttr, longAttr);
 }
 
 /**
@@ -1728,5 +1364,28 @@ export async function focusOnGapPeriodData(dataContextName: string): Promise<voi
     });
   } catch (error) {
     console.error("Error focusing on gap period data:", error);
+  }
+}
+
+/**
+ * Gets all available data contexts from CODAP
+ * @returns Array of data context names
+ */
+export async function getAvailableDatasets(): Promise<string[]> {
+  try {
+    const result = await codapInterface.sendRequest({
+      action: 'get',
+      resource: 'dataContextList'
+    }) as CodapApiResult;
+
+    if (!result.success || !result.values || !isDataContextArray(result.values)) {
+      console.warn('Failed to get data context list');
+      return [];
+    }
+
+    return result.values.map((context: CodapDataContext) => context.name);
+  } catch (error) {
+    console.error('Error getting available datasets:', error);
+    return [];
   }
 } 
