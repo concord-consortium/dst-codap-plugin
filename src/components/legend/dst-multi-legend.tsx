@@ -5,7 +5,6 @@ import { useDataDisplayLayout } from "../../codap/components/data-display/hooks/
 import { DataConfigurationContext } from "../../codap/components/data-display/hooks/use-data-configuration-context";
 import { Legend } from "../../codap/components/data-display/components/legend/legend";
 import { IBaseLayerModel } from "../../codap/components/data-display/models/base-data-display-content-model";
-import { IAttribute } from "../../codap/models/data/attribute";
 import { IDataSet } from "../../codap/models/data/data-set";
 import { IDstDataConfigurationModel } from "../../models/dst-data-configuration-model";
 import { useDstDataDisplayModelContext } from "../hooks/use-dst-data-display-model";
@@ -43,6 +42,7 @@ export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAtt
   const [selectedSizeAttribute, setSelectedSizeAttribute] = useState<SafeAttribute | null>(null);
 
   // Load attributes from the dataset when component mounts or dataset changes
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   useEffect(() => {
     const loadAttributes = async () => {
       if (!dataset) return;

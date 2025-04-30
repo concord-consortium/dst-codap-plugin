@@ -1,12 +1,12 @@
 import { makeAutoObservable } from "mobx";
 
 export class OpacityManager {
-  private _isLocked: boolean = false;
-  private _currentOpacity: number = 1;
-  private _targetOpacity: number = 1;
-  private _transitionDuration: number = 100; // milliseconds
+  private _isLocked = false;
+  private _currentOpacity = 1;
+  private _targetOpacity = 1;
+  private _transitionDuration = 100; // milliseconds
   private _lockTimeout: number | null = null;
-  private readonly _opacityPower: number = 1; // Linear scale for direct response
+  private readonly _opacityPower = 1; // Linear scale for direct response
 
   constructor() {
     makeAutoObservable(this);

@@ -161,13 +161,14 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   };
   
   // Update opacity calculation to use OpacityManager
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const pointOpacity = useMemo(() => {
     // Selected points are always fully opaque
     if (isSelected) return 1;
     
-    // In see-through mode, use transformed slider opacity
+    // In see-through mode, use the slider opacity directly
     if (ui.seeThroughMode) {
-      return transformOpacity(ui.unselectedPointsOpacity);
+      return ui.unselectedPointsOpacity;
     }
     
     // In normal mode, respect the checkbox setting
@@ -182,6 +183,7 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   }, [isSelected]);
   
   // Determine if the point should be visible at all
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const pointVisible = useMemo(() => {
     if (isSelected) {
       // Selected points visibility is controlled by the selected checkbox
@@ -196,7 +198,7 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
     
     // In normal mode, visibility is controlled by the unselected checkbox
     return ui.showUnselectedPoints;
-  }, [isSelected, ui.seeThroughMode, ui.unselectedPointsOpacity, ui.showSelectedPoints, ui.showUnselectedPoints]);
+  }, [isSelected, ui.seeThroughMode, ui.showSelectedPoints, ui.showUnselectedPoints, ui.unselectedPointsOpacity]);
 
   useFrame((_state, delta) => {
     if (pointSize < targetPointSize) {

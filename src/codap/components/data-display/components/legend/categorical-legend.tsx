@@ -1,5 +1,5 @@
 import {drag, select} from "d3"
-import React, {useCallback, useEffect, useMemo, useRef, useState} from "react"
+import React, {useEffect, useMemo, useRef, useState} from "react"
 import {mstReaction} from "../../../../utilities/mst-reaction"
 import { mstAutorun } from "../../../../utilities/mst-autorun"
 import {axisGap} from "../../../axis/axis-types"
@@ -31,6 +31,7 @@ export const CategoricalLegend = observer(function CategoricalLegend(props: IBas
   // the number of categories changes or the max width of a category changes.
   // Also the setDesiredExtent might cause extra re-renders, so it only
   // runs when the desiredExtent actually changes
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   useEffect(function updateDesiredExtent() {
     return mstReaction(
       () => {
@@ -48,11 +49,13 @@ export const CategoricalLegend = observer(function CategoricalLegend(props: IBas
   }, [dataConfiguration, props.setDesiredExtent, props.layerIndex, legendModel])
 
   // These variables should not change, but theoretically it is possible
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   useEffect(function updateContextVariables() {
     legendModel.setDataConfiguration(dataConfiguration)
     legendModel.setDataDisplayLayout(dataDisplayLayout)
   }, [dataConfiguration, dataDisplayLayout, legendModel])
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   useEffect(() => {
     return function cleanup() {
       props.setDesiredExtent(props.layerIndex, 0)
@@ -60,28 +63,28 @@ export const CategoricalLegend = observer(function CategoricalLegend(props: IBas
   }, [props.layerIndex, props.setDesiredExtent])
 
   const handleClick = (event: any, d: Key) => {
-    event.stopPropagation();
+    event.stopPropagation()
     // Lock opacity state before selection change
-    ui.opacityManager.lockState();
+    ui.opacityManager.lockState()
     
-    if (!dataConfiguration?.dataset) return;
+    if (!dataConfiguration?.dataset) return
 
-    const legendAttrID = dataConfiguration.attributeID("legend");
-    if (!legendAttrID) return;
+    const legendAttrID = dataConfiguration.attributeID("legend")
+    if (!legendAttrID) return
 
     // Get all cases with this category
-    const casesToSelect = dataConfiguration.getCasesForLegendValue(d.category);
-    if (!casesToSelect?.length) return;
+    const casesToSelect = dataConfiguration.getCasesForLegendValue(d.category)
+    if (!casesToSelect?.length) return
 
     // Update selection
-    dataConfiguration.dataset.setSelectedCases(casesToSelect);
+    dataConfiguration.dataset.setSelectedCases(casesToSelect)
     
     // Set a timeout to complete the transition after the table update
     setTimeout(() => {
-      ui.opacityManager.completeTransition();
-      ui.opacityManager.unlockState();
-    }, 100);
-  };
+      ui.opacityManager.completeTransition()
+      ui.opacityManager.unlockState()
+    }, 100)
+  }
 
   // The dragBehavior is created first, so d3Render can add this to all new elements.
   const dragBehavior = useMemo(() => {
