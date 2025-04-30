@@ -26,31 +26,21 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   const sizeDataConfig = dstContainer.dataDisplayModel.sizeDataConfiguration;
   
   // Check if a color legend attribute is set
-  const colorLegendId = colorDataConfig.attributeID("legend");
+  const colorLegendId = colorDataConfig?.attributeID("legend");
+  const hasColorConfig = !!colorDataConfig;
+  const legendValue = colorDataConfig?.dataset?.getStrValue(id, colorLegendId || "");
+  const legendType = colorDataConfig?.attributeType("legend");
   
-  // Get more detailed information about the attribute and values for debugging
-  const dataset = colorDataConfig.dataset;
-  const legendValue = colorLegendId && dataset ? dataset.getStrValue(id, colorLegendId) : undefined;
-  const legendType = colorLegendId ? colorDataConfig.attributeType("legend") : undefined;
+  // Get the color based on the configuration
+  const color = colorDataConfig?.getLegendColorForCase(id) || DEFAULT_COLOR;
   
-  // Add debugging effect
-  useEffect(() => {
-    if (legendType === "categorical" && colorLegendId) {
-      console.log("Point Color Debug:", {
-        id,
-        legendValue,
-        legendType,
-        colorLegendId,
-        hasColorConfig: !!colorDataConfig,
-        rawColor: colorDataConfig.getLegendColorForCase?.(id),
-      });
-    }
-  }, [id, legendValue, legendType, colorLegendId, colorDataConfig]);
+  // Get the size based on the configuration
+  const size = sizeDataConfig?.getLegendSizeForCase(id) || 10;
   
   // Calculate the thresholds for the current legend attribute once per render
   // This ensures all points use the same thresholds
   const thresholds = useMemo(() => {
-    if (!dataset || !colorLegendId || legendType !== "numeric") {
+    if (!colorDataConfig?.dataset || !colorLegendId || legendType !== "numeric") {
       return [];
     }
     
@@ -73,10 +63,10 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
     }
     
     return result;
-  }, [dataset, colorLegendId, legendType, colorDataConfig]);
+  }, [colorDataConfig, colorLegendId, legendType]);
   
   // Dynamic color assignment that will respond to legend changes
-  let dotColor = DEFAULT_COLOR; // Default color
+  let dotColor = color; // Default color
   
   if (colorLegendId && legendValue) {
     // Try the standard CODAP color first
@@ -87,14 +77,14 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
       dotColor = standardColor;
     } else if (legendType === "numeric") {
       // Otherwise fall back to our manual color calculation
-      const numValue = parseFloat(legendValue);
+      const numericValue = colorDataConfig?.dataset?.getNumeric(id, colorLegendId);
       
-      if (!isNaN(numValue)) {
+      if (numericValue !== undefined && numericValue !== null) {
         if (thresholds.length > 0) {
           // Determine which color to use based on thresholds
           let colorIndex = 0;
           for (let i = 0; i < thresholds.length; i++) {
-            if (numValue >= thresholds[i]) {
+            if (numericValue >= thresholds[i]) {
               colorIndex = i + 1;
             }
           }
@@ -103,7 +93,7 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
         } else {
           // If for some reason we don't have thresholds, use a linear scale based on the value
           // Find min and max values in the dataset for this attribute
-          const allValues = dataset && colorLegendId ? 
+          const allValues = colorDataConfig.dataset && colorLegendId ? 
             Array.from(colorDataConfig.numericValuesForAttrRole("legend") || []) : [];
           
           if (allValues.length > 0) {
@@ -113,7 +103,7 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
             
             if (range > 0) {
               // Normalize the value to 0-1 range
-              const normalizedValue = Math.max(0, Math.min(1, (numValue - min) / range));
+              const normalizedValue = Math.max(0, Math.min(1, (numericValue - min) / range));
               // Map to color index
               const colorIndex = Math.min(colors.length - 1, Math.floor(normalizedValue * colors.length));
               dotColor = colors[colorIndex];
@@ -134,15 +124,11 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
       const categoryColor = colorDataConfig.getLegendColorForCase(id);
       if (categoryColor && categoryColor !== "#888888" && categoryColor.startsWith("#")) {
         dotColor = categoryColor;
-        console.log(`Applying categorical color for point ${id}:`, {
-          categoryColor,
-          legendValue
-        });
       }
     }
   }
   
-  const dotDiameterInPixels = sizeDataConfig.getLegendSizeForCase(id);
+  const dotDiameterInPixels = size;
   const basePointSize = dotDiameterInPixels * 0.0195;
   const isSelected = codapData.isSelected(id);
   const selectedExtra = isSelected ? .02 : 0;
