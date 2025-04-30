@@ -153,14 +153,21 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   const outlineColor = isSelected ? "#FF0000" : "#FFFFFF";
   const outlineWidth = isSelected ? 2 : 1;
   
+  // Transform slider value to perceived opacity using a quadratic curve
+  const transformOpacity = (sliderValue: number): number => {
+    // Use quadratic curve to make middle range more sensitive
+    // This will create an S-curve that's more sensitive in the middle range
+    return Math.pow(sliderValue, 1.5);
+  };
+  
   // Update opacity calculation to use OpacityManager
   const pointOpacity = useMemo(() => {
     // Selected points are always fully opaque
     if (isSelected) return 1;
     
-    // In see-through mode, use the slider opacity directly
+    // In see-through mode, use transformed slider opacity
     if (ui.seeThroughMode) {
-      return ui.unselectedPointsOpacity;
+      return transformOpacity(ui.unselectedPointsOpacity);
     }
     
     // In normal mode, respect the checkbox setting
@@ -254,7 +261,8 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
       <Outlines 
         color={outlineColor}
         thickness={outlineWidth * 0.4}
-        visible={pointOpacity > 0.1}
+        opacity={pointOpacity}
+        transparent={true}
       />
     </mesh>
   );
