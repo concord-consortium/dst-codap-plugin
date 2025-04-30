@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Outlines } from "@react-three/drei";
 import { ThreeEvent, useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
@@ -32,6 +32,20 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
   const dataset = colorDataConfig.dataset;
   const legendValue = colorLegendId && dataset ? dataset.getStrValue(id, colorLegendId) : undefined;
   const legendType = colorLegendId ? colorDataConfig.attributeType("legend") : undefined;
+  
+  // Add debugging effect
+  useEffect(() => {
+    if (legendType === "categorical" && colorLegendId) {
+      console.log("Point Color Debug:", {
+        id,
+        legendValue,
+        legendType,
+        colorLegendId,
+        hasColorConfig: !!colorDataConfig,
+        rawColor: colorDataConfig.getLegendColorForCase?.(id),
+      });
+    }
+  }, [id, legendValue, legendType, colorLegendId, colorDataConfig]);
   
   // Calculate the thresholds for the current legend attribute once per render
   // This ensures all points use the same thresholds
@@ -118,7 +132,13 @@ export const Point = observer(function Point({ id, visible, x, y, z }: IPointPro
     } else if (legendType === "categorical") {
       // For categorical values, try to get a computed color or use default
       const categoryColor = colorDataConfig.getLegendColorForCase(id);
-      dotColor = (categoryColor && categoryColor !== "#888888") ? categoryColor : DEFAULT_COLOR;
+      if (categoryColor && categoryColor !== "#888888" && categoryColor.startsWith("#")) {
+        dotColor = categoryColor;
+        console.log(`Applying categorical color for point ${id}:`, {
+          categoryColor,
+          legendValue
+        });
+      }
     }
   }
   

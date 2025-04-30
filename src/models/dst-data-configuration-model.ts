@@ -123,6 +123,64 @@ export const DstDataConfigurationModel = DataConfigurationModel.named("DstDataCo
         default:
           return defaultPointDiameter;
       }
+    },
+    getLegendColorForCase(id: string) {
+      const legendID = self.attributeID("legend");
+      const legendAttribute = self.dataset?.getAttribute(legendID);
+      
+      if (!id || !legendID || !legendAttribute) {
+        console.log(`Color Generation Debug [missing-data]:`, {
+          id,
+          color: "#888888",
+          isValidHex: /^#[0-9A-F]{6}$/i.test("#888888"),
+        });
+        return "#888888";
+      }
+
+      const legendType = self.attributeType("legend");
+      
+      if (legendType === "categorical") {
+        const value = self.dataset?.getStrValue(id, legendID);
+        if (!value) {
+          console.log(`Color Generation Debug [missing-categorical-value]:`, {
+            id,
+            color: "#888888",
+            isValidHex: /^#[0-9A-F]{6}$/i.test("#888888"),
+          });
+          return "#888888";
+        }
+        const color = self.getLegendColorForCategory(value);
+        console.log(`Color Generation Debug [categorical]:`, {
+          id,
+          color,
+          isValidHex: /^#[0-9A-F]{6}$/i.test(color),
+        });
+        return color;
+      } else if (legendType === "numeric") {
+        const value = self.dataset?.getNumeric(id, legendID);
+        if (value == null) {
+          console.log(`Color Generation Debug [invalid-numeric]:`, {
+            id,
+            color: "#888888",
+            isValidHex: /^#[0-9A-F]{6}$/i.test("#888888"),
+          });
+          return "#888888";
+        }
+        const color = self.getLegendColorForNumericValue(value);
+        console.log(`Color Generation Debug [numeric]:`, {
+          id,
+          color,
+          isValidHex: /^#[0-9A-F]{6}$/i.test(color),
+        });
+        return color;
+      }
+      
+      console.log(`Color Generation Debug [fallback]:`, {
+        id,
+        color: "#888888",
+        isValidHex: /^#[0-9A-F]{6}$/i.test("#888888"),
+      });
+      return "#888888";
     }
   }));
 
