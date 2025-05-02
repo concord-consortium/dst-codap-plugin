@@ -5,7 +5,7 @@ import { graph } from "../models/graph";
 import { getData, setupSelectionSynchronization } from "./codap-utils";
 import { analyzeDateString, parseDateWithFormat } from "./date-utils";
 import { CodapApiResult, CodapAttribute, CodapDataContext, isCollectionResponse, isDataContextArray } from "./codap-types";
-import { MapBoundsManager } from './map-bounds-manager';
+import { MapBoundsManager } from "./map-bounds-manager";
 
 /**
  * Parse a date string using the specified format
@@ -81,24 +81,24 @@ function extractAttributesFromContext(dataContextResult: any): string[] {
 export async function getDatasetAttributes(dataContextName: string): Promise<string[]> {
   try {
     const result = await codapInterface.sendRequest({
-      action: 'get',
+      action: "get",
       resource: `dataContext[${dataContextName}].collection[Cases]`
     }) as CodapApiResult;
 
     if (!result.success || !result.values || !isCollectionResponse(result.values)) {
-      console.warn('Failed to get attributes from data context');
+      console.warn("Failed to get attributes from data context");
       return [];
     }
 
     const attrs = result.values.attrs;
     if (!attrs || !Array.isArray(attrs)) {
-      console.warn('Attributes are not in expected format');
+      console.warn("Attributes are not in expected format");
       return [];
     }
 
     return attrs.map((attr: CodapAttribute) => attr.name);
   } catch (error) {
-    console.error('Error getting dataset attributes:', error);
+    console.error("Error getting dataset attributes:", error);
     return [];
   }
 }
@@ -230,9 +230,13 @@ export async function updateDateRangeFromData(dataContextName: string): Promise<
     
     console.log("Date summary result:", dateSummaryResult);
     
-    if (dateSummaryResult.success && dateSummaryResult.values) {
-      // For date attributes, the min/max might be returned as date strings
-      // or as numbers depending on how CODAP stores them
+    if (
+      dateSummaryResult.success &&
+      dateSummaryResult.values &&
+      typeof dateSummaryResult.values === "object" &&
+      "min" in dateSummaryResult.values &&
+      "max" in dateSummaryResult.values
+    ) {
       let minDateValue = dateSummaryResult.values.min;
       let maxDateValue = dateSummaryResult.values.max;
       
@@ -270,7 +274,15 @@ export async function updateDateRangeFromData(dataContextName: string): Promise<
       
       console.log("Date attribute details:", dateAttrResult);
       
-      if (dateAttrResult.success && dateAttrResult.values && dateAttrResult.values.stats) {
+      if (
+        dateAttrResult.success &&
+        dateAttrResult.values &&
+        typeof dateAttrResult.values === "object" &&
+        "stats" in dateAttrResult.values &&
+        dateAttrResult.values.stats &&
+        "min" in dateAttrResult.values.stats &&
+        "max" in dateAttrResult.values.stats
+      ) {
         let minDateValue = dateAttrResult.values.stats.min;
         let maxDateValue = dateAttrResult.values.stats.max;
         
@@ -302,40 +314,50 @@ export async function updateDateRangeFromData(dataContextName: string): Promise<
       
       const collectionResult = await codapInterface.sendRequest({
         action: "get",
-        resource: `dataContext[${dataContextName}].collection["Cases"]`
+        resource: `dataContext[${dataContextName}].collection[\"Cases\"]`
       }) as CodapApiResult;
       
-      if (collectionResult.success && collectionResult.values) {
+      if (
+        collectionResult.success &&
+        collectionResult.values &&
+        typeof collectionResult.values === "object" &&
+        "attrs" in collectionResult.values &&
+        Array.isArray(collectionResult.values.attrs)
+      ) {
         console.log("Collection info:", collectionResult.values);
         
         // Check if we can find the attributes with stats
-        if (collectionResult.values.attrs) {
-          const dateAttribute = collectionResult.values.attrs.find((attr: any) => 
-            attr.name === dateAttr);
+        const dateAttribute = collectionResult.values.attrs.find((attr: any) => attr && attr.name === dateAttr);
+        
+        if (
+          dateAttribute &&
+          typeof dateAttribute === "object" &&
+          "stats" in dateAttribute &&
+          dateAttribute.stats &&
+          "min" in dateAttribute.stats &&
+          "max" in dateAttribute.stats
+        ) {
+          let minDateValue = dateAttribute.stats.min;
+          let maxDateValue = dateAttribute.stats.max;
           
-          if (dateAttribute && dateAttribute.stats) {
-            let minDateValue = dateAttribute.stats.min;
-            let maxDateValue = dateAttribute.stats.max;
-            
-            // Parse date values if they're strings
-            if (typeof minDateValue === "string") {
-              const parsedDate = parseDate(minDateValue, datasetConfig.dateFormat);
-              minDate = parsedDate !== undefined ? parsedDate : null;
-            } else if (typeof minDateValue === "number") {
-              minDate = minDateValue;
-            }
-            
-            if (typeof maxDateValue === "string") {
-              const parsedDate = parseDate(maxDateValue, datasetConfig.dateFormat);
-              maxDate = parsedDate !== undefined ? parsedDate : null;
-            } else if (typeof maxDateValue === "number") {
-              maxDate = maxDateValue;
-            }
-            
-            if (minDate !== null && maxDate !== null && !isNaN(minDate) && !isNaN(maxDate)) {
-              hasValidDates = true;
-              console.log(`Date range from collection stats: ${new Date(minDate).toLocaleDateString()} to ${new Date(maxDate).toLocaleDateString()}`);
-            }
+          // Parse date values if they're strings
+          if (typeof minDateValue === "string") {
+            const parsedDate = parseDate(minDateValue, datasetConfig.dateFormat);
+            minDate = parsedDate !== undefined ? parsedDate : null;
+          } else if (typeof minDateValue === "number") {
+            minDate = minDateValue;
+          }
+          
+          if (typeof maxDateValue === "string") {
+            const parsedDate = parseDate(maxDateValue, datasetConfig.dateFormat);
+            maxDate = parsedDate !== undefined ? parsedDate : null;
+          } else if (typeof maxDateValue === "number") {
+            maxDate = maxDateValue;
+          }
+          
+          if (minDate !== null && maxDate !== null && !isNaN(minDate) && !isNaN(maxDate)) {
+            hasValidDates = true;
+            console.log(`Date range from collection stats: ${new Date(minDate).toLocaleDateString()} to ${new Date(maxDate).toLocaleDateString()}`);
           }
         }
       }
@@ -472,7 +494,7 @@ export async function updateDateRangeFromData(dataContextName: string): Promise<
         });
         
         // Process minimum date result
-        if (minDateResult.success && minDateResult.values && minDateResult.values.length > 0) {
+        if (minDateResult.success && minDateResult.values && Array.isArray(minDateResult.values) && minDateResult.values.length > 0) {
           const dateCase = minDateResult.values[0];
           let dateValue = null;
           
@@ -507,7 +529,7 @@ export async function updateDateRangeFromData(dataContextName: string): Promise<
         }
         
         // Process maximum date result
-        if (maxDateResult.success && maxDateResult.values && maxDateResult.values.length > 0) {
+        if (maxDateResult.success && maxDateResult.values && Array.isArray(maxDateResult.values) && maxDateResult.values.length > 0) {
           const dateCase = maxDateResult.values[0];
           let dateValue = null;
           
@@ -662,10 +684,10 @@ export async function getDatasetDetails(dataContextName: string): Promise<any> {
     }) as CodapApiResult;
     
     // Get attributes for each collection
-    const collections = collectionsResult.success ? collectionsResult.values : [];
+    const collectionsArr = collectionsResult.success && Array.isArray(collectionsResult.values) ? collectionsResult.values : [];
     const collectionsWithAttributes = [];
     
-    for (const collection of collections) {
+    for (const collection of collectionsArr) {
       const attrResult = await codapInterface.sendRequest({
         action: "get",
         resource: `dataContext[${dataContextName}].collection["${collection.name}"].attribute`
@@ -705,9 +727,9 @@ export async function exploreDataset(dataContextName: string): Promise<string[]>
     
     console.log("First case result (caseSearch):", JSON.stringify(getCaseResult, null, 2));
     
-    if (getCaseResult.success && getCaseResult.values && getCaseResult.values.length) {
+    if (getCaseResult.success && getCaseResult.values && Array.isArray(getCaseResult.values) && getCaseResult.values.length) {
       // Extract attribute names from case values
-      const firstCase = getCaseResult.values[0];
+      const firstCase = Array.isArray(getCaseResult.values) ? getCaseResult.values[0] : undefined;
       
       if (firstCase && firstCase.values) {
         const attributeNames = Object.keys(firstCase.values);
@@ -1155,7 +1177,7 @@ export async function checkGapDateRange(dataContextName: string): Promise<void> 
  */
 export async function updateMapBoundsFromData(dataContextName: string): Promise<void> {
   if (!dataContextName) {
-    console.warn('No data context name provided for map bounds update');
+    console.warn("No data context name provided for map bounds update");
     return;
   }
 
@@ -1163,7 +1185,7 @@ export async function updateMapBoundsFromData(dataContextName: string): Promise<
   const longAttr = datasetConfig.longitudeAttribute;
 
   if (!latAttr || !longAttr) {
-    console.warn('Latitude or longitude attributes not configured');
+    console.warn("Latitude or longitude attributes not configured");
     return;
   }
 
@@ -1374,18 +1396,18 @@ export async function focusOnGapPeriodData(dataContextName: string): Promise<voi
 export async function getAvailableDatasets(): Promise<string[]> {
   try {
     const result = await codapInterface.sendRequest({
-      action: 'get',
-      resource: 'dataContextList'
+      action: "get",
+      resource: "dataContextList"
     }) as CodapApiResult;
 
     if (!result.success || !result.values || !isDataContextArray(result.values)) {
-      console.warn('Failed to get data context list');
+      console.warn("Failed to get data context list");
       return [];
     }
 
     return result.values.map((context: CodapDataContext) => context.name);
   } catch (error) {
-    console.error('Error getting available datasets:', error);
+    console.error("Error getting available datasets:", error);
     return [];
   }
 } 

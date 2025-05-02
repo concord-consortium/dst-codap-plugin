@@ -27,11 +27,14 @@ describe("get-min-max-coordinates", () => {
   describe("getMinMaxCoordinates", () => {
     it("should return null if no data context is configured", async () => {
       // Temporarily override the mock
-      jest.spyOn(datasetConfig, "dataContextName", "get").mockReturnValueOnce(undefined);
+      const originalDataContextName = datasetConfig.dataContextName;
+      datasetConfig.dataContextName = undefined as any;
       
       const result = await getMinMaxCoordinates();
       expect(result).toBeNull();
       expect(mockSendRequest).not.toHaveBeenCalled();
+      // Restore original value
+      datasetConfig.dataContextName = originalDataContextName;
     });
 
     it("should return null if data context cannot be retrieved", async () => {

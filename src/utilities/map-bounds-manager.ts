@@ -1,12 +1,12 @@
-import { graph } from '../models/graph';
-import { codapInterface } from './codap-interface';
-import { codapData } from '../models/codap-data';
+import { graph } from "../models/graph";
+import { codapInterface } from "./codap-interface";
+import { codapData } from "../models/codap-data";
 import {
   CodapApiResult,
   CodapAttribute,
   isCollectionResponse,
   isCaseArray
-} from './codap-types';
+} from "./codap-types";
 
 export interface Bounds {
   minLat: number;
@@ -46,13 +46,13 @@ export class MapBoundsManager {
     try {
       // First set absolute bounds to allow unlimited panning
       this.setWorldMapBounds();
-      console.log('Set absolute bounds for unlimited panning');
+      console.log("Set absolute bounds for unlimited panning");
 
       // Calculate bounds from existing data
       const bounds = this.calculateBoundsFromExistingData();
       
       if (bounds) {
-        console.log('Found valid bounds in existing data:', bounds);
+        console.log("Found valid bounds in existing data:", bounds);
         
         // Calculate optimal view bounds with proper aspect ratio
         const optimalBounds = this.calculateOptimalViewBounds(bounds);
@@ -65,12 +65,12 @@ export class MapBoundsManager {
           maxLongitude: optimalBounds.maxLong
         });
         
-        console.log('Adjusted view to optimal bounds:', optimalBounds);
+        console.log("Adjusted view to optimal bounds:", optimalBounds);
       } else {
-        console.log('No valid bounds found in existing data, keeping current view');
+        console.log("No valid bounds found in existing data, keeping current view");
       }
     } catch (error) {
-      console.error('Error updating map bounds:', error);
+      console.error("Error updating map bounds:", error);
       // World map is already shown from setWorldMapBounds, so no need for additional fallback
     }
   }

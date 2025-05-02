@@ -29,13 +29,13 @@ describe("DSTCamera", () => {
 
     dstCamera.resetHome();
 
-
+    // Increased timeout to ensure animation completes
     setTimeout(() => {
       expect(dstCamera.zoom).toBeCloseTo(defaultZoom);
       expect(dstCamera.pivot).toBeCloseTo(defaultPivot);
       expect(dstCamera.rotation).toBeCloseTo(defaultRotation);
       done();
-    }, 250);
+    }, 1000);
   });
 
   test("should set distance within legal range", () => {

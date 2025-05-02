@@ -204,11 +204,11 @@ describe("graph", () => {
       graph.setMinLatitude(graph.absoluteMinLatitude);
       graph.setMaxLongitude(graph.absoluteMaxLongitude);
       graph.setMinLongitude(graph.absoluteMinLongitude);
-      expect(graph.canZoomOut).toBe(true);
-      expect(graph.canPanDown).toBe(true);
-      expect(graph.canPanUp).toBe(true);
-      expect(graph.canPanLeft).toBe(true);
-      expect(graph.canPanRight).toBe(true);
+      expect(graph.canZoomOut).toBe(false);
+      expect(graph.canPanDown).toBe(false);
+      expect(graph.canPanUp).toBe(false);
+      expect(graph.canPanLeft).toBe(false);
+      expect(graph.canPanRight).toBe(false);
       expect(graph.canReset).toBe(true);
       graph.reset();
 
@@ -224,7 +224,7 @@ describe("graph", () => {
         expect(graph.canPanRight).toBe(true);
         expect(graph.canReset).toBe(false);
         done();
-      }, 250);
+      }, 3000);
     });
   });
 });

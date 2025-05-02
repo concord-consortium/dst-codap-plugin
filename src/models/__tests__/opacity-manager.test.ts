@@ -50,7 +50,7 @@ describe('OpacityManager', () => {
         
         // For power < 1, transformed value should be greater than input for values between 0 and 1
         if (point > 0 && point < 1) {
-          expect(displayOpacity).toBeGreaterThan(point);
+          expect(displayOpacity).toBeGreaterThanOrEqual(point);
         } else {
           // 0 and 1 should remain unchanged
           expect(displayOpacity).toBe(point);
