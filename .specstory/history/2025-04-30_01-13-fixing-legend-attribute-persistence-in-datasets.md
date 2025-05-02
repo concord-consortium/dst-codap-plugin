@@ -21225,6 +21225,2047 @@ Proceed directly
 
 _**Assistant**_
 
+```diff
+    let mapBoundsManager: MapBoundsManager;
+    let mockGraph: MockGraph;
+-   let originalCaseIds: PropertyDescriptor | undefined;
++   let caseIdsSpy: jest.SpyInstance;
+  
+    beforeEach(() => {
+      mockGraph.animateTo.mockClear();
+      (codapInterface.sendRequest as jest.Mock).mockClear();
+-     // Save and override codapData.caseIds getter
+-     originalCaseIds = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(codapData), 'caseIds');
+-     Object.defineProperty(codapData, 'caseIds', { get: () => [], configurable: true });
++     // Spy on codapData.caseIds getter on the prototype
++     caseIdsSpy = jest.spyOn(Object.getPrototypeOf(codapData), 'caseIds', 'get').mockReturnValue([]);
+      (codapData.getLatitude as any) = jest.fn();
+      (codapData.getLongitude as any) = jest.fn();
+    });
+  
+    afterEach(() => {
+-     // Remove the instance override if present
+-     if (Object.prototype.hasOwnProperty.call(codapData, 'caseIds')) {
+-       delete (codapData as any).caseIds;
+-     }
+-     // Restore original getter from prototype
+-     if (originalCaseIds) {
+-       Object.defineProperty(codapData, 'caseIds', originalCaseIds);
++     // Restore the spy
++     if (caseIdsSpy) {
++       caseIdsSpy.mockRestore();
+      }
+    });
+      it('should animate to bounds if in-memory data is present', async () => {
+        // Simulate in-memory data
+-       Object.defineProperty(codapData, 'caseIds', { get: () => ['case1', 'case2'], configurable: true });
++       caseIdsSpy.mockReturnValue(['case1', 'case2']);
+        (codapData.getLatitude as any) = jest.fn()
+          .mockReturnValueOnce(10)
+```
+
+---
+
+_****_
+
+```bash
+npm test
+```
+
+```
+
+> dst-codap-plugin@0.0.1 test
+> jest
+
+
+
+Test Suites: 0 of 16 total
+Tests:       0 total
+Snapshots:   0 total
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/utilities/__tests__/get-min-max-coordinates.test.ts
+ RUNS  src/models/__tests__/opacity-manager.test.ts
+ RUNS  src/utilities/__tests__/date-utils.test.ts
+
+Test Suites: 0 of 16 total
+Tests:       0 total
+Snapshots:   0 total
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/utilities/__tests__/get-min-max-coordinates.test.ts
+ RUNS  src/models/__tests__/opacity-manager.test.ts
+ RUNS  src/utilities/__tests__/date-utils.test.ts
+
+Test Suites: 0 of 16 total
+Tests:       0 total
+Snapshots:   0 total
+ PASS  src/utilities/__tests__/date-utils.test.ts
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/utilities/__tests__/get-min-max-coordinates.test.ts
+ RUNS  src/models/__tests__/opacity-manager.test.ts
+ RUNS  src/utilities/__tests__/date-utils.test.ts
+
+Test Suites: 0 of 16 total
+Tests:       0 total
+Snapshots:   0 total
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/utilities/__tests__/get-min-max-coordinates.test.ts
+ RUNS  src/models/__tests__/opacity-manager.test.ts
+ RUNS  src/utilities/__tests__/date-utils.test.ts
+
+Test Suites: 0 of 16 total
+Tests:       0 total
+Snapshots:   0 total
+ PASS  src/models/__tests__/opacity-manager.test.ts
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/utilities/__tests__/get-min-max-coordinates.test.ts
+ RUNS  src/models/__tests__/opacity-manager.test.ts
+ RUNS  src/utilities/__tests__/date-utils.test.ts
+
+Test Suites: 0 of 16 total
+Tests:       0 total
+Snapshots:   0 total
+ PASS  src/utilities/__tests__/get-min-max-coordinates.test.ts
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/utilities/__tests__/get-min-max-coordinates.test.ts
+ RUNS  src/models/__tests__/opacity-manager.test.ts
+ RUNS  src/utilities/__tests__/date-utils.test.ts
+
+Test Suites: 0 of 16 total
+Tests:       0 total
+Snapshots:   0 total
+  ● Console
+
+    console.warn
+      No data context configured for coordinate bounds
+
+      70 |   const dataContextName = datasetConfig.dataContextName;
+      71 |   if (!dataContextName) {
+    > 72 |     console.warn("No data context configured for coordinate bounds");
+         |             ^
+      73 |     return null;
+      74 |   }
+      75 |
+
+      at getMinMaxCoordinates (src/utilities/get-min-max-coordinates.ts:72:13)
+      at Object.<anonymous> (src/utilities/__tests__/get-min-max-coordinates.test.ts:33:48)
+
+    console.warn
+      Data context TestData not found
+
+      82 |
+      83 |     if (!contextResult.success) {
+    > 84 |       console.warn(`Data context ${dataContextName} not found`);
+         |               ^
+      85 |       return null;
+      86 |     }
+      87 |
+
+      at getMinMaxCoordinates (src/utilities/get-min-max-coordinates.ts:84:15)
+      at Object.<anonymous> (src/utilities/__tests__/get-min-max-coordinates.test.ts:45:22)
+
+    console.error
+      Error executing formula search: Error: API Error
+          at Object.<anonymous> (/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/util
+ities/__tests__/get-min-max-coordinates.test.ts:149:45)
+          at Promise.then.completed (/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/node
+_modules/jest-circus/build/utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/node_modu
+les/jest-circus/build/utils.js:231:10)
+          at _callCircusTest (/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/node_module
+s/jest-circus/build/run.js:316:40)
+          at processTicksAndRejections (node:internal/process/task_queues:95:5)
+          at _runTest (/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/node_modules/jest-
+circus/build/run.js:252:3)
+          at _runTestsForDescribeBlock (/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/n
+ode_modules/jest-circus/build/run.js:126:9)
+          at _runTestsForDescribeBlock (/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/n
+ode_modules/jest-circus/build/run.js:121:9)
+          at _runTestsForDescribeBlock (/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/n
+ode_modules/jest-circus/build/run.js:121:9)
+          at run (/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/node_modules/jest-circu
+s/build/run.js:71:3)
+          at runAndTransformResultsToJestFormat (/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap
+-plugin/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+          at jestAdapter (/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/node_modules/je
+st-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+          at runTestInternal (/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/node_module
+s/jest-runner/build/runTest.js:367:16)
+          at runTest (/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/node_modules/jest-r
+unner/build/runTest.js:444:34)
+          at Object.worker (/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/node_modules/
+jest-runner/build/testWorker.js:106:12)
+
+      54 |     };
+      55 |   } catch (error) {
+    > 56 |     console.error("Error executing formula search:", error);
+         |             ^
+      57 |     return {
+      58 |       success: false,
+      59 |       error: error instanceof Error ? error.message : "Unknown error"
+
+      at executeFormulaSearch (src/utilities/get-min-max-coordinates.ts:56:13)
+      at Object.<anonymous> (src/utilities/__tests__/get-min-max-coordinates.test.ts:151:22)
+
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/utilities/__tests__/get-min-max-coordinates.test.ts
+ RUNS  src/models/__tests__/opacity-manager.test.ts
+ RUNS  src/utilities/__tests__/date-utils.test.ts
+
+Test Suites: 0 of 16 total
+Tests:       0 total
+Snapshots:   0 total
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/models/__tests__/codap-data.test.ts
+ RUNS  src/utilities/__tests__/codap-interface-helpers.test.ts
+ RUNS  src/models/__tests__/dataset-config.test.ts
+
+Test Suites: 3 passed, 3 of 16 total
+Tests:       30 passed, 30 total
+Snapshots:   0 total
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/models/__tests__/codap-data.test.ts
+ RUNS  src/utilities/__tests__/codap-interface-helpers.test.ts
+ RUNS  src/models/__tests__/dataset-config.test.ts
+
+Test Suites: 3 passed, 3 of 16 total
+Tests:       31 passed, 31 total
+Snapshots:   0 total
+ PASS  src/utilities/__tests__/codap-interface-helpers.test.ts
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/models/__tests__/codap-data.test.ts
+ RUNS  src/utilities/__tests__/codap-interface-helpers.test.ts
+ RUNS  src/models/__tests__/dataset-config.test.ts
+
+Test Suites: 3 passed, 3 of 16 total
+Tests:       31 passed, 31 total
+Snapshots:   0 total
+ PASS  src/models/__tests__/dataset-config.test.ts
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/models/__tests__/codap-data.test.ts
+ RUNS  src/utilities/__tests__/codap-interface-helpers.test.ts
+ RUNS  src/models/__tests__/dataset-config.test.ts
+
+Test Suites: 3 passed, 3 of 16 total
+Tests:       31 passed, 31 total
+Snapshots:   0 total
+ PASS  src/models/__tests__/codap-data.test.ts
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/models/__tests__/codap-data.test.ts
+ RUNS  src/utilities/__tests__/codap-interface-helpers.test.ts
+ RUNS  src/models/__tests__/dataset-config.test.ts
+
+Test Suites: 3 passed, 3 of 16 total
+Tests:       31 passed, 31 total
+Snapshots:   0 total
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/utilities/camera-utils.test.ts
+ RUNS  src/models/ui.test.ts
+ RUNS  src/utilities/geometry-utils.test.ts
+
+Test Suites: 6 passed, 6 of 16 total
+Tests:       53 passed, 53 total
+Snapshots:   0 total
+ PASS  src/utilities/camera-utils.test.ts
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/utilities/camera-utils.test.ts
+ RUNS  src/models/ui.test.ts
+ RUNS  src/utilities/geometry-utils.test.ts
+
+Test Suites: 6 passed, 6 of 16 total
+Tests:       53 passed, 53 total
+Snapshots:   0 total
+ PASS  src/models/ui.test.ts
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/utilities/camera-utils.test.ts
+ RUNS  src/models/ui.test.ts
+ RUNS  src/utilities/geometry-utils.test.ts
+
+Test Suites: 6 passed, 6 of 16 total
+Tests:       53 passed, 53 total
+Snapshots:   0 total
+ PASS  src/utilities/geometry-utils.test.ts
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/utilities/camera-utils.test.ts
+ RUNS  src/models/ui.test.ts
+ RUNS  src/utilities/geometry-utils.test.ts
+
+Test Suites: 6 passed, 6 of 16 total
+Tests:       53 passed, 53 total
+Snapshots:   0 total
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/utilities/trig-utils.test.ts
+
+Test Suites: 9 passed, 9 of 16 total
+Tests:       61 passed, 61 total
+Snapshots:   0 total
+ PASS  src/utilities/trig-utils.test.ts
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+ RUNS  src/utilities/trig-utils.test.ts
+
+Test Suites: 9 passed, 9 of 16 total
+Tests:       61 passed, 61 total
+Snapshots:   0 total
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+
+Test Suites: 10 passed, 10 of 16 total
+Tests:       63 passed, 63 total
+Snapshots:   0 total
+ PASS  src/models/codap-data.test.ts
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+
+Test Suites: 10 passed, 10 of 16 total
+Tests:       63 passed, 63 total
+Snapshots:   0 total
+ PASS  src/utilities/__tests__/map-bounds-manager.test.ts
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+
+Test Suites: 10 passed, 10 of 16 total
+Tests:       63 passed, 63 total
+Snapshots:   0 total
+  ● Console
+
+    console.log
+      Set absolute bounds for unlimited panning
+
+      at MapBoundsManager.updateMapBounds (src/utilities/map-bounds-manager.ts:49:15)
+
+    console.log
+      No valid bounds found in existing data, keeping current view
+
+      at MapBoundsManager.updateMapBounds (src/utilities/map-bounds-manager.ts:70:17)
+
+    console.log
+      Set absolute bounds for unlimited panning
+
+      at MapBoundsManager.updateMapBounds (src/utilities/map-bounds-manager.ts:49:15)
+
+    console.log
+      No valid bounds found in existing data, keeping current view
+
+      at MapBoundsManager.updateMapBounds (src/utilities/map-bounds-manager.ts:70:17)
+
+    console.log
+      Set absolute bounds for unlimited panning
+
+      at MapBoundsManager.updateMapBounds (src/utilities/map-bounds-manager.ts:49:15)
+
+    console.log
+      Found valid bounds in existing data: { minLat: 10, maxLat: 20, minLong: 30, maxLong: 40 }
+
+      at MapBoundsManager.updateMapBounds (src/utilities/map-bounds-manager.ts:55:17)
+
+    console.log
+      Adjusted view to optimal bounds: { minLat: 8.5, maxLat: 21.5, minLong: 22, maxLong: 48 }
+
+      at MapBoundsManager.updateMapBounds (src/utilities/map-bounds-manager.ts:68:17)
+
+
+ RUNS  src/utilities/__tests__/map-bounds-manager.test.ts
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+ RUNS  src/models/codap-data.test.ts
+
+Test Suites: 10 passed, 10 of 16 total
+Tests:       63 passed, 63 total
+Snapshots:   0 total
+
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+
+Test Suites: 12 passed, 12 of 16 total
+Tests:       76 passed, 76 total
+Snapshots:   0 total
+ PASS  src/utilities/codap-utils.test.ts
+
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+ RUNS  src/utilities/codap-utils.test.ts
+
+Test Suites: 12 passed, 12 of 16 total
+Tests:       76 passed, 76 total
+Snapshots:   0 total
+
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+
+Test Suites: 13 passed, 13 of 16 total
+Tests:       83 passed, 83 total
+Snapshots:   0 total
+ PASS  src/models/camera.test.ts
+
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+ RUNS  src/models/camera.test.ts
+
+Test Suites: 13 passed, 13 of 16 total
+Tests:       83 passed, 83 total
+Snapshots:   0 total
+
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+
+Test Suites: 14 passed, 14 of 16 total
+Tests:       100 passed, 100 total
+Snapshots:   0 total
+
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+
+Test Suites: 14 passed, 14 of 16 total
+Tests:       102 passed, 102 total
+Snapshots:   0 total
+
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+
+Test Suites: 14 passed, 14 of 16 total
+Tests:       104 passed, 104 total
+Snapshots:   0 total
+
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+
+Test Suites: 14 passed, 14 of 16 total
+Tests:       104 passed, 104 total
+Snapshots:   0 total
+
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+
+Test Suites: 14 passed, 14 of 16 total
+Tests:       106 passed, 106 total
+Snapshots:   0 total
+
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+
+Test Suites: 14 passed, 14 of 16 total
+Tests:       108 passed, 108 total
+Snapshots:   0 total
+ PASS  src/components/__tests__/dataset-config-panel.test.js
+
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+
+Test Suites: 14 passed, 14 of 16 total
+Tests:       108 passed, 108 total
+Snapshots:   0 total
+  ● Console
+
+    console.log
+      Fetching available datasets...
+
+      at src/components/dataset-config-panel.tsx:63:15
+
+    console.log
+      CODAP plugin API available: true
+
+      at src/components/dataset-config-panel.tsx:65:15
+
+    console.log
+      Available datasets: [ 'Dataset1', 'Dataset2' ]
+
+      at src/components/dataset-config-panel.tsx:68:15
+
+    console.log
+      Fetching available datasets...
+
+      at src/components/dataset-config-panel.tsx:63:15
+
+    console.log
+      CODAP plugin API available: true
+
+      at src/components/dataset-config-panel.tsx:65:15
+
+    console.log
+      Available datasets: [ 'Dataset1', 'Dataset2' ]
+
+      at src/components/dataset-config-panel.tsx:68:15
+
+    console.log
+      Selected dataset: Dataset1
+
+      at handleDatasetChange (src/components/dataset-config-panel.tsx:292:13)
+
+    console.log
+      Final retrieved attributes: [ 'Latitude', 'Longitude', 'Date', 'Color', 'Size' ]
+
+      at handleDatasetChange (src/components/dataset-config-panel.tsx:306:15)
+
+    console.log
+      Auto-detecting attribute mappings from: [ 'Latitude', 'Longitude', 'Date', 'Color', 'Size' ]
+
+      at autoDetectAttributes (src/components/dataset-config-panel.tsx:179:13)
+
+    console.log
+      Latitude match: Latitude
+
+      at autoDetectAttributes (src/components/dataset-config-panel.tsx:199:17)
+
+    console.log
+      Longitude match: Longitude
+
+      at autoDetectAttributes (src/components/dataset-config-panel.tsx:211:17)
+
+    console.log
+      Date match: Date
+
+      at autoDetectAttributes (src/components/dataset-config-panel.tsx:258:15)
+
+    console.log
+      Color match: Color
+
+      at autoDetectAttributes (src/components/dataset-config-panel.tsx:268:17)
+
+    console.log
+      Size match: Size
+
+      at autoDetectAttributes (src/components/dataset-config-panel.tsx:280:17)
+
+    console.log
+      Attribute mapping results: {
+        latitude: 'Latitude',
+        longitude: 'Longitude',
+        date: 'Date',
+        color: 'Color',
+        size: 'Size'
+      }
+
+      at autoDetectAttributes (src/components/dataset-config-panel.tsx:285:13)
+
+    console.log
+      Fetching available datasets...
+
+      at src/components/dataset-config-panel.tsx:63:15
+
+    console.log
+      CODAP plugin API available: true
+
+      at src/components/dataset-config-panel.tsx:65:15
+
+    console.log
+      Available datasets: [ 'Dataset1', 'Dataset2' ]
+
+      at src/components/dataset-config-panel.tsx:68:15
+
+    console.log
+      Fetching available datasets...
+
+      at src/components/dataset-config-panel.tsx:63:15
+
+    console.log
+      CODAP plugin API available: true
+
+      at src/components/dataset-config-panel.tsx:65:15
+
+    console.log
+      Available datasets: [ 'Dataset1', 'Dataset2' ]
+
+      at src/components/dataset-config-panel.tsx:68:15
+
+    console.log
+      Configuration applied, loading configured data...
+
+      at handleSaveConfig (src/components/dataset-config-panel.tsx:338:15)
+
+    console.log
+      Fetching available datasets...
+
+      at src/components/dataset-config-panel.tsx:63:15
+
+    console.log
+      CODAP plugin API available: true
+
+      at src/components/dataset-config-panel.tsx:65:15
+
+    console.log
+      Available datasets: [ 'Dataset1', 'Dataset2' ]
+
+      at src/components/dataset-config-panel.tsx:68:15
+
+    console.log
+      Selected dataset: Dataset1
+
+      at handleDatasetChange (src/components/dataset-config-panel.tsx:292:13)
+
+    console.log
+      Final retrieved attributes: [ 'Latitude', 'Longitude', 'Date', 'Color', 'Size' ]
+
+      at handleDatasetChange (src/components/dataset-config-panel.tsx:306:15)
+
+    console.log
+      Auto-detecting attribute mappings from: [ 'Latitude', 'Longitude', 'Date', 'Color', 'Size' ]
+
+      at autoDetectAttributes (src/components/dataset-config-panel.tsx:179:13)
+
+    console.log
+      Latitude match: Latitude
+
+      at autoDetectAttributes (src/components/dataset-config-panel.tsx:199:17)
+
+    console.log
+      Longitude match: Longitude
+
+      at autoDetectAttributes (src/components/dataset-config-panel.tsx:211:17)
+
+    console.log
+      Date match: Date
+
+      at autoDetectAttributes (src/components/dataset-config-panel.tsx:258:15)
+
+    console.log
+      Color match: Color
+
+      at autoDetectAttributes (src/components/dataset-config-panel.tsx:268:17)
+
+    console.log
+      Size match: Size
+
+      at autoDetectAttributes (src/components/dataset-config-panel.tsx:280:17)
+
+    console.log
+      Attribute mapping results: {
+        latitude: 'Latitude',
+        longitude: 'Longitude',
+        date: 'Date',
+        color: 'Color',
+        size: 'Size'
+      }
+
+      at autoDetectAttributes (src/components/dataset-config-panel.tsx:285:13)
+
+
+ RUNS  src/models/graph.test.ts
+ RUNS  src/components/__tests__/dataset-config-panel.test.js
+
+Test Suites: 14 passed, 14 of 16 total
+Tests:       108 passed, 108 total
+Snapshots:   0 total
+
+ RUNS  src/models/graph.test.ts
+
+Test Suites: 15 passed, 15 of 16 total
+Tests:       109 passed, 109 total
+Snapshots:   0 total
+
+ RUNS  src/models/graph.test.ts
+
+Test Suites: 15 passed, 15 of 16 total
+Tests:       110 passed, 110 total
+Snapshots:   0 total
+
+ RUNS  src/models/graph.test.ts
+
+Test Suites: 15 passed, 15 of 16 total
+Tests:       111 passed, 111 total
+Snapshots:   0 total
+
+ RUNS  src/models/graph.test.ts
+
+Test Suites: 15 passed, 15 of 16 total
+Tests:       111 passed, 111 total
+Snapshots:   0 total
+
+ RUNS  src/models/graph.test.ts
+
+Test Suites: 15 passed, 15 of 16 total
+Tests:       111 passed, 111 total
+Snapshots:   0 total
+
+ RUNS  src/models/graph.test.ts
+
+Test Suites: 15 passed, 15 of 16 total
+Tests:       111 passed, 111 total
+Snapshots:   0 total
+ PASS  src/models/graph.test.ts (7.016 s)
+
+ RUNS  src/models/graph.test.ts
+
+Test Suites: 15 passed, 15 of 16 total
+Tests:       111 passed, 111 total
+Snapshots:   0 total
+
+Test Suites: 16 passed, 16 total
+Tests:       112 passed, 112 total
+Snapshots:   0 total
+Time:        7.94 s, estimated 8 s
+Ran all test suites.
+
+```
+
+---
+
+_****_
+
+✅ **All blocking errors are now resolved!**
+
+- All test suites pass (16/16), with 112/112 tests passing.
+- The previous issues with property redefinition and deletion in `map-bounds-manager.test.ts` are fixed by using `jest.spyOn` on the prototype.
+- No assertion, timeout, or TypeError issues remain.
+
+---
+
+**Next steps (per our process):**
+1. I will report completion with passing tests and no errors.
+2. Upon your confirmation, I can provide the git commands to commit these changes.
+
+Would you like to review the changes, or should I proceed with the commit instructions?
+
+---
+
+_**User**_
+
+I've committed them. Let's push this branch to remote.
+
+---
+
+_**Assistant**_
+
+Great! Since all tests are passing and you’ve committed the changes, you’re ready to push your branch to the remote repository.
+
+Here’s the command to push your current branch to the remote (assuming you’re on the correct feature/fix branch):
+
+```bash
+git push origin HEAD
+```
+
+This will push your current branch and its commits to the remote repository.
+
+Let me know if you’d like to proceed with a pull request or need help with anything else!
+
+---
+
+_**User**_
+
+Let's push feature/expand-cube-size 
+
+---
+
+_**Assistant**_
+
+```bash
+git push origin feature/expand-cube-size
+```
+
+```
+Enumerating objects: 42, done.
+Counting objects: 100% (42/42), done.
+Delta compression using up to 10 threads
+Compressing objects: 100% (21/21), done.
+Writing objects: 100% (22/22), 93.72 KiB | 6.25 MiB/s, done.
+Total 22 (delta 17), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (17/17), completed with 17 local objects.
+To https://github.com/chaddorsey/dst-codap-plugin.git
+   55cc565..1b30f4d  feature/expand-cube-size -> feature/expand-cube-size
+
+```
+
+---
+
+_****_
+
+The branch `feature/expand-cube-size` has been successfully pushed to the remote repository.
+
+**Next steps:**
+- You can now open a pull request from `feature/expand-cube-size` to your main branch on GitHub for review and merging.
+- If you’d like, I can guide you through the pull request process or help with any final documentation or review steps.
+
+Let me know how you’d like to proceed!
+
+---
+
+_**User**_
+
+I still get this:
+
+ERROR in [eslint] 
+/home/runner/work/dst-codap-plugin/dst-codap-plugin/src/utilities/codap-dataset-utils.ts
+  317:63  error  Unnecessary escape character: \"  no-useless-escape
+  317:70  error  Unnecessary escape character: \"  no-useless-escape
+
+✖ 3 problems (2 errors, 1 warning)
+
+
+webpack 5.97.1 compiled with 1 error and 1 warning in 65480 ms
+
+---
+
+_**Assistant**_
+
+Thank you for sharing the error details! This is a **blocking ESLint error** caused by unnecessary escape characters in a regular expression or string at line 317 of `src/utilities/codap-dataset-utils.ts`:
+
+```
+317:63  error  Unnecessary escape character: \"  no-useless-escape
+317:70  error  Unnecessary escape character: \"  no-useless-escape
+```
+
+---
+
+## How to Fix
+
+- **Remove the unnecessary backslashes (`\`) before the double quotes (`"`)** in the code at or near line 317.
+- This usually happens in a regex or string where escaping the quote is not needed (e.g., inside double-quoted strings, you don’t need to escape `"` unless it’s inside another set of quotes).
+
+---
+
+### Next Steps
+
+1. **Review line 317** of `src/utilities/codap-dataset-utils.ts` and look for something like `\\"` or similar.
+2. **Remove the unnecessary backslashes** so that only the quotes remain, unless the context truly requires escaping (which is rare in JS/TS unless inside single-quoted strings or regexes).
+
+---
+
+Would you like to:
+- See the exact code at line 317 so I can suggest the precise edit,
+- Or should I go ahead and propose the fix directly?
+
+Let me know how you’d like to proceed!
+
+---
+
+_**User**_
+
+Proceed directly
+
+---
+
+_**Assistant**_
+
+Read file: undefined
+
+---
+
+_****_
+
+Read file: undefined
+
+---
+
+_****_
+
+```diff
+        const collectionResult = await codapInterface.sendRequest({
+          action: "get",
+-         resource: `dataContext[${dataContextName}].collection[\"Cases\"]`
++         resource: `dataContext[${dataContextName}].collection["Cases"]`
+        }) as CodapApiResult;
+        
+```
+
+---
+
+_****_
+
+```bash
+npm run lint
+```
+
+```
+
+> dst-codap-plugin@0.0.1 lint
+> eslint "./src/**/*.{js,jsx,ts,tsx}" "./cypress/**/*.{js,jsx,ts,tsx}" "webpack.config.js"
+
+^C
+^C
+^C
+^C
+^C
+
+
+```
+
+---
+
+_****_
+
+```bash
+npm run lint
+```
+
+```
+(base) Chads-MacBook-Air-6158:dst-codap-plugin chaddorsey$ 
+/no-require-imports
+    6:23  error    'require' is not defined                                               no-undef
+    7:1   error    Unexpected var, use let or const instead                               no-var
+    7:24  error    A `require()` style import is forbidden                                @typescript-eslint
+/no-require-imports
+    7:24  error    'require' is not defined                                               no-undef
+    8:1   error    Unexpected var, use let or const instead                               no-var
+    8:20  error    A `require()` style import is forbidden                                @typescript-eslint
+/no-require-imports
+    8:20  error    'require' is not defined                                               no-undef
+    9:1   error    Unexpected var, use let or const instead                               no-var
+   10:14  warning  'CodapData' is already declared in the upper scope on line 9 column 5  @typescript-eslint
+/no-shadow
+   17:9   error    Expected method shorthand                                              object-shorthand
+   24:9   error    Expected method shorthand                                              object-shorthand
+   25:13  error    Unexpected var, use let or const instead                               no-var
+   32:9   error    Expected method shorthand                                              object-shorthand
+   45:9   error    Unexpected var, use let or const instead                               no-var
+   55:9   error    Unexpected var, use let or const instead                               no-var
+   56:9   error    Unexpected var, use let or const instead                               no-var
+   57:9   error    Unexpected var, use let or const instead                               no-var
+   70:13  error    Unexpected var, use let or const instead                               no-var
+   72:17  error    Unexpected var, use let or const instead                               no-var
+   82:9   error    Unexpected var, use let or const instead                               no-var
+   83:9   error    Unexpected var, use let or const instead                               no-var
+   84:9   error    Unexpected var, use let or const instead                               no-var
+   86:13  error    Unexpected var, use let or const instead                               no-var
+   86:17  error    'timestamp' is already defined                                         no-redeclare
+  185:1   error    'exports' is not defined                                               no-undef
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/models/dataset-config.js
+   2:23  error  'exports' is not defined                  no-undef
+   3:1   error  'exports' is not defined                  no-undef
+   3:25  error  'exports' is not defined                  no-undef
+   4:1   error  Unexpected var, use let or const instead  no-var
+   4:25  error  A `require()` style import is forbidden   @typescript-eslint/no-require-imports
+   4:25  error  'require' is not defined                  no-undef
+   9:1   error  'exports' is not defined                  no-undef
+  35:5   error  Expected method shorthand                 object-shorthand
+  41:5   error  Expected method shorthand                 object-shorthand
+  47:5   error  Expected method shorthand                 object-shorthand
+  53:5   error  Expected method shorthand                 object-shorthand
+  59:5   error  Expected method shorthand                 object-shorthand
+  65:5   error  Expected method shorthand                 object-shorthand
+  71:5   error  Expected method shorthand                 object-shorthand
+  77:5   error  Expected method shorthand                 object-shorthand
+  83:5   error  Expected method shorthand                 object-shorthand
+  95:1   error  'exports' is not defined                  no-undef
+  95:25  error  'exports' is not defined                  no-undef
+  98:28  error  'exports' is not defined                  no-undef
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/models/dst-container.js
+    2:1   error  Unexpected var, use let or const instead                          no-var
+    4:14  error  Unexpected var, use let or const instead                          no-var
+    6:18  error  Unexpected var, use let or const instead                          no-var
+    6:30  error  Expected { after 'for-in'                                         curly
+    7:17  error  Expected { after 'if' condition                                   curly
+   13:23  error  'exports' is not defined                                          no-undef
+   14:1   error  'exports' is not defined                                          no-undef
+   14:24  error  'exports' is not defined                                          no-undef
+   15:1   error  Unexpected var, use let or const instead                          no-var
+   15:25  error  A `require()` style import is forbidden                           @typescript-eslint/no-req
+uire-imports
+   15:25  error  'require' is not defined                                          no-undef
+   16:1   error  Unexpected var, use let or const instead                          no-var
+   16:32  error  A `require()` style import is forbidden                           @typescript-eslint/no-req
+uire-imports
+   16:32  error  'require' is not defined                                          no-undef
+   17:1   error  Unexpected var, use let or const instead                          no-var
+   17:18  error  A `require()` style import is forbidden                           @typescript-eslint/no-req
+uire-imports
+   17:18  error  'require' is not defined                                          no-undef
+   18:1   error  Unexpected var, use let or const instead                          no-var
+   18:30  error  A `require()` style import is forbidden                           @typescript-eslint/no-req
+uire-imports
+   18:30  error  'require' is not defined                                          no-undef
+   19:1   error  'exports' is not defined                                          no-undef
+   24:1   error  Unexpected var, use let or const instead                          no-var
+   26:9   error  Expected method shorthand                                         object-shorthand
+   29:9   error  Expected method shorthand                                         object-shorthand
+   42:1   error  'exports' is not defined                                          no-undef
+   42:24  error  'exports' is not defined                                          no-undef
+  149:4   error  Use an object spread instead of `Object.assign` eg: `{ ...foo }`  prefer-object-spread
+  150:23  error  'exports' is not defined                                          no-undef
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/models/dst-data-configuration-model.j
+s
+    2:23   error  'exports' is not defined                  no-undef
+    3:1    error  'exports' is not defined                  no-undef
+    3:37   error  'exports' is not defined                  no-undef
+    4:1    error  Unexpected var, use let or const instead  no-var
+    4:12   error  A `require()` style import is forbidden   @typescript-eslint/no-require-imports
+    4:12   error  'require' is not defined                  no-undef
+    5:1    error  Unexpected var, use let or const instead  no-var
+    5:25   error  A `require()` style import is forbidden   @typescript-eslint/no-require-imports
+    5:25   error  'require' is not defined                  no-undef
+    6:1    error  Unexpected var, use let or const instead  no-var
+    6:34   error  A `require()` style import is forbidden   @typescript-eslint/no-require-imports
+    6:34   error  'require' is not defined                  no-undef
+    7:1    error  Unexpected var, use let or const instead  no-var
+    7:34   error  A `require()` style import is forbidden   @typescript-eslint/no-require-imports
+    7:34   error  'require' is not defined                  no-undef
+    9:1    error  Unexpected var, use let or const instead  no-var
+   10:1    error  Unexpected var, use let or const instead  no-var
+   12:1    error  'exports' is not defined                  no-undef
+   13:1    error  'exports' is not defined                  no-undef
+   19:9    error  Unexpected var, use let or const instead  no-var
+   21:13   error  Expected { after 'if' condition           curly
+   22:9    error  Unexpected var, use let or const instead  no-var
+   24:13   error  Expected { after 'if' condition           curly
+   25:9    error  Unexpected var, use let or const instead  no-var
+   27:13   error  Expected { after 'if' condition           curly
+   31:9    error  Unexpected var, use let or const instead  no-var
+   33:13   error  Expected { after 'if' condition           curly
+   34:9    error  Unexpected var, use let or const instead  no-var
+   41:9    error  Unexpected var, use let or const instead  no-var
+   49:21   error  'exports' is not defined                  no-undef
+   52:9    error  Unexpected var, use let or const instead  no-var
+   54:13   error  Expected { after 'if' condition           curly
+   55:9    error  Unexpected var, use let or const instead  no-var
+   56:9    error  Unexpected var, use let or const instead  no-var
+   59:9    error  Unexpected var, use let or const instead  no-var
+   60:9    error  Unexpected var, use let or const instead  no-var
+   65:9    error  Unexpected var, use let or const instead  no-var
+   70:5    error  Expected method shorthand                 object-shorthand
+   71:9    error  Unexpected var, use let or const instead  no-var
+   72:92   error  'exports' is not defined                  no-undef
+   74:5    error  Expected method shorthand                 object-shorthand
+   75:9    error  Unexpected var, use let or const instead  no-var
+   76:85   error  'exports' is not defined                  no-undef
+   80:5    error  Expected method shorthand                 object-shorthand
+   81:9    error  Unexpected var, use let or const instead  no-var
+   84:17   error  Unexpected var, use let or const instead  no-var
+   91:5    error  Expected method shorthand                 object-shorthand
+   92:9    error  Unexpected var, use let or const instead  no-var
+   93:144  error  Unexpected var, use let or const instead  no-var
+   95:5    error  Expected method shorthand                 object-shorthand
+   96:9    error  Unexpected var, use let or const instead  no-var
+   97:9    error  Unexpected var, use let or const instead  no-var
+   98:9    error  Unexpected var, use let or const instead  no-var
+  100:20   error  'exports' is not defined                  no-undef
+  102:9    error  Unexpected var, use let or const instead  no-var
+  105:17   error  Unexpected var, use let or const instead  no-var
+  107:21   error  Expected { after 'if' condition           curly
+  107:28   error  'exports' is not defined                  no-undef
+  111:17   error  Unexpected var, use let or const instead  no-var
+  111:21   error  'legendValue' is already defined          no-redeclare
+  113:21   error  Expected { after 'if' condition           curly
+  113:28   error  'exports' is not defined                  no-undef
+  119:24   error  'exports' is not defined                  no-undef
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/models/dst-data-display-model.js
+   2:23  error  'exports' is not defined                  no-undef
+   3:1   error  'exports' is not defined                  no-undef
+   3:31  error  'exports' is not defined                  no-undef
+   4:1   error  'exports' is not defined                  no-undef
+   5:1   error  Unexpected var, use let or const instead  no-var
+   5:25  error  A `require()` style import is forbidden   @typescript-eslint/no-require-imports
+   5:25  error  'require' is not defined                  no-undef
+   6:1   error  Unexpected var, use let or const instead  no-var
+   6:38  error  A `require()` style import is forbidden   @typescript-eslint/no-require-imports
+   6:38  error  'require' is not defined                  no-undef
+   7:1   error  'exports' is not defined                  no-undef
+  12:1   error  'exports' is not defined                  no-undef
+  13:43  error  'exports' is not defined                  no-undef
+  24:5   error  Expected method shorthand                 object-shorthand
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/models/graph.js
+    2:23   error    'exports' is not defined                                            no-undef
+    3:1    error    'exports' is not defined                                            no-undef
+    3:17   error    'exports' is not defined                                            no-undef
+    3:48   error    'exports' is not defined                                            no-undef
+    3:67   error    'exports' is not defined                                            no-undef
+    4:1    error    Unexpected var, use let or const instead                            no-var
+    4:14   error    A `require()` style import is forbidden                             @typescript-eslint/n
+o-require-imports
+    4:14   error    'require' is not defined                                            no-undef
+    5:1    error    Unexpected var, use let or const instead                            no-var
+    5:19   error    A `require()` style import is forbidden                             @typescript-eslint/n
+o-require-imports
+    5:19   error    'require' is not defined                                            no-undef
+    6:1    error    Unexpected var, use let or const instead                            no-var
+    6:20   error    A `require()` style import is forbidden                             @typescript-eslint/n
+o-require-imports
+    6:20   error    'require' is not defined                                            no-undef
+    7:1    error    Unexpected var, use let or const instead                            no-var
+    7:20   error    A `require()` style import is forbidden                             @typescript-eslint/n
+o-require-imports
+    7:20   error    'require' is not defined                                            no-undef
+    8:1    error    Unexpected var, use let or const instead                            no-var
+    8:20   error    A `require()` style import is forbidden                             @typescript-eslint/n
+o-require-imports
+    8:20   error    'require' is not defined                                            no-undef
+    9:1    error    'exports' is not defined                                            no-undef
+   10:1    error    'exports' is not defined                                            no-undef
+   11:1    error    Unexpected var, use let or const instead                            no-var
+   11:18   error    'exports' is not defined                                            no-undef
+   11:37   error    'exports' is not defined                                            no-undef
+   12:1    error    Unexpected var, use let or const instead                            no-var
+   13:1    error    Unexpected var, use let or const instead                            no-var
+   14:1    error    Unexpected var, use let or const instead                            no-var
+   15:1    error    Unexpected var, use let or const instead                            no-var
+   16:1    error    'exports' is not defined                                            no-undef
+   17:1    error    Unexpected var, use let or const instead                            no-var
+   18:14   warning  'Graph' is already declared in the upper scope on line 17 column 5  @typescript-eslint/n
+o-shadow
+   43:13   error    Unexpected var, use let or const instead                            no-var
+   78:9    error    Unexpected var, use let or const instead                            no-var
+   79:9    error    Unexpected var, use let or const instead                            no-var
+   81:13   error    Expected { after 'if' condition                                     curly
+   93:9    error    Unexpected var, use let or const instead                            no-var
+   94:9    error    Unexpected var, use let or const instead                            no-var
+   96:13   error    Expected { after 'if' condition                                     curly
+   97:9    error    Unexpected var, use let or const instead                            no-var
+   99:13   error    Expected { after 'if' condition                                     curly
+  105:9    error    Unexpected var, use let or const instead                            no-var
+  121:9    error    Unexpected var, use let or const instead                            no-var
+  122:74   error    'exports' is not defined                                            no-undef
+  125:9    error    Unexpected var, use let or const instead                            no-var
+  126:77   error    'exports' is not defined                                            no-undef
+  132:109  error    'exports' is not defined                                            no-undef
+  135:9    error    Expected method shorthand                                           object-shorthand
+  142:9    error    Expected method shorthand                                           object-shorthand
+  149:9    error    Expected method shorthand                                           object-shorthand
+  156:9    error    Expected method shorthand                                           object-shorthand
+  163:9    error    Expected method shorthand                                           object-shorthand
+  170:9    error    Expected method shorthand                                           object-shorthand
+  178:9    error    Expected method shorthand                                           object-shorthand
+  179:13   error    Unexpected var, use let or const instead                            no-var
+  180:13   error    Unexpected var, use let or const instead                            no-var
+  187:9    error    Expected method shorthand                                           object-shorthand
+  188:13   error    Unexpected var, use let or const instead                            no-var
+  189:13   error    Unexpected var, use let or const instead                            no-var
+  196:9    error    Expected method shorthand                                           object-shorthand
+  203:9    error    Expected method shorthand                                           object-shorthand
+  210:9    error    Expected method shorthand                                           object-shorthand
+  217:9    error    Expected method shorthand                                           object-shorthand
+  224:9    error    Expected method shorthand                                           object-shorthand
+  231:9    error    Expected method shorthand                                           object-shorthand
+  238:9    error    Expected method shorthand                                           object-shorthand
+  245:9    error    Expected method shorthand                                           object-shorthand
+  252:9    error    Expected method shorthand                                           object-shorthand
+  259:9    error    Expected method shorthand                                           object-shorthand
+  266:9    error    Expected method shorthand                                           object-shorthand
+  273:9    error    Expected method shorthand                                           object-shorthand
+  280:9    error    Expected method shorthand                                           object-shorthand
+  287:9    error    Expected method shorthand                                           object-shorthand
+  294:9    error    Expected method 'get' to always return a value                      getter-return
+  294:9    error    Expected method shorthand                                           object-shorthand
+  296:17   error    Expected { after 'if' condition                                     curly
+  312:13   error    Expected { after 'if' condition                                     curly
+  313:9    error    Unexpected var, use let or const instead                            no-var
+  314:9    error    Unexpected var, use let or const instead                            no-var
+  319:13   error    Expected { after 'if' condition                                     curly
+  320:9    error    Unexpected var, use let or const instead                            no-var
+  321:9    error    Unexpected var, use let or const instead                            no-var
+  326:13   error    Expected { after 'if' condition                                     curly
+  327:9    error    Unexpected var, use let or const instead                            no-var
+  328:9    error    Unexpected var, use let or const instead                            no-var
+  333:13   error    Expected { after 'if' condition                                     curly
+  334:9    error    Unexpected var, use let or const instead                            no-var
+  335:9    error    Unexpected var, use let or const instead                            no-var
+  392:9    error    Unexpected var, use let or const instead                            no-var
+  393:9    error    Unexpected var, use let or const instead                            no-var
+  394:9    error    Unexpected var, use let or const instead                            no-var
+  395:9    error    Unexpected var, use let or const instead                            no-var
+  396:9    error    Unexpected var, use let or const instead                            no-var
+  397:9    error    Unexpected var, use let or const instead                            no-var
+  398:26   error    Expected property shorthand                                         object-shorthand
+  398:52   error    Expected property shorthand                                         object-shorthand
+  398:78   error    Expected property shorthand                                         object-shorthand
+  398:106  error    Expected property shorthand                                         object-shorthand
+  401:9    error    Unexpected var, use let or const instead                            no-var
+  405:9    error    Unexpected var, use let or const instead                            no-var
+  406:9    error    Unexpected var, use let or const instead                            no-var
+  415:9    error    Unexpected var, use let or const instead                            no-var
+  416:9    error    Unexpected var, use let or const instead                            no-var
+  425:26   error    Expected property shorthand                                         object-shorthand
+  425:52   error    Expected property shorthand                                         object-shorthand
+  425:78   error    Expected property shorthand                                         object-shorthand
+  425:106  error    Expected property shorthand                                         object-shorthand
+  467:1    error    'exports' is not defined                                            no-undef
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/models/opacity-manager.ts
+  83:3  warning  Newline required at end of file but not found  eol-last
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/models/ui.js
+   2:23  error    'exports' is not defined                                        no-undef
+   3:1   error    'exports' is not defined                                        no-undef
+   4:1   error    Unexpected var, use let or const instead                        no-var
+   4:14  error    A `require()` style import is forbidden                         @typescript-eslint/no-requ
+ire-imports
+   4:14  error    'require' is not defined                                        no-undef
+   5:1   error    Unexpected var, use let or const instead                        no-var
+   6:14  warning  'UI' is already declared in the upper scope on line 5 column 5  @typescript-eslint/no-shad
+ow
+  39:1   error    'exports' is not defined                                        no-undef
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/utilities/__tests__/codap-interface-h
+elpers.test.ts
+  39:15  warning  'result' is already declared in the upper scope on line 51 column 13  @typescript-eslint/n
+o-shadow
+  42:44  error    Array type using 'Array<T>' is forbidden. Use 'T[]' instead           @typescript-eslint/a
+rray-type
+  71:15  warning  'result' is already declared in the upper scope on line 83 column 13  @typescript-eslint/n
+o-shadow
+  74:44  error    Array type using 'Array<T>' is forbidden. Use 'T[]' instead           @typescript-eslint/a
+rray-type
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/utilities/__tests__/map-bounds-manage
+r.test.ts
+    1:28  warning  'Bounds' is defined but never used             @typescript-eslint/no-unused-vars
+    1:42  error    Strings must use doublequote                   quotes
+    2:23  error    Strings must use doublequote                   quotes
+    3:32  error    Strings must use doublequote                   quotes
+    4:27  error    Strings must use doublequote                   quotes
+    7:11  error    Strings must use doublequote                   quotes
+   31:11  error    Strings must use doublequote                   quotes
+   49:10  error    Strings must use doublequote                   quotes
+   59:56  error    Strings must use doublequote                   quotes
+   66:63  error    Strings must use doublequote                   quotes
+   66:74  error    Strings must use doublequote                   quotes
+   78:12  error    Strings must use doublequote                   quotes
+   79:8   error    Strings must use doublequote                   quotes
+   99:12  error    Strings must use doublequote                   quotes
+  100:8   error    Strings must use doublequote                   quotes
+  109:8   error    Strings must use doublequote                   quotes
+  111:35  error    Strings must use doublequote                   quotes
+  111:44  error    Strings must use doublequote                   quotes
+  129:5   warning  Newline required at end of file but not found  eol-last
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/utilities/codap-dataset-utils.js
+     2:1    error    Unexpected var, use let or const instead                                  no-var
+     6:57   error    ["throw"] is better written in dot notation                               dot-notation
+     7:33   error    Expected an assignment or function call and instead saw an expression     @typescript-e
+slint/no-unused-expressions
+    11:1    error    Unexpected var, use let or const instead                                  no-var
+    12:5    error    Unexpected var, use let or const instead                                  no-var
+    12:25   error    Expected method shorthand                                                 object-shorth
+and
+    12:48   error    Unexpected use of '&'                                                     no-bitwise
+    13:28   error    Unexpected use of comma operator                                          no-sequences
+    13:32   error    ["throw"] is better written in dot notation                               dot-notation
+    13:54   error    ["return"] is better written in dot notation                              dot-notation
+    17:46   error    Unexpected use of comma operator                                          no-sequences
+    17:51   error    Expected { after 'while' condition                                        curly
+    18:22   error    Unexpected use of comma operator                                          no-sequences
+    18:34   error    Unexpected use of '&'                                                     no-bitwise
+    18:48   error    ["return"] is better written in dot notation                              dot-notation
+    18:70   error    ["throw"] is better written in dot notation                               dot-notation
+    18:90   error    ["return"] is better written in dot notation                              dot-notation
+    19:22   error    Unexpected use of comma operator                                          no-sequences
+    19:33   error    Unexpected use of '&'                                                     no-bitwise
+    35:13   error    Unexpected use of '&'                                                     no-bitwise
+    38:23   error    'exports' is not defined                                                  no-undef
+    39:1    error    'exports' is not defined                                                  no-undef
+    40:1    error    'exports' is not defined                                                  no-undef
+    41:1    error    'exports' is not defined                                                  no-undef
+    42:1    error    'exports' is not defined                                                  no-undef
+    43:1    error    'exports' is not defined                                                  no-undef
+    44:1    error    'exports' is not defined                                                  no-undef
+    45:1    error    'exports' is not defined                                                  no-undef
+    46:1    error    'exports' is not defined                                                  no-undef
+    47:1    error    'exports' is not defined                                                  no-undef
+    48:1    error    'exports' is not defined                                                  no-undef
+    49:1    error    'exports' is not defined                                                  no-undef
+    50:1    error    Unexpected var, use let or const instead                                  no-var
+    50:26   error    A `require()` style import is forbidden                                   @typescript-e
+slint/no-require-imports
+    50:26   error    'require' is not defined                                                  no-undef
+    51:1    error    Unexpected var, use let or const instead                                  no-var
+    51:24   error    A `require()` style import is forbidden                                   @typescript-e
+slint/no-require-imports
+    51:24   error    'require' is not defined                                                  no-undef
+    52:1    error    Unexpected var, use let or const instead                                  no-var
+    52:20   error    A `require()` style import is forbidden                                   @typescript-e
+slint/no-require-imports
+    52:20   error    'require' is not defined                                                  no-undef
+    53:1    error    Unexpected var, use let or const instead                                  no-var
+    53:15   error    A `require()` style import is forbidden                                   @typescript-e
+slint/no-require-imports
+    53:15   error    'require' is not defined                                                  no-undef
+    54:1    error    Unexpected var, use let or const instead                                  no-var
+    54:21   error    A `require()` style import is forbidden                                   @typescript-e
+slint/no-require-imports
+    54:21   error    'require' is not defined                                                  no-undef
+    55:1    error    Unexpected var, use let or const instead                                  no-var
+    55:20   error    A `require()` style import is forbidden                                   @typescript-e
+slint/no-require-imports
+    55:20   error    'require' is not defined                                                  no-undef
+    66:13   error    Unexpected var, use let or const instead                                  no-var
+    70:9    error    Unexpected var, use let or const instead                                  no-var
+    93:9    error    Unexpected var, use let or const instead                                  no-var
+    94:9    error    Unexpected var, use let or const instead                                  no-var
+   102:21   error    Unexpected var, use let or const instead                                  no-var
+   105:21   error    Use the spread operator instead of '.apply()'                             prefer-spread
+   124:9    error    Unexpected var, use let or const instead                                  no-var
+   128:41   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+   170:21   error    Expected an assignment or function call and instead saw an expression     @typescript-e
+slint/no-unused-expressions
+   170:27   error    Unexpected use of comma operator                                          no-sequences
+   172:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+   186:25   error    Use the spread operator instead of '.apply()'                             prefer-spread
+   192:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+   213:9    error    Unexpected var, use let or const instead                                  no-var
+   222:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+   223:41   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+   264:9    error    Unexpected var, use let or const instead                                  no-var
+   268:41   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+   305:37   error    Expected { after 'if' condition                                           curly
+   307:37   error    Expected { after 'if' condition                                           curly
+   313:45   error    Expected property shorthand                                               object-shorth
+and
+   313:55   error    Expected property shorthand                                               object-shorth
+and
+   329:9    error    Unexpected var, use let or const instead                                  no-var
+   329:117  error    'parsedDate' is already defined                                           no-redeclare
+   329:145  error    'minDateValue' is already defined                                         no-redeclare
+   329:159  error    'maxDateValue' is already defined                                         no-redeclare
+   329:173  error    'parsedDate' is already defined                                           no-redeclare
+   329:185  error    'parsedDate' is already defined                                           no-redeclare
+   329:230  error    'minDateValue' is already defined                                         no-redeclare
+   329:244  error    'maxDateValue' is already defined                                         no-redeclare
+   329:258  error    'parsedDate' is already defined                                           no-redeclare
+   329:270  error    'parsedDate' is already defined                                           no-redeclare
+   329:397  error    'referenceDate' is already defined                                        no-redeclare
+   329:452  error    'dateValue' is already defined                                            no-redeclare
+   329:463  error    'timestamp' is already defined                                            no-redeclare
+   329:474  error    'referenceDate' is already defined                                        no-redeclare
+   329:489  error    'dateCase' is already defined                                             no-redeclare
+   329:499  error    'dateValue' is already defined                                            no-redeclare
+   329:510  error    'timestamp' is already defined                                            no-redeclare
+   329:521  error    'referenceDate' is already defined                                        no-redeclare
+   329:586  error    'foundDates' is already defined                                           no-redeclare
+   329:616  error    'dateValue' is already defined                                            no-redeclare
+   329:627  error    'timestamp' is already defined                                            no-redeclare
+   329:638  error    'referenceDate' is already defined                                        no-redeclare
+   330:9    error    Unexpected var, use let or const instead                                  no-var
+   334:42   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+   380:25   error    Redundant double negation                                                 no-extra-bool
+ean-cast
+   413:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+   414:25   error    Redundant double negation                                                 no-extra-bool
+ean-cast
+   455:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+   456:25   error    Redundant double negation                                                 no-extra-bool
+ean-cast
+   467:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+   486:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+   487:25   error    Redundant double negation                                                 no-extra-bool
+ean-cast
+   553:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+   554:25   error    Redundant double negation                                                 no-extra-bool
+ean-cast
+   557:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+   558:43   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+   652:25   error    Redundant double negation                                                 no-extra-bool
+ean-cast
+   655:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+   656:43   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+   749:9    error    Unexpected var, use let or const instead                                  no-var
+   753:41   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+   769:21   error    Expected an assignment or function call and instead saw an expression     @typescript-e
+slint/no-unused-expressions
+   769:27   error    Unexpected use of comma operator                                          no-sequences
+   771:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+   785:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+   809:9    error    Unexpected var, use let or const instead                                  no-var
+   809:74   error    'firstCase' is already defined                                            no-redeclare
+   813:41   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+   861:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+   862:41   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+   907:9    error    Unexpected var, use let or const instead                                  no-var
+   911:41   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+   959:9    error    Unexpected var, use let or const instead                                  no-var
+   959:182  error    'format' is already defined                                               no-redeclare
+   959:231  error    'year' is already defined                                                 no-redeclare
+   959:285  error    'month' is already defined                                                no-redeclare
+   959:312  error    'caseData' is already defined                                             no-redeclare
+   960:9    error    Unexpected var, use let or const instead                                  no-var
+   969:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+   970:41   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+   998:29   error    Expected { after 'if' condition                                           curly
+  1005:33   error    Expected { after 'if' condition                                           curly
+  1026:33   error    Expected property shorthand                                               object-shorth
+and
+  1044:25   error    Expected an assignment or function call and instead saw an expression     @typescript-e
+slint/no-unused-expressions
+  1044:36   error    Unexpected use of comma operator                                          no-sequences
+  1052:25   error    Expected an assignment or function call and instead saw an expression     @typescript-e
+slint/no-unused-expressions
+  1052:36   error    Unexpected use of comma operator                                          no-sequences
+  1056:33   error    Unexpected var, use let or const instead                                  no-var
+  1084:29   error    Expected { after 'if' condition                                           curly
+  1134:9    error    Unexpected var, use let or const instead                                  no-var
+  1134:171  error    'i' is already defined                                                    no-redeclare
+  1138:41   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+  1161:29   error    Expected { after 'if' condition                                           curly
+  1164:29   error    Expected { after 'if' condition                                           curly
+  1167:29   error    Expected property shorthand                                               object-shorth
+and
+  1220:48   warning  'dateObj' is already declared in the upper scope on line 1134 column 114  @typescript-e
+slint/no-shadow
+  1221:25   error    Unexpected var, use let or const instead                                  no-var
+  1221:29   warning  'date' is already declared in the upper scope on line 1134 column 108     @typescript-e
+slint/no-shadow
+  1223:29   error    Unexpected var, use let or const instead                                  no-var
+  1255:13   error    Unexpected var, use let or const instead                                  no-var
+  1259:17   error    Unexpected var, use let or const instead                                  no-var
+  1260:17   error    Unexpected var, use let or const instead                                  no-var
+  1278:17   error    Unexpected var, use let or const instead                                  no-var
+  1278:21   error    'value' is already defined                                                no-redeclare
+  1279:17   error    Unexpected var, use let or const instead                                  no-var
+  1286:9    error    Unexpected var, use let or const instead                                  no-var
+  1295:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+  1296:42   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+  1307:17   error    Expected a 'break' statement before 'case'                                no-fallthroug
+h
+  1308:41   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+  1444:9    error    Unexpected var, use let or const instead                                  no-var
+  1444:176  error    'c' is already defined                                                    no-redeclare
+  1448:41   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+  1467:29   error    Expected { after 'if' condition                                           curly
+  1470:29   error    Expected { after 'if' condition                                           curly
+  1479:37   error    Expected property shorthand                                               object-shorth
+and
+  1480:37   error    Expected property shorthand                                               object-shorth
+and
+  1481:37   error    Expected property shorthand                                               object-shorth
+and
+  1539:9    error    Unexpected var, use let or const instead                                  no-var
+  1543:41   error    Unexpected comma in middle of array                                       no-sparse-arr
+ays
+  1565:29   error    Expected { after 'if' condition                                           curly
+  1568:29   error    Expected { after 'if' condition                                           curly
+  1587:74   error    Expected property shorthand                                               object-shorth
+and
+  1587:90   error    Expected property shorthand                                               object-shorth
+and
+  1587:106  error    Expected property shorthand                                               object-shorth
+and
+  1587:124  error    Expected property shorthand                                               object-shorth
+and
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/utilities/codap-dataset-utils.ts
+  42:10  warning  'extractAttributesFromContext' is defined but never used  @typescript-eslint/no-unused-var
+s
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/utilities/codap-interface-helpers.js
+    2:1   error  Unexpected var, use let or const instead                               no-var
+    6:57  error  ["throw"] is better written in dot notation                            dot-notation
+    7:33  error  Expected an assignment or function call and instead saw an expression  @typescript-eslint/n
+o-unused-expressions
+   11:1   error  Unexpected var, use let or const instead                               no-var
+   12:5   error  Unexpected var, use let or const instead                               no-var
+   12:25  error  Expected method shorthand                                              object-shorthand
+   12:48  error  Unexpected use of '&'                                                  no-bitwise
+   13:28  error  Unexpected use of comma operator                                       no-sequences
+   13:32  error  ["throw"] is better written in dot notation                            dot-notation
+   13:54  error  ["return"] is better written in dot notation                           dot-notation
+   17:46  error  Unexpected use of comma operator                                       no-sequences
+   17:51  error  Expected { after 'while' condition                                     curly
+   18:22  error  Unexpected use of comma operator                                       no-sequences
+   18:34  error  Unexpected use of '&'                                                  no-bitwise
+   18:48  error  ["return"] is better written in dot notation                           dot-notation
+   18:70  error  ["throw"] is better written in dot notation                            dot-notation
+   18:90  error  ["return"] is better written in dot notation                           dot-notation
+   19:22  error  Unexpected use of comma operator                                       no-sequences
+   19:33  error  Unexpected use of '&'                                                  no-bitwise
+   35:13  error  Unexpected use of '&'                                                  no-bitwise
+   38:23  error  'exports' is not defined                                               no-undef
+   39:1   error  'exports' is not defined                                               no-undef
+   40:1   error  'exports' is not defined                                               no-undef
+   41:1   error  'exports' is not defined                                               no-undef
+   42:1   error  Unexpected var, use let or const instead                               no-var
+   42:26  error  A `require()` style import is forbidden                                @typescript-eslint/n
+o-require-imports
+   42:26  error  'require' is not defined                                               no-undef
+   49:9   error  Unexpected var, use let or const instead                               no-var
+   53:41  error  Unexpected comma in middle of array                                    no-sparse-arrays
+   80:9   error  Unexpected var, use let or const instead                               no-var
+   84:41  error  Unexpected comma in middle of array                                    no-sparse-arrays
+  122:9   error  Unexpected var, use let or const instead                               no-var
+  126:41  error  Unexpected comma in middle of array                                    no-sparse-arrays
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/utilities/codap-interface.ts
+   1:46  error    Strings must use doublequote                   quotes
+  21:21  error    Strings must use doublequote                   quotes
+  27:4   warning  Newline required at end of file but not found  eol-last
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/utilities/codap-utils.js
+    2:1   error  Unexpected var, use let or const instead                               no-var
+    4:14  error  Unexpected var, use let or const instead                               no-var
+    6:18  error  Unexpected var, use let or const instead                               no-var
+    6:30  error  Expected { after 'for-in'                                              curly
+    7:17  error  Expected { after 'if' condition                                        curly
+   13:1   error  Unexpected var, use let or const instead                               no-var
+   17:57  error  ["throw"] is better written in dot notation                            dot-notation
+   18:33  error  Expected an assignment or function call and instead saw an expression  @typescript-eslint/n
+o-unused-expressions
+   22:1   error  Unexpected var, use let or const instead                               no-var
+   23:5   error  Unexpected var, use let or const instead                               no-var
+   23:25  error  Expected method shorthand                                              object-shorthand
+   23:48  error  Unexpected use of '&'                                                  no-bitwise
+   24:28  error  Unexpected use of comma operator                                       no-sequences
+   24:32  error  ["throw"] is better written in dot notation                            dot-notation
+   24:54  error  ["return"] is better written in dot notation                           dot-notation
+   28:46  error  Unexpected use of comma operator                                       no-sequences
+   28:51  error  Expected { after 'while' condition                                     curly
+   29:22  error  Unexpected use of comma operator                                       no-sequences
+   29:34  error  Unexpected use of '&'                                                  no-bitwise
+   29:48  error  ["return"] is better written in dot notation                           dot-notation
+   29:70  error  ["throw"] is better written in dot notation                            dot-notation
+   29:90  error  ["return"] is better written in dot notation                           dot-notation
+   30:22  error  Unexpected use of comma operator                                       no-sequences
+   30:33  error  Unexpected use of '&'                                                  no-bitwise
+   46:13  error  Unexpected use of '&'                                                  no-bitwise
+   49:23  error  'exports' is not defined                                               no-undef
+   50:1   error  'exports' is not defined                                               no-undef
+   51:1   error  'exports' is not defined                                               no-undef
+   52:1   error  'exports' is not defined                                               no-undef
+   53:1   error  'exports' is not defined                                               no-undef
+   54:1   error  'exports' is not defined                                               no-undef
+   55:1   error  'exports' is not defined                                               no-undef
+   56:1   error  'exports' is not defined                                               no-undef
+   57:1   error  'exports' is not defined                                               no-undef
+   58:1   error  Unexpected var, use let or const instead                               no-var
+   58:26  error  A `require()` style import is forbidden                                @typescript-eslint/n
+o-require-imports
+   58:26  error  'require' is not defined                                               no-undef
+   59:1   error  Unexpected var, use let or const instead                               no-var
+   59:14  error  A `require()` style import is forbidden                                @typescript-eslint/n
+o-require-imports
+   59:14  error  'require' is not defined                                               no-undef
+   60:1   error  Unexpected var, use let or const instead                               no-var
+   60:25  error  A `require()` style import is forbidden                                @typescript-eslint/n
+o-require-imports
+   60:25  error  'require' is not defined                                               no-undef
+   61:1   error  Unexpected var, use let or const instead                               no-var
+   61:36  error  A `require()` style import is forbidden                                @typescript-eslint/n
+o-require-imports
+   61:36  error  'require' is not defined                                               no-undef
+   62:1   error  Unexpected var, use let or const instead                               no-var
+   62:21  error  A `require()` style import is forbidden                                @typescript-eslint/n
+o-require-imports
+   62:21  error  'require' is not defined                                               no-undef
+   63:1   error  Unexpected var, use let or const instead                               no-var
+   63:20  error  A `require()` style import is forbidden                                @typescript-eslint/n
+o-require-imports
+   63:20  error  'require' is not defined                                               no-undef
+   64:1   error  Unexpected var, use let or const instead                               no-var
+   64:23  error  A `require()` style import is forbidden                                @typescript-eslint/n
+o-require-imports
+   64:23  error  'require' is not defined                                               no-undef
+   65:1   error  Unexpected var, use let or const instead                               no-var
+   65:12  error  A `require()` style import is forbidden                                @typescript-eslint/n
+o-require-imports
+   65:12  error  'require' is not defined                                               no-undef
+   66:1   error  Unexpected var, use let or const instead                               no-var
+   66:19  error  A `require()` style import is forbidden                                @typescript-eslint/n
+o-require-imports
+   66:19  error  'require' is not defined                                               no-undef
+   67:1   error  Unexpected var, use let or const instead                               no-var
+   67:33  error  A `require()` style import is forbidden                                @typescript-eslint/n
+o-require-imports
+   67:33  error  'require' is not defined                                               no-undef
+   68:1   error  Unexpected var, use let or const instead                               no-var
+   68:24  error  A `require()` style import is forbidden                                @typescript-eslint/n
+o-require-imports
+   68:24  error  'require' is not defined                                               no-undef
+   72:1   error  Unexpected var, use let or const instead                               no-var
+   72:38  error  A `require()` style import is forbidden                                @typescript-eslint/n
+o-require-imports
+   72:38  error  'require' is not defined                                               no-undef
+   73:1   error  Unexpected var, use let or const instead                               no-var
+   76:9   error  Unexpected var, use let or const instead                               no-var
+   89:17  error  Expected a 'break' statement before 'case'                             no-fallthrough
+   90:41  error  Unexpected comma in middle of array                                    no-sparse-arrays
+  101:42  error  Unexpected comma in middle of array                                    no-sparse-arrays
+  120:17  error  Expected a 'break' statement before 'case'                             no-fallthrough
+  136:17  error  Expected a 'break' statement before 'case'                             no-fallthrough
+  154:9   error  Unexpected var, use let or const instead                               no-var
+  159:41  error  Unexpected comma in middle of array                                    no-sparse-arrays
+  163:25  error  Redundant double negation                                              no-extra-boolean-cas
+t
+  189:72  error  Use an object spread instead of `Object.assign` eg: `{ ...foo }`       prefer-object-spread
+  195:69  error  Use the spread operator instead of '.apply()'                          prefer-spread
+  195:98  error  Use the spread operator instead of '.apply()'                          prefer-spread
+  217:9   error  Unexpected var, use let or const instead                               no-var
+  231:9   error  Unexpected var, use let or const instead                               no-var
+  238:25  error  Expected { after 'if' condition                                        curly
+  240:17  error  Expected a 'break' statement before 'case'                             no-fallthrough
+  241:41  error  Unexpected comma in middle of array                                    no-sparse-arrays
+  276:5   error  Unexpected var, use let or const instead                               no-var
+  277:5   error  Unexpected var, use let or const instead                               no-var
+  278:5   error  Unexpected var, use let or const instead                               no-var
+  283:5   error  Unexpected var, use let or const instead                               no-var
+  284:5   error  Unexpected var, use let or const instead                               no-var
+  285:5   error  Unexpected var, use let or const instead                               no-var
+  288:5   error  Unexpected var, use let or const instead                               no-var
+  291:13  error  Expected property shorthand                                            object-shorthand
+  300:5   error  Unexpected var, use let or const instead                               no-var
+  301:30  error  Expected property shorthand                                            object-shorthand
+  301:56  error  Expected property shorthand                                            object-shorthand
+  302:5   error  Unexpected var, use let or const instead                               no-var
+  304:5   error  Unexpected var, use let or const instead                               no-var
+  306:5   error  Unexpected var, use let or const instead                               no-var
+  307:5   error  Unexpected var, use let or const instead                               no-var
+  311:9   error  Expected { after 'if' condition                                        curly
+  312:5   error  Unexpected var, use let or const instead                               no-var
+  315:5   error  Unexpected var, use let or const instead                               no-var
+  321:9   error  Expected { after 'if' condition                                        curly
+  328:5   error  Unexpected var, use let or const instead                               no-var
+  331:5   error  Unexpected var, use let or const instead                               no-var
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/utilities/constants.js
+   2:23   error  'exports' is not defined                  no-undef
+   3:1    error  'exports' is not defined                  no-undef
+   3:29   error  'exports' is not defined                  no-undef
+   3:54   error  'exports' is not defined                  no-undef
+   3:82   error  'exports' is not defined                  no-undef
+   3:110  error  'exports' is not defined                  no-undef
+   3:137  error  'exports' is not defined                  no-undef
+   3:164  error  'exports' is not defined                  no-undef
+   3:184  error  'exports' is not defined                  no-undef
+   3:212  error  'exports' is not defined                  no-undef
+   3:240  error  'exports' is not defined                  no-undef
+   3:270  error  'exports' is not defined                  no-undef
+   3:298  error  'exports' is not defined                  no-undef
+   3:327  error  'exports' is not defined                  no-undef
+   3:358  error  'exports' is not defined                  no-undef
+   3:387  error  'exports' is not defined                  no-undef
+   3:416  error  'exports' is not defined                  no-undef
+   3:444  error  'exports' is not defined                  no-undef
+   3:471  error  'exports' is not defined                  no-undef
+   3:496  error  'exports' is not defined                  no-undef
+   3:521  error  'exports' is not defined                  no-undef
+   3:547  error  'exports' is not defined                  no-undef
+   3:576  error  'exports' is not defined                  no-undef
+   3:595  error  'exports' is not defined                  no-undef
+   4:1    error  'exports' is not defined                  no-undef
+   5:1    error  'exports' is not defined                  no-undef
+   6:1    error  'exports' is not defined                  no-undef
+  10:1    error  'exports' is not defined                  no-undef
+  11:1    error  'exports' is not defined                  no-undef
+  12:1    error  'exports' is not defined                  no-undef
+  30:1    error  'exports' is not defined                  no-undef
+  31:1    error  'exports' is not defined                  no-undef
+  32:1    error  'exports' is not defined                  no-undef
+  33:1    error  'exports' is not defined                  no-undef
+  34:1    error  Unexpected var, use let or const instead  no-var
+  35:1    error  Unexpected var, use let or const instead  no-var
+  36:1    error  'exports' is not defined                  no-undef
+  36:32   error  'exports' is not defined                  no-undef
+  36:61   error  'exports' is not defined                  no-undef
+  37:1    error  'exports' is not defined                  no-undef
+  37:30   error  'exports' is not defined                  no-undef
+  37:59   error  'exports' is not defined                  no-undef
+  38:1    error  Unexpected var, use let or const instead  no-var
+  39:1    error  'exports' is not defined                  no-undef
+  40:1    error  'exports' is not defined                  no-undef
+  41:1    error  'exports' is not defined                  no-undef
+  41:29   error  'exports' is not defined                  no-undef
+  41:57   error  'exports' is not defined                  no-undef
+  42:1    error  'exports' is not defined                  no-undef
+  42:29   error  'exports' is not defined                  no-undef
+  42:57   error  'exports' is not defined                  no-undef
+  45:1    error  'exports' is not defined                  no-undef
+  45:21   error  'exports' is not defined                  no-undef
+  45:51   error  'exports' is not defined                  no-undef
+  46:1    error  'exports' is not defined                  no-undef
+  46:28   error  'exports' is not defined                  no-undef
+  46:56   error  'exports' is not defined                  no-undef
+  47:1    error  'exports' is not defined                  no-undef
+  47:28   error  'exports' is not defined                  no-undef
+  47:56   error  'exports' is not defined                  no-undef
+  48:1    error  'exports' is not defined                  no-undef
+  48:29   error  'exports' is not defined                  no-undef
+  48:58   error  'exports' is not defined                  no-undef
+  49:1    error  'exports' is not defined                  no-undef
+  49:29   error  'exports' is not defined                  no-undef
+  49:58   error  'exports' is not defined                  no-undef
+  50:1    error  'exports' is not defined                  no-undef
+  51:1    error  'exports' is not defined                  no-undef
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/utilities/date-range-manager.ts
+    6:18  warning  'runInAction' is defined but never used        @typescript-eslint/no-unused-vars
+   87:13  error    Strings must use doublequote                   quotes
+   87:42  error    Strings must use doublequote                   quotes
+  220:3   warning  Newline required at end of file but not found  eol-last
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/utilities/date-utils.js
+    5:23  error  'exports' is not defined                  no-undef
+    6:1   error  'exports' is not defined                  no-undef
+    7:1   error  'exports' is not defined                  no-undef
+    8:1   error  'exports' is not defined                  no-undef
+    9:1   error  'exports' is not defined                  no-undef
+   10:1   error  'exports' is not defined                  no-undef
+   11:1   error  'exports' is not defined                  no-undef
+   12:1   error  'exports' is not defined                  no-undef
+   22:9   error  Expected { after 'if' condition           curly
+   43:9   error  Expected { after 'if' condition           curly
+   44:5   error  Unexpected var, use let or const instead  no-var
+   46:9   error  Expected { after 'if' condition           curly
+   47:5   error  Unexpected var, use let or const instead  no-var
+   50:9   error  Unexpected var, use let or const instead  no-var
+   57:9   error  Unexpected var, use let or const instead  no-var
+   59:13  error  Unexpected var, use let or const instead  no-var
+   60:13  error  Unexpected var, use let or const instead  no-var
+   61:13  error  Unexpected var, use let or const instead  no-var
+   64:17  error  Unexpected var, use let or const instead  no-var
+   64:21  error  'date' is already defined                 no-redeclare
+   73:9   error  Unexpected var, use let or const instead  no-var
+   73:13  error  'parts' is already defined                no-redeclare
+   75:13  error  Unexpected var, use let or const instead  no-var
+   75:17  error  'day' is already defined                  no-redeclare
+   76:13  error  Unexpected var, use let or const instead  no-var
+   76:17  error  'month' is already defined                no-redeclare
+   77:13  error  Unexpected var, use let or const instead  no-var
+   77:17  error  'year' is already defined                 no-redeclare
+   80:17  error  Unexpected var, use let or const instead  no-var
+   80:21  error  'date' is already defined                 no-redeclare
+   89:9   error  Unexpected var, use let or const instead  no-var
+   89:13  error  'parts' is already defined                no-redeclare
+   91:13  error  Unexpected var, use let or const instead  no-var
+   91:17  error  'year' is already defined                 no-redeclare
+   92:13  error  Unexpected var, use let or const instead  no-var
+   92:17  error  'month' is already defined                no-redeclare
+   93:13  error  Unexpected var, use let or const instead  no-var
+   93:17  error  'day' is already defined                  no-redeclare
+   95:17  error  Unexpected var, use let or const instead  no-var
+   95:21  error  'date' is already defined                 no-redeclare
+  104:9   error  Unexpected var, use let or const instead  no-var
+  104:13  error  'parts' is already defined                no-redeclare
+  106:13  error  Unexpected var, use let or const instead  no-var
+  106:17  error  'month' is already defined                no-redeclare
+  107:13  error  Unexpected var, use let or const instead  no-var
+  107:17  error  'day' is already defined                  no-redeclare
+  108:13  error  Unexpected var, use let or const instead  no-var
+  108:17  error  'year' is already defined                 no-redeclare
+  110:17  error  Unexpected var, use let or const instead  no-var
+  110:21  error  'date' is already defined                 no-redeclare
+  119:9   error  Unexpected var, use let or const instead  no-var
+  119:13  error  'parts' is already defined                no-redeclare
+  121:13  error  Unexpected var, use let or const instead  no-var
+  121:17  error  'month' is already defined                no-redeclare
+  122:13  error  Unexpected var, use let or const instead  no-var
+  122:17  error  'day' is already defined                  no-redeclare
+  123:13  error  Unexpected var, use let or const instead  no-var
+  123:17  error  'year' is already defined                 no-redeclare
+  132:17  error  Unexpected var, use let or const instead  no-var
+  132:21  error  'date' is already defined                 no-redeclare
+  141:9   error  Unexpected var, use let or const instead  no-var
+  141:13  error  'parts' is already defined                no-redeclare
+  143:13  error  Unexpected var, use let or const instead  no-var
+  143:17  error  'month' is already defined                no-redeclare
+  144:13  error  Unexpected var, use let or const instead  no-var
+  144:17  error  'day' is already defined                  no-redeclare
+  145:13  error  Unexpected var, use let or const instead  no-var
+  145:17  error  'year' is already defined                 no-redeclare
+  147:17  error  Unexpected var, use let or const instead  no-var
+  147:21  error  'date' is already defined                 no-redeclare
+  156:9   error  Unexpected var, use let or const instead  no-var
+  156:13  error  'date' is already defined                 no-redeclare
+  163:9   error  Unexpected var, use let or const instead  no-var
+  163:13  error  'date' is already defined                 no-redeclare
+  170:9   error  Unexpected var, use let or const instead  no-var
+  173:13  error  Unexpected var, use let or const instead  no-var
+  173:17  error  'date' is already defined                 no-redeclare
+  180:13  error  Unexpected var, use let or const instead  no-var
+  180:17  error  'date' is already defined                 no-redeclare
+  187:13  error  Unexpected var, use let or const instead  no-var
+  187:17  error  'date' is already defined                 no-redeclare
+  195:9   error  Unexpected var, use let or const instead  no-var
+  195:13  error  'year' is already defined                 no-redeclare
+  196:9   error  Unexpected var, use let or const instead  no-var
+  196:13  error  'month' is already defined                no-redeclare
+  197:9   error  Unexpected var, use let or const instead  no-var
+  197:13  error  'day' is already defined                  no-redeclare
+  199:13  error  Unexpected var, use let or const instead  no-var
+  199:17  error  'date' is already defined                 no-redeclare
+  208:13  error  Unexpected var, use let or const instead  no-var
+  208:17  error  'date' is already defined                 no-redeclare
+  230:13  error  Unexpected var, use let or const instead  no-var
+  231:13  error  Unexpected var, use let or const instead  no-var
+  235:13  error  Unexpected var, use let or const instead  no-var
+  235:54  error  'month' is already defined                no-redeclare
+  235:69  error  'day' is already defined                  no-redeclare
+  235:82  error  'year' is already defined                 no-redeclare
+  236:13  error  Unexpected var, use let or const instead  no-var
+  236:17  error  'parsedDate' is already defined           no-redeclare
+  240:13  error  Unexpected var, use let or const instead  no-var
+  240:54  error  'day' is already defined                  no-redeclare
+  240:67  error  'month' is already defined                no-redeclare
+  240:82  error  'year' is already defined                 no-redeclare
+  241:13  error  Unexpected var, use let or const instead  no-var
+  241:17  error  'parsedDate' is already defined           no-redeclare
+  258:5   error  Unexpected var, use let or const instead  no-var
+  259:5   error  Unexpected var, use let or const instead  no-var
+  260:5   error  Unexpected var, use let or const instead  no-var
+  267:5   error  Unexpected var, use let or const instead  no-var
+  268:5   error  Unexpected var, use let or const instead  no-var
+  269:5   error  Unexpected var, use let or const instead  no-var
+  291:5   error  Unexpected var, use let or const instead  no-var
+  292:5   error  Unexpected var, use let or const instead  no-var
+  293:5   error  Unexpected var, use let or const instead  no-var
+  294:5   error  Unexpected var, use let or const instead  no-var
+  305:9   error  Unexpected var, use let or const instead  no-var
+  312:9   error  Unexpected var, use let or const instead  no-var
+  312:50  error  'year' is already defined                 no-redeclare
+  312:64  error  'month' is already defined                no-redeclare
+  312:79  error  'day' is already defined                  no-redeclare
+  319:9   error  Unexpected var, use let or const instead  no-var
+  319:50  error  'month' is already defined                no-redeclare
+  319:65  error  'day' is already defined                  no-redeclare
+  319:78  error  'year' is already defined                 no-redeclare
+  338:9   error  Unexpected var, use let or const instead  no-var
+  338:50  error  'month' is already defined                no-redeclare
+  338:65  error  'day' is already defined                  no-redeclare
+  339:9   error  Unexpected var, use let or const instead  no-var
+  339:13  error  'year' is already defined                 no-redeclare
+  346:9   error  Unexpected var, use let or const instead  no-var
+  346:50  error  'month' is already defined                no-redeclare
+  346:65  error  'day' is already defined                  no-redeclare
+  346:78  error  'year' is already defined                 no-redeclare
+  351:9   error  Unexpected var, use let or const instead  no-var
+  377:9   error  Unexpected var, use let or const instead  no-var
+  377:13  error  'year' is already defined                 no-redeclare
+  378:9   error  Unexpected var, use let or const instead  no-var
+  378:13  error  'month' is already defined                no-redeclare
+  379:9   error  Unexpected var, use let or const instead  no-var
+  379:13  error  'day' is already defined                  no-redeclare
+  388:5   error  Unexpected var, use let or const instead  no-var
+  390:9   error  Expected property shorthand               object-shorthand
+  391:9   error  Expected property shorthand               object-shorthand
+  392:9   error  Expected property shorthand               object-shorthand
+  393:9   error  Expected property shorthand               object-shorthand
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/utilities/get-min-max-coordinates.ts
+  170:3  warning  Newline required at end of file but not found  eol-last
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/utilities/map-bounds-manager.ts
+  2:10  warning  'codapInterface' is defined but never used        @typescript-eslint/no-unused-vars
+  5:3   warning  'CodapApiResult' is defined but never used        @typescript-eslint/no-unused-vars
+  6:3   warning  'CodapAttribute' is defined but never used        @typescript-eslint/no-unused-vars
+  7:3   warning  'isCollectionResponse' is defined but never used  @typescript-eslint/no-unused-vars
+  8:3   warning  'isCaseArray' is defined but never used           @typescript-eslint/no-unused-vars
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/src/utilities/trig-utils.js
+   2:23  error  'exports' is not defined                  no-undef
+   3:1   error  'exports' is not defined                  no-undef
+   3:21  error  'exports' is not defined                  no-undef
+   3:38  error  'exports' is not defined                  no-undef
+   4:1   error  'exports' is not defined                  no-undef
+   5:1   error  'exports' is not defined                  no-undef
+   6:1   error  'exports' is not defined                  no-undef
+   7:1   error  'exports' is not defined                  no-undef
+   8:1   error  'exports' is not defined                  no-undef
+  11:5   error  Unexpected var, use let or const instead  no-var
+  13:9   error  Expected { after 'while' condition        curly
+  13:19  error  'exports' is not defined                  no-undef
+  15:9   error  Expected { after 'while' condition        curly
+  15:19  error  'exports' is not defined                  no-undef
+  20:39  error  'exports' is not defined                  no-undef
+
+/Users/chaddorsey/Dropbox/dev/ChatGPT-experiments/dst-codap-plugin/webpack.config.js
+  179:9  error  Expected property shorthand  object-shorthand
+
+✖ 7466 problems (3788 errors, 3678 warnings)
+  2117 errors and 3619 warnings potentially fixable with the `--fix` option.
+
+
+```
+
+---
+
+_****_
+
+The **no-useless-escape** error in `codap-dataset-utils.ts` is now resolved—there are no more errors about unnecessary escape characters at line 317.
+
+However, your linter output shows a large number of other errors, mostly in `.js` files (not `.ts`), such as:
+- Use of `var` instead of `let` or `const`
+- Use of CommonJS (`require`, `exports`) instead of ES modules
+- Object shorthand and other style issues
+
+**These are not related to the original escape character error, but they are still blocking if your build treats all ESLint errors as blocking.**
+
+---
+
+## Next Steps
+
+1. **Confirm:** The original escape character error is fixed.
+2. **For the remaining errors:**  
+   - Most are in legacy `.js` files. If these files are not part of your main TypeScript/React app, consider excluding them from linting/build, or refactor them to modern JS/TS as needed.
+   - Many errors are auto-fixable with:
+     ```bash
+     npm run lint -- --fix
+     ```
+   - For CommonJS/ESM issues, you may need to refactor or configure ESLint to allow legacy code if you cannot refactor immediately.
+
+---
+
+Would you like to:
+- Focus on auto-fixing what can be fixed,
+- Exclude legacy `.js` files from linting,
+- Or discuss a plan for refactoring legacy code?
+
+Let me know how you’d like to proceed!
+
+---
+
+_**User**_
+
+Let's push this branch to remote again
+
+---
+
+_**Assistant**_
+
 Cancelled
 
 ---
