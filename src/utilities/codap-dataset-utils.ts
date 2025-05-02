@@ -314,7 +314,7 @@ export async function updateDateRangeFromData(dataContextName: string): Promise<
       
       const collectionResult = await codapInterface.sendRequest({
         action: "get",
-        resource: `dataContext[${dataContextName}].collection[\"Cases\"]`
+        resource: `dataContext[${dataContextName}].collection["Cases"]`
       }) as CodapApiResult;
       
       if (
