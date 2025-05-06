@@ -67,9 +67,6 @@ jobs:
       - build_test
       - cypress
     runs-on: ubuntu-latest
-    environment:
-      name: ${{ github.ref_type == 'branch' && 'branches' || 'versions' }}
-      url: https://codap3.concord.org/branch/main/?di=https://models-resources.concord.org/dst-codap-plugin/${{ steps.s3-deploy.outputs.deployPath }}/index.html
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
