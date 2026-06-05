@@ -15,7 +15,12 @@ const DEPLOY_PATH = process.env.DEPLOY_PATH;
 
 // For GitHub Pages deployment
 const isGitHubPages = process.env.GITHUB_PAGES === 'true';
-const publicPath = isGitHubPages ? '/dst-codap-plugin/' : DEPLOY_PATH || '.';
+// The in-folder index.html is served from the deploy folder itself
+// (…/dst-codap-plugin/branch/[name]/index.html), so its assets must be
+// referenced relatively ('.') — using DEPLOY_PATH here doubles the path
+// (branch/[name]/branch/[name]/assets) and 404s. The separate index-top.html
+// below uses DEPLOY_PATH for when it is copied to the prefix root (top branches).
+const publicPath = isGitHubPages ? '/dst-codap-plugin/' : '.';
 
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
