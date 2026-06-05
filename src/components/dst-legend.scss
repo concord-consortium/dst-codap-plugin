@@ -28,11 +28,25 @@
     width: 100%;
     overflow: visible;
     position: relative;
+    display: flex;
+    flex-direction: column; /* plain title above, legend graphic below */
 
     &:not(:last-child) {
       border-bottom: 1px dotted #eee;
       padding-bottom: 2px;
     }
+  }
+
+  /* Plain, non-interactive legend title, spaced above its legend graphic */
+  .legend-title {
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: bold;
+    color: #333;
+    padding: 2px 6px 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
@@ -44,6 +58,7 @@
 
 /* Style the legend display area */
 .legend-display {
+  flex: 1 1 auto; /* fill the legend body below the title */
   margin-top: 2px;
   padding: 2px 0;
   border-top: 1px dotted #eee;

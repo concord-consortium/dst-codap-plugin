@@ -5,7 +5,7 @@ import {
   DataDisplayLayoutContext, useDataDisplayLayout
 } from "../../codap/components/data-display/hooks/use-data-display-layout";
 import { DataConfigurationContext } from "../../codap/components/data-display/hooks/use-data-configuration-context";
-import { Legend } from "../../codap/components/data-display/components/legend/legend";
+import { legendComponentManager } from "../../codap/components/data-display/components/legend/legend";
 import { IBaseLayerModel } from "../../codap/components/data-display/models/base-data-display-content-model";
 import { IDataSet } from "../../codap/models/data/data-set";
 import { IDstDataConfigurationModel } from "../../models/dst-data-configuration-model";
@@ -14,10 +14,16 @@ import { useLegendAttributes } from "./use-legend-attributes";
 
 interface IMultiLegendProps {
   divElt: HTMLDivElement | null
+  // Retained for API compatibility with DstLegend; attribute changes are now
+  // made via the cube-space dropdowns, so the bottom-pane legend titles are
+  // plain (non-interactive) text.
   onChangeAttribute: (dataSet: IDataSet, attrId: string, layer: IBaseLayerModel) => void
 }
 
-export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAttribute}: IMultiLegendProps) {
+// Reserved height for each plain legend title, above its legend graphic.
+const kLegendTitleHeight = 18;
+
+export const DstMultiLegend = observer(function MultiLegend(_props: IMultiLegendProps) {
   const dataDisplayModel = useDstDataDisplayModelContext();
   const layout = useDataDisplayLayout();
   const legendRef = useRef() as React.RefObject<HTMLDivElement>;
@@ -53,8 +59,10 @@ export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAtt
     };
   }, [layout]);
 
+  // The legend component reports the height of its graphic; reserve extra space
+  // for the title above it.
   const setDesiredExtent = useCallback((layerIndex: number, extent: number) => {
-    extentsRef.current[layerIndex] = Math.max(extent, 40);
+    extentsRef.current[layerIndex] = Math.max(extent, 40) + kLegendTitleHeight;
     const sum = extentsRef.current.reduce((a, b) => a + (b || 0), 0);
     layout.setDesiredExtent("legend", Math.max(sum, kLegendMinHeight));
     const theDivElt = divRefs.current[layerIndex]?.current;
@@ -75,17 +83,24 @@ export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAtt
     const divRef = divRefs.current[index] || createRef<HTMLDivElement>();
     divRefs.current[index] = divRef;
 
+    const LegendComponent = dataConfiguration
+      ? legendComponentManager.getLegendComponent(dataConfiguration)
+      : undefined;
+
     return (
       <div className="legend-body" key={`body-${index}`} ref={divRef}>
+        <div className="legend-title" title={selectedAttribute.name}>{selectedAttribute.name}</div>
         {!selectedAttribute.isTemporary && (
           <div className="legend-display">
             <DataDisplayLayoutContext.Provider value={label === "Color" ? colorLayout : layout}>
               <DataConfigurationContext.Provider value={dataConfiguration}>
-                <Legend layerIndex={index}
-                       setDesiredExtent={setDesiredExtent}
-                       onDropAttribute={(place, dataSet, attributeID) =>
-                         onChangeAttribute(dataSet, attributeID, dataDisplayModel.layers[index])}
-                />
+                {/* Render the legend graphic directly (no LegendAttributeLabel),
+                    so the title above is a plain, non-interactive label. */}
+                {/* eslint-disable-next-line react/no-unknown-property */}
+                <svg className="legend-component" data-testid="legend-component">
+                  {LegendComponent &&
+                    <LegendComponent layerIndex={index} setDesiredExtent={setDesiredExtent} />}
+                </svg>
               </DataConfigurationContext.Provider>
             </DataDisplayLayoutContext.Provider>
           </div>
@@ -93,10 +108,7 @@ export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAtt
         {selectedAttribute.isTemporary && (
           <div className="legend-display">
             <Text fontSize="xs" mt={1}>
-              {label} attribute: {selectedAttribute.name}
-              <Text as="em" fontSize="10px" color="gray.500" ml={2}>
-                (preview unavailable)
-              </Text>
+              <Text as="em" fontSize="10px" color="gray.500">(preview unavailable)</Text>
             </Text>
           </div>
         )}
