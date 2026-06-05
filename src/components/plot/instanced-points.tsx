@@ -9,7 +9,7 @@ import { graph, graphMin, graphMax } from "../../models/graph";
 import { ui } from "../../models/ui";
 import { dstContainer } from "../../models/dst-container";
 import { datasetConfig } from "../../models/dataset-config";
-import { computeNumericThresholds, getCaseColor } from "../../utilities/point-color-utils";
+import { computeNumericThresholds, getCaseColor, DEFAULT_POINT_COLOR } from "../../utilities/point-color-utils";
 import { writeInstanceFrame } from "../../utilities/instance-frame";
 
 const graphRange = graphMax - graphMin;
@@ -266,9 +266,16 @@ export const InstancedPoints = observer(function InstancedPoints() {
           latArr[i] = lat == null ? NaN : lat;
           lonArr[i] = lon == null ? NaN : lon;
           dateArr[i] = dateMs == null || !isFinite(dateMs) ? NaN : dateMs;
-          sizeArr[i] = sizeConfig?.getLegendSizeForCase(id) ?? 10;
-
-          tmpColor.set(getCaseColor(id, colorConfig, thresholds));
+          // Size/color come from the MST legend configs; guard so one bad case
+          // (or a transient legend-scale error) can't abort buffer population and
+          // leave the whole plot blank.
+          try {
+            sizeArr[i] = sizeConfig?.getLegendSizeForCase(id) ?? 10;
+            tmpColor.set(getCaseColor(id, colorConfig, thresholds));
+          } catch {
+            sizeArr[i] = 10;
+            tmpColor.set(DEFAULT_POINT_COLOR);
+          }
           fillMesh.setColorAt(i, tmpColor);
         }
         if (fillMesh.instanceColor) fillMesh.instanceColor.needsUpdate = true;
