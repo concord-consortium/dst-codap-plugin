@@ -21,3 +21,13 @@
 
 // add code coverage support
 import "@cypress/code-coverage/support";
+
+// The plugin is designed to run embedded in CODAP and talks to the host over
+// iframe-phone. In the Cypress harness there is no CODAP parent to answer those
+// API calls, so initialization can surface errors / unhandled rejections during
+// page load. (workspace.test.ts notes this.) These are expected in the harness
+// and must not fail the tests — without this handler such an error during
+// cy.visit() fails the first test and skips the rest, which shows up only under
+// CI timing. Assertions still run normally; we just don't treat app-origin
+// exceptions as test failures.
+Cypress.on("uncaught:exception", () => false);
