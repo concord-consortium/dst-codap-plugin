@@ -100,6 +100,26 @@ export async function initializeDST() {
  * Preserves the current view (camera, bounds, date range) — only the case
  * set changes.
  */
+/**
+ * Fetch all visible cases for a collection, retrying on timeout/failure. CODAP's
+ * single all-cases request can exceed the iframe-phone request timeout on large
+ * datasets; the timeout is intermittent, so a few retries with backoff usually
+ * succeed. Returns the successful result, or a failed result after all attempts.
+ */
+async function fetchAllVisibleCases(contextName: string, collectionName: string, attempts = 4) {
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      const result = await getCaseByFormulaSearch(contextName, collectionName, "true");
+      if (result?.success && Array.isArray(result.values)) return result;
+      console.warn(`Case fetch attempt ${i}/${attempts} unsuccessful`, result);
+    } catch (e) {
+      console.warn(`Case fetch attempt ${i}/${attempts} failed (likely timeout):`, e);
+    }
+    if (i < attempts) await new Promise(resolve => setTimeout(resolve, 600 * i));
+  }
+  return { success: false, values: [] as DIGetCaseResult["case"][] };
+}
+
 export async function resyncHiddenCasesFromCodap(contextName: string) {
   try {
     const dataContextResult = await getDataContext(contextName);
@@ -108,7 +128,7 @@ export async function resyncHiddenCasesFromCodap(contextName: string) {
       return;
     }
     const collectionName = await resolveLeafCollectionName(contextName, dataContextResult.values);
-    const casesResult = await getCaseByFormulaSearch(contextName, collectionName, "true");
+    const casesResult = await fetchAllVisibleCases(contextName, collectionName);
     if (!casesResult.success || !Array.isArray(casesResult.values)) {
       console.warn("Reload Table: case fetch failed", casesResult);
       return;
@@ -176,10 +196,11 @@ export async function getData(contextName: string = dataContextName) {
     // hardcoded "Cases" only matches the bundled tornado sample.
     const collectionName = await resolveLeafCollectionName(contextName, dataContextResult.values);
 
-    const casesResult = await getCaseByFormulaSearch(contextName, collectionName, "true");
+    const casesResult = await fetchAllVisibleCases(contextName, collectionName);
 
     if (!casesResult.success) {
-      console.error(`Couldn't load cases from dataset (collection "${collectionName}")`);
+      console.error(`Couldn't load cases from dataset (collection "${collectionName}") after retries — ` +
+        `CODAP did not return the cases in time (dataset may be too large for a single request).`);
       return;
     }
 

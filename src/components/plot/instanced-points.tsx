@@ -242,6 +242,7 @@ export const InstancedPoints = observer(function InstancedPoints() {
       untracked(() => {
         idToIndex.clear();
         itemIdToIndex.clear();
+
         let thresholds: number[] = [];
         try {
           thresholds = computeNumericThresholds(colorConfig);
