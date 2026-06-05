@@ -1,7 +1,9 @@
 import { observer } from "mobx-react-lite";
-import React, { createRef, RefObject, useCallback, useEffect, useRef } from "react";
+import React, { createRef, RefObject, useCallback, useEffect, useMemo, useRef } from "react";
 import { Text } from "@chakra-ui/react";
-import { useDataDisplayLayout } from "../../codap/components/data-display/hooks/use-data-display-layout";
+import {
+  DataDisplayLayoutContext, useDataDisplayLayout
+} from "../../codap/components/data-display/hooks/use-data-display-layout";
 import { DataConfigurationContext } from "../../codap/components/data-display/hooks/use-data-configuration-context";
 import { Legend } from "../../codap/components/data-display/components/legend/legend";
 import { IBaseLayerModel } from "../../codap/components/data-display/models/base-data-display-content-model";
@@ -23,6 +25,22 @@ export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAtt
   const extentsRef = useRef([] as number[]);
 
   const { selectedColorAttribute, selectedSizeAttribute } = useLegendAttributes();
+
+  // The color legend body should render 25px narrower than the size legend.
+  // Its width comes from useDataDisplayLayout().tileWidth, shared with the size
+  // legend, so wrap only the color body in a layout that reports a reduced
+  // tileWidth while delegating everything else (height/extent management,
+  // actions) to the real shared layout instance.
+  const kColorLegendWidthReduction = 25;
+  const colorLayout = useMemo(() => new Proxy(layout, {
+    get(target, prop, receiver) {
+      if (prop === "tileWidth") {
+        return Math.max(0, target.tileWidth - kColorLegendWidthReduction);
+      }
+      const value = Reflect.get(target, prop, target);
+      return typeof value === "function" ? value.bind(target) : value;
+    }
+  }), [layout]);
 
   // Legend bodies stack vertically — pane height is the sum of their extents.
   const kLegendMinHeight = 60;
@@ -61,13 +79,15 @@ export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAtt
       <div className="legend-body" key={`body-${index}`} ref={divRef}>
         {!selectedAttribute.isTemporary && (
           <div className="legend-display">
-            <DataConfigurationContext.Provider value={dataConfiguration}>
-              <Legend layerIndex={index}
-                     setDesiredExtent={setDesiredExtent}
-                     onDropAttribute={(place, dataSet, attributeID) =>
-                       onChangeAttribute(dataSet, attributeID, dataDisplayModel.layers[index])}
-              />
-            </DataConfigurationContext.Provider>
+            <DataDisplayLayoutContext.Provider value={label === "Color" ? colorLayout : layout}>
+              <DataConfigurationContext.Provider value={dataConfiguration}>
+                <Legend layerIndex={index}
+                       setDesiredExtent={setDesiredExtent}
+                       onDropAttribute={(place, dataSet, attributeID) =>
+                         onChangeAttribute(dataSet, attributeID, dataDisplayModel.layers[index])}
+                />
+              </DataConfigurationContext.Provider>
+            </DataDisplayLayoutContext.Provider>
           </div>
         )}
         {selectedAttribute.isTemporary && (
