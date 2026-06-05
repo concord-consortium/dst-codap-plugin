@@ -222,7 +222,15 @@ export function setupSelectionSynchronization(contextName: string) {
   // When the selection changes in the plugin, pass those changes to Codap.
   reaction(
     () => Array.from(codapData.dataSet.selection),
-    selection => selectCases(contextName, Array.from(codapData.dataSet.selection)),
+    selection => {
+      // A very large selection — e.g. clicking a legend quintile that covers ~20%
+      // of a big dataset — can exceed CODAP's request timeout. The selection is
+      // already applied locally, so degrade gracefully rather than letting the
+      // rejection surface as an unhandled promise rejection (dev-server overlay).
+      selectCases(contextName, selection).catch((error: unknown) => {
+        console.warn("Pushing selection to CODAP failed (the selection may be too large):", error);
+      });
+    },
     { equals: comparer.structural}
   );
 }
