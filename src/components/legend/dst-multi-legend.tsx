@@ -1,6 +1,5 @@
 import { observer } from "mobx-react-lite";
 import React, { createRef, RefObject, useCallback, useEffect, useMemo, useRef } from "react";
-import { Text } from "@chakra-ui/react";
 import {
   DataDisplayLayoutContext, useDataDisplayLayout
 } from "../../codap/components/data-display/hooks/use-data-display-layout";
@@ -10,7 +9,6 @@ import { IBaseLayerModel } from "../../codap/components/data-display/models/base
 import { IDataSet } from "../../codap/models/data/data-set";
 import { IDstDataConfigurationModel } from "../../models/dst-data-configuration-model";
 import { useDstDataDisplayModelContext } from "../hooks/use-dst-data-display-model";
-import { useLegendAttributes } from "./use-legend-attributes";
 
 interface IMultiLegendProps {
   divElt: HTMLDivElement | null
@@ -29,8 +27,6 @@ export const DstMultiLegend = observer(function MultiLegend(_props: IMultiLegend
   const legendRef = useRef() as React.RefObject<HTMLDivElement>;
   const divRefs = useRef<RefObject<HTMLDivElement>[]>([]);
   const extentsRef = useRef([] as number[]);
-
-  const { selectedColorAttribute, selectedSizeAttribute } = useLegendAttributes();
 
   // The color legend body should render 25px narrower than the size legend.
   // Its width comes from useDataDisplayLayout().tileWidth, shared with the size
@@ -77,41 +73,35 @@ export const DstMultiLegend = observer(function MultiLegend(_props: IMultiLegend
 
   const renderLegendBody = (label: "Color" | "Size", index: number,
                             dataConfiguration?: IDstDataConfigurationModel) => {
-    const selectedAttribute = label === "Color" ? selectedColorAttribute : selectedSizeAttribute;
-    if (!selectedAttribute) return null;
+    // Derive the legend straight from the config (reactive via observer) rather
+    // than from the async attribute-loader state, so the legend appears as soon as
+    // a legend attribute is set — regardless of selection order or load timing.
+    if (!dataConfiguration) return null;
+    const attrId = dataConfiguration.attributeID("legend");
+    if (!attrId) return null;
+    const attrName = dataConfiguration.dataset?.getAttribute(attrId)?.name ?? label;
 
     const divRef = divRefs.current[index] || createRef<HTMLDivElement>();
     divRefs.current[index] = divRef;
 
-    const LegendComponent = dataConfiguration
-      ? legendComponentManager.getLegendComponent(dataConfiguration)
-      : undefined;
+    const LegendComponent = legendComponentManager.getLegendComponent(dataConfiguration);
 
     return (
       <div className="legend-body" key={`body-${index}`} ref={divRef}>
-        <div className="legend-title" title={selectedAttribute.name}>{selectedAttribute.name}</div>
-        {!selectedAttribute.isTemporary && (
-          <div className="legend-display">
-            <DataDisplayLayoutContext.Provider value={label === "Color" ? colorLayout : layout}>
-              <DataConfigurationContext.Provider value={dataConfiguration}>
-                {/* Render the legend graphic directly (no LegendAttributeLabel),
-                    so the title above is a plain, non-interactive label. */}
-                {/* eslint-disable-next-line react/no-unknown-property */}
-                <svg className="legend-component" data-testid="legend-component">
-                  {LegendComponent &&
-                    <LegendComponent layerIndex={index} setDesiredExtent={setDesiredExtent} />}
-                </svg>
-              </DataConfigurationContext.Provider>
-            </DataDisplayLayoutContext.Provider>
-          </div>
-        )}
-        {selectedAttribute.isTemporary && (
-          <div className="legend-display">
-            <Text fontSize="xs" mt={1}>
-              <Text as="em" fontSize="10px" color="gray.500">(preview unavailable)</Text>
-            </Text>
-          </div>
-        )}
+        <div className="legend-title" title={attrName}>{attrName}</div>
+        <div className="legend-display">
+          <DataDisplayLayoutContext.Provider value={label === "Color" ? colorLayout : layout}>
+            <DataConfigurationContext.Provider value={dataConfiguration}>
+              {/* Render the legend graphic directly (no LegendAttributeLabel),
+                  so the title above is a plain, non-interactive label. */}
+              {/* eslint-disable-next-line react/no-unknown-property */}
+              <svg className="legend-component" data-testid="legend-component">
+                {LegendComponent &&
+                  <LegendComponent layerIndex={index} setDesiredExtent={setDesiredExtent} />}
+              </svg>
+            </DataConfigurationContext.Provider>
+          </DataDisplayLayoutContext.Provider>
+        </div>
       </div>
     );
   };
