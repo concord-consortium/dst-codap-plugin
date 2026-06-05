@@ -59,12 +59,13 @@ export class NumericSizeLegendModel {
 
   get pointsData(): NumericSizeLegendKey[] {
     if (this.ticks.length < 2) return [];
-    const halfStep = (this.ticks[1] - this.ticks[0]) / 2;
 
     return this.pointValues.map((size, index) => ({
       size,
       index,
-      canonicalValue: this.ticks[index] + halfStep,
+      // Bin midpoint in value space. Bins may be unequal width (quantiles), so
+      // use the actual edges rather than a uniform half-step.
+      canonicalValue: (this.ticks[index] + this.ticks[index + 1]) / 2,
       min: index === 0 ? -Infinity : this.ticks[index],
       max: index === this.pointValues.length - 1 ? Infinity : this.ticks[index+1]
     }));
