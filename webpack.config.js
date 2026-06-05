@@ -28,6 +28,17 @@ module.exports = (env, argv) => {
       headers: {
         'Access-Control-Allow-Origin': '*'
       },
+      client: {
+        // ESLint warnings (surfaced as webpack compile warnings by
+        // eslint-webpack-plugin) must not pop the full-screen overlay: it covers
+        // the UI and blocks Cypress interaction. Keep the overlay for real
+        // errors (compile + runtime) only.
+        overlay: {
+          errors: true,
+          warnings: false,
+          runtimeErrors: true
+        }
+      },
       server: {
         type: 'https',
         options: {

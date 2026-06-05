@@ -3,9 +3,12 @@
 // the measured fps it writes to window.__perf. This is the milestone-6 GPU-side
 // evidence the CPU benchmark (scripts/bench-instance-frame.mjs) cannot provide.
 //
-// Run against a static server of the repo root on :8080, e.g.
+// This is a manual benchmark, NOT a CI spec — it lives outside cypress/e2e so
+// the CI specPattern (cypress/e2e/**) skips it, and it needs a real-GPU Chrome
+// plus a static server of the repo root (the dev server only serves dist/).
+// Run it explicitly against a static server of the repo root on :8080, e.g.
 //   python3 -m http.server 8080
-//   npx cypress run --browser chrome --spec cypress/e2e/instanced-perf.cy.js
+//   npx cypress run --browser chrome --spec cypress/benchmarks/instanced-perf.cy.js
 
 describe("instanced points GPU performance @ 200K", () => {
   it("measures orbit and scrub fps", () => {
