@@ -7,6 +7,9 @@ export interface SafeAttribute {
   id: string;
   name: string;
   isTemporary?: boolean;
+  // Attribute type ("numeric" | "categorical" | "date" | ...). Undefined for
+  // temporary (CODAP-only) attributes whose type we can't yet determine.
+  type?: string;
 }
 
 export type LegendLabel = "Color" | "Size";
@@ -36,7 +39,8 @@ export function useLegendAttributes() {
         const safeAttributes: SafeAttribute[] = dataset.attributes.map(attr => ({
           id: attr.id,
           name: attr.name,
-          isTemporary: false
+          isTemporary: false,
+          type: attr.type
         }));
         if (datasetConfig.dataContextName) {
           try {

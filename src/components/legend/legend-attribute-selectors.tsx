@@ -25,6 +25,11 @@ export const LegendAttributeSelectors = observer(function LegendAttributeSelecto
     const dataConfiguration = label === "Color"
       ? dataDisplayModel.colorDataConfiguration
       : dataDisplayModel.sizeDataConfiguration;
+    // The size legend only makes sense for numeric attributes, so don't offer
+    // categorical ones in the Size dropdown (Color still offers all types).
+    const options = label === "Size"
+      ? availableAttributes.filter(attr => attr.type !== "categorical")
+      : availableAttributes;
     return (
       <Flex align="center" gap={1} className="legend-selector-row">
         <Text fontSize="xs" fontWeight="bold" minW="36px">{label}:</Text>
@@ -39,7 +44,7 @@ export const LegendAttributeSelectors = observer(function LegendAttributeSelecto
               placeholder="Select attribute"
             >
               <option value="">None</option>
-              {availableAttributes.map(attr => (
+              {options.map(attr => (
                 <option key={attr.id} value={attr.id}>{attr.name}</option>
               ))}
             </Select>
