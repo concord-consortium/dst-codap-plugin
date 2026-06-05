@@ -1,0 +1,188 @@
+<!doctype html>
+<!--
+  GPU draw benchmark for the instanced point renderer, faithful to
+  src/components/plot/instanced-points.tsx: two THREE.InstancedMesh (fill +
+  back-side outline), 8-segment spheres, per-instance color + a custom
+  instanceAlpha attribute multiplied into gl_FragColor.a via onBeforeCompile.
+
+  Measures, at 200K instances:
+    - orbitFps : camera rotates, buffers untouched (our real orbit path)
+    - scrubFps : every instance matrix rewritten + re-uploaded each frame
+                 (our worst-case date-scrub path, including GPU upload)
+
+  Serve the repo root and open over http (NOT file://, so ESM + importmap work):
+    python3 -m http.server 8080
+    open http://localhost:8080/scripts/perf-harness.html
+  Driven headlessly by cypress/e2e/instanced-perf.cy.js using real Chrome (real
+  GPU via ANGLE/Metal), which reports window.__perf.
+-->
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Instanced points GPU benchmark</title>
+  <style>
+    body { margin: 0; background: #222; color: #eee; font-family: monospace; }
+    #result { position: fixed; top: 8px; left: 8px; white-space: pre; font-size: 13px; }
+  </style>
+  <script type="importmap">
+    { "imports": { "three": "/node_modules/three/build/three.module.js" } }
+  </script>
+</head>
+<body>
+  <div id="result">starting…</div>
+  <script type="module">
+    import * as THREE from "three";
+
+    const COUNT = Number(new URLSearchParams(location.search).get("count") || 200000);
+    const SEGMENTS = Number(new URLSearchParams(location.search).get("seg") || 8);
+
+    const resultEl = document.getElementById("result");
+    const renderer = new THREE.WebGLRenderer({ antialias: false });
+    renderer.setPixelRatio(1);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+
+    function patchInstanceAlpha(material) {
+      material.onBeforeCompile = (shader) => {
+        shader.vertexShader = shader.vertexShader
+          .replace("#include <common>", "#include <common>\nattribute float instanceAlpha;\nvarying float vInstanceAlpha;")
+          .replace("#include <begin_vertex>", "#include <begin_vertex>\nvInstanceAlpha = instanceAlpha;");
+        shader.fragmentShader = shader.fragmentShader
+          .replace("#include <common>", "#include <common>\nvarying float vInstanceAlpha;")
+          .replace("#include <dithering_fragment>", "#include <dithering_fragment>\ngl_FragColor.a *= vInstanceAlpha;");
+      };
+    }
+
+    const fillGeo = new THREE.SphereGeometry(1, SEGMENTS, SEGMENTS);
+    const outlineGeo = new THREE.SphereGeometry(1, SEGMENTS, SEGMENTS);
+    const fillMat = new THREE.MeshBasicMaterial({ transparent: true });
+    const outlineMat = new THREE.MeshBasicMaterial({ transparent: true, side: THREE.BackSide });
+    patchInstanceAlpha(fillMat);
+    patchInstanceAlpha(outlineMat);
+
+    const fillAlpha = new THREE.InstancedBufferAttribute(new Float32Array(COUNT), 1);
+    const outlineAlpha = new THREE.InstancedBufferAttribute(new Float32Array(COUNT), 1);
+    fillAlpha.setUsage(THREE.DynamicDrawUsage);
+    outlineAlpha.setUsage(THREE.DynamicDrawUsage);
+    fillGeo.setAttribute("instanceAlpha", fillAlpha);
+    outlineGeo.setAttribute("instanceAlpha", outlineAlpha);
+
+    const fill = new THREE.InstancedMesh(fillGeo, fillMat, COUNT);
+    const outline = new THREE.InstancedMesh(outlineGeo, outlineMat, COUNT);
+    fill.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    outline.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    fill.renderOrder = 1; outline.renderOrder = 0;
+    scene.add(outline); scene.add(fill);
+
+    // Synthetic source data, spread through the [-5,5]^3 cube like real points.
+    const lat = new Float64Array(COUNT), lon = new Float64Array(COUNT), dat = new Float64Array(COUNT);
+    for (let i = 0; i < COUNT; i++) {
+      lat[i] = ((i * 7919) % 1000) / 1000;
+      lon[i] = ((i * 104729) % 1000) / 1000;
+      dat[i] = ((i * 1299709) % 1000) / 1000;
+    }
+
+    const col = new THREE.Color();
+    const palette = ["#eff3ff", "#b5cbe6", "#7ca2ce", "#427ab5", "#08519c"];
+
+    // Direct column-major matrix write — identical to writeMatrix in
+    // src/utilities/instance-frame.ts (the shipped per-frame path), NOT
+    // Matrix4.compose. Colors are NOT touched per frame (the real renderer sets
+    // them only on data/legend change), so this faithfully models a date scrub.
+    function writeMatrix(arr, base, x, y, z, s) {
+      arr[base] = s; arr[base + 1] = 0; arr[base + 2] = 0; arr[base + 3] = 0;
+      arr[base + 4] = 0; arr[base + 5] = s; arr[base + 6] = 0; arr[base + 7] = 0;
+      arr[base + 8] = 0; arr[base + 9] = 0; arr[base + 10] = s; arr[base + 11] = 0;
+      arr[base + 12] = x; arr[base + 13] = y; arr[base + 14] = z; arr[base + 15] = 1;
+    }
+
+    const fillM = fill.instanceMatrix.array;
+    const outM = outline.instanceMatrix.array;
+    const fillA = fillAlpha.array;
+    const outA = outlineAlpha.array;
+
+    function writeFrame(phase) {
+      const fillRadius = 0.117;
+      const outlineRadius = fillRadius + 0.012;
+      const dy = phase * 0.0001; // tiny per-frame motion so the upload isn't elided
+      for (let i = 0; i < COUNT; i++) {
+        const b = i * 16;
+        const x = lat[i] * 10 - 5;
+        const y = dat[i] * 10 - 5 + dy;
+        const z = lon[i] * 10 - 5;
+        writeMatrix(fillM, b, x, y, z, fillRadius);
+        writeMatrix(outM, b, x, y, z, outlineRadius);
+        fillA[i] = 1; outA[i] = 1;
+      }
+      fill.instanceMatrix.needsUpdate = true;
+      outline.instanceMatrix.needsUpdate = true;
+      fillAlpha.needsUpdate = true; outlineAlpha.needsUpdate = true;
+    }
+
+    // Set colors once up front (allocates instanceColor); never touched per frame.
+    for (let i = 0; i < COUNT; i++) {
+      col.set(palette[i % palette.length]);
+      fill.setColorAt(i, col);
+      outline.setColorAt(i, col);
+    }
+    if (fill.instanceColor) fill.instanceColor.needsUpdate = true;
+    if (outline.instanceColor) outline.instanceColor.needsUpdate = true;
+    writeFrame(0);
+
+    let angle = 0;
+    function orbit(dt) {
+      angle += dt * 0.5;
+      camera.position.set(Math.cos(angle) * 14, 4, Math.sin(angle) * 14);
+      camera.lookAt(0, 0, 0);
+    }
+
+    // Phase runner: warm up, then measure fps over `durationMs`.
+    function runPhase({ rewrite, durationMs }) {
+      return new Promise((resolve) => {
+        let frames = 0;
+        let warmup = 30;
+        let startTime = null;
+        let last = performance.now();
+        function tick(now) {
+          const dt = (now - last) / 1000; last = now;
+          orbit(dt);
+          if (rewrite) writeFrame(frames + 1);
+          renderer.render(scene, camera);
+          if (warmup > 0) { warmup--; requestAnimationFrame(tick); return; }
+          if (startTime === null) startTime = now;
+          frames++;
+          if (now - startTime < durationMs) { requestAnimationFrame(tick); return; }
+          resolve((frames * 1000) / (now - startTime));
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+
+    (async () => {
+      const orbitFps = await runPhase({ rewrite: false, durationMs: 3000 });
+      const scrubFps = await runPhase({ rewrite: true, durationMs: 3000 });
+      const result = {
+        count: COUNT,
+        segments: SEGMENTS,
+        orbitFps: Math.round(orbitFps),
+        scrubFps: Math.round(scrubFps),
+        gl: renderer.getContext().getParameter(renderer.getContext().RENDERER) || "unknown",
+        unmasked: (() => {
+          const gl = renderer.getContext();
+          const ext = gl.getExtension("WEBGL_debug_renderer_info");
+          return ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : "n/a";
+        })(),
+      };
+      window.__perf = result;
+      resultEl.textContent =
+        `count=${result.count} segments=${result.segments}\n` +
+        `orbit (draw only):  ${result.orbitFps} fps  (target >= 50)\n` +
+        `scrub (rewrite+upload+draw): ${result.scrubFps} fps  (target >= 30)\n` +
+        `GPU: ${result.unmasked}`;
+    })();
+  </script>
+</body>
+</html>
