@@ -242,7 +242,13 @@ export const InstancedPoints = observer(function InstancedPoints() {
       untracked(() => {
         idToIndex.clear();
         itemIdToIndex.clear();
-        const thresholds = computeNumericThresholds(colorConfig);
+        let thresholds: number[] = [];
+        try {
+          thresholds = computeNumericThresholds(colorConfig);
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error("[InstancedPoints] computeNumericThresholds failed", e);
+        }
         for (let i = 0; i < count; i++) {
           const id = caseIds[i];
           idToIndex.set(id, i);
@@ -286,7 +292,14 @@ export const InstancedPoints = observer(function InstancedPoints() {
       rebuildMatrices();
     };
 
-    const disposeData = autorun(() => rebuildData());
+    const disposeData = autorun(() => {
+      try {
+        rebuildData();
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("[InstancedPoints] rebuildData failed (plot may be blank):", e);
+      }
+    });
 
     // Geometry autorun: graph transform + ui. Fires on pan/zoom/date-scrub and
     // visibility toggles, but NOT on selection (handled separately) or camera

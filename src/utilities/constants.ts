@@ -2,8 +2,9 @@ export const kPluginName = "Space-Time Cube";
 export const kVersion = "0.0.1";
 export const kInitialDimensions = {
   width: 1110,
-  // 20px taller than the prior 880 so both legends are fully visible on create.
-  height: 900
+  // Taller than the original 880 so both legends fit on create. The plain legend
+  // titles added ~18px above each of the two legend bodies, so this includes that.
+  height: 940
 };
 
 export const kCollectionName = "Cases";
