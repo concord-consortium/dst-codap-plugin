@@ -19,7 +19,20 @@
 
     &.legend-key-selected {
       stroke: red;
-      stroke-width: 2px;    
+      stroke-width: 2px;
+    }
+  }
+
+  // Quintile bin rectangles behind the dots, mirroring the choropleth color legend.
+  .legend-size-bin {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 1px;
+    cursor: pointer;
+
+    &.legend-rect-selected {
+      stroke: red;
+      stroke-width: 2px;
     }
   }
 

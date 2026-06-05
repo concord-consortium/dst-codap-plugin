@@ -14,14 +14,35 @@ export const defaultPointDiameter = 6;
 // Number of numeric size bins. Matches the 5-color choropleth so the size legend
 // reflects quintiles just like the color legend.
 const kSizeBinCount = 5;
-// Evenly-spaced diameters from minDiameter to maxDiameter, one per bin.
+// Compressed diameter range so the largest dots don't obscure the smaller ones:
+// the smallest is 20% larger than minDiameter, and the largest is midway between
+// the old second- and third-largest of the full [minDiameter, maxDiameter] spread
+// (i.e. the 0.75 and 0.5 points -> 0.625).
+const kSizeMinDiameter = minDiameter * 1.2;
+const kSizeMaxDiameter = minDiameter + (maxDiameter - minDiameter) * 0.625;
+// Evenly-spaced diameters across the compressed range, one per bin.
 const sizeDiameters = Array.from({ length: kSizeBinCount }, (_, i) =>
-  minDiameter + (maxDiameter - minDiameter) * (i / (kSizeBinCount - 1)));
+  kSizeMinDiameter + (kSizeMaxDiameter - kSizeMinDiameter) * (i / (kSizeBinCount - 1)));
 
 export const DstDataConfigurationModel = DataConfigurationModel.named("DstDataConfiguration")
   .props({
     legendRepresentation: types.maybe(types.enumeration(["color", "size"]))
   })
+  .views(self => ({
+    // Numeric values for the size legend attribute, taken from the full attribute
+    // (like the color legend's distribution) so quantile bins reflect the real
+    // data spread regardless of this layer's visible-case wiring.
+    get numericSizeValues(): number[] {
+      const attrID = self.attributeID("legend");
+      const dataset = self.dataset;
+      const attr = attrID && dataset ? dataset.getAttribute(attrID) : undefined;
+      if (!attr) return [];
+      // Read changeCount so this is reactive to value edits.
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      attr.changeCount;
+      return attr.numValues.filter((v: number) => Number.isFinite(v));
+    }
+  }))
   .views(self => ({
     get categoricalSizeScale() {
       // This will return an array of [kMain] if there is no legend
@@ -41,8 +62,8 @@ export const DstDataConfigurationModel = DataConfigurationModel.named("DstDataCo
     // color legend's binning: scaleQuantile (equal-count quintiles) by default,
     // scaleQuantize (equal-width) when the attribute's binningType is "quantize".
     get numericSizeScale() {
+      const values = self.numericSizeValues;
       const attrID = self.attributeID("legend");
-      const values = attrID ? (self.numericValuesForAttrRole("legend") ?? []) : [];
       const binningType = attrID ? self.metadata?.getAttributeBinningType(attrID) : undefined;
 
       if (binningType === "quantize") {
@@ -59,15 +80,14 @@ export const DstDataConfigurationModel = DataConfigurationModel.named("DstDataCo
     // (kSizeBinCount + 1 values). Mirrors the color legend — quantile (quintiles)
     // by default, equal-width when the attribute's binningType is "quantize".
     get numericSizeTicks(): number[] {
-      const attrID = self.attributeID("legend");
-      if (!attrID) return [];
-      const values = self.numericValuesForAttrRole("legend") ?? [];
+      const values = self.numericSizeValues;
       if (values.length === 0) return [];
       const [min, max] = extent(values);
       if (min == null || max == null) return [];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const scale = self.numericSizeScale as any;
-      const binningType = self.metadata?.getAttributeBinningType(attrID);
+      const attrID = self.attributeID("legend");
+      const binningType = attrID ? self.metadata?.getAttributeBinningType(attrID) : undefined;
       const internal: number[] = binningType === "quantize"
         ? (scale.thresholds?.() ?? [])
         : (scale.quantiles?.() ?? []);

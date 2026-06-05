@@ -1,4 +1,4 @@
-import {axisBottom, scaleLinear, select} from "d3";
+import {axisBottom, format, range as d3Range, scaleLinear, select} from "d3";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import { IBaseLegendProps } from "../../codap/components/data-display/components/legend/legend-common";
 import { useDataConfigurationContext } from "../../codap/components/data-display/hooks/use-data-configuration-context";
@@ -71,43 +71,65 @@ export const NumericSizeLegend =
 
     useEffect(() => { return mstAutorun(function d3Render() {
       if (!keysElt.current) return;
+      const root = select(keysElt.current);
 
       const keySize = legendModel.circleMaxDiameter;
-
-      const keysSelection = select(keysElt.current)
-        .select(".legend-size-numeric-points")
-        .selectAll<SVGGElement, NumericSizeLegendKey>("circle")
-        .data(legendModel.pointsData)
-        .join(
-          (enter) => {
-            return enter.append("circle")
-              .attr("class", "legend-key")
-              .attr("data-testid", "legend-key")
-              .on("click", handleLegendKeyClick);
-          }
-        );
-
+      const pointsData = legendModel.pointsData;
       const ticks = legendModel.ticks;
-      if (ticks.length < 2) {
-        console.warn("Not enough ticks");
+      const n = pointsData.length;
+
+      if (n === 0 || ticks.length < 2) {
+        root.select(".legend-size-numeric-bins").selectAll("*").remove();
+        root.select(".legend-size-numeric-points").selectAll("*").remove();
+        root.select(".legend-size-numeric-axis").selectAll("*").remove();
         return;
       }
-      const firstTick = ticks[0];
-      const lastTick = ticks[ticks.length-1];
-      const axisScale = scaleLinear([firstTick, lastTick], [margin, legendModel.layoutData.fullWidth - margin*2]);
-  
-      keysSelection
-        .attr("r", d => d.size/2)
-        .attr("cx", d => axisScale(d.canonicalValue))
-        .attr("cy", labelHeight + keySize/2)
-        .classed("legend-key-selected", (d) => {
-          return dataConfiguration?.casesInRangeAreSelected(d.min, d.max) ?? false;
-        });
-      
-      const axis = axisBottom(axisScale).ticks(ticks.length);
 
-      select(keysElt.current)
-        .selectAll<SVGGElement, any>(".legend-size-numeric-axis")
+      const fullWidth = legendModel.layoutData.fullWidth;
+      // Equal-width bins indexed by position, mirroring the choropleth color legend:
+      // binScale maps a bin index to its right edge; bin i spans [binScale(i-1), binScale(i)].
+      const binScale = scaleLinear().domain([-1, n - 1]).range([margin, fullWidth - margin * 2]);
+      const binLeft = (i: number) => binScale(i - 1);
+      const binRight = (i: number) => binScale(i);
+      const binCenter = (i: number) => (binLeft(i) + binRight(i)) / 2;
+
+      // Bin rectangles.
+      root.select(".legend-size-numeric-bins")
+        .selectAll<SVGRectElement, NumericSizeLegendKey>("rect")
+        .data(pointsData)
+        .join(enter => enter.append("rect")
+          .attr("class", "legend-size-bin")
+          .attr("data-testid", "legend-size-bin")
+          .on("click", handleLegendKeyClick))
+        .attr("x", d => binLeft(d.index))
+        .attr("y", labelHeight)
+        .attr("width", d => binRight(d.index) - binLeft(d.index))
+        .attr("height", keySize)
+        .classed("legend-rect-selected", d => dataConfiguration?.casesInRangeAreSelected(d.min, d.max) ?? false);
+
+      // A dot centered in each bin rectangle, sized for that bin.
+      root.select(".legend-size-numeric-points")
+        .selectAll<SVGCircleElement, NumericSizeLegendKey>("circle")
+        .data(pointsData)
+        .join(enter => enter.append("circle")
+          .attr("class", "legend-key")
+          .attr("data-testid", "legend-key")
+          .on("click", handleLegendKeyClick))
+        .attr("r", d => d.size / 2)
+        .attr("cx", d => binCenter(d.index))
+        .attr("cy", labelHeight + keySize / 2)
+        .classed("legend-key-selected", d => dataConfiguration?.casesInRangeAreSelected(d.min, d.max) ?? false);
+
+      // Axis labels the internal bin-boundary thresholds at the bin edges, like the
+      // color legend (ticks = [min, ...thresholds, max]).
+      const thresholds = ticks.slice(1, -1);
+      const fmt = format(".2r");
+      const axis = axisBottom(binScale)
+        .tickValues(d3Range(thresholds.length))
+        .tickFormat(i => fmt(thresholds[Number(i)]))
+        .tickSize(4);
+
+      root.selectAll<SVGGElement, any>(".legend-size-numeric-axis")
         .call(axis)
         .attr("transform", `translate(0 ${labelHeight + legendModel.layoutData.rowHeight})`);
 
@@ -117,6 +139,7 @@ export const NumericSizeLegend =
 
     return (
       <g ref={keysElt} className="legend-size-numeric" data-testid="legend-size-numeric">
+        <g className="legend-size-numeric-bins"></g>
         <g className="legend-size-numeric-points"></g>
         <g className="legend-size-numeric-axis"></g>
       </g>
