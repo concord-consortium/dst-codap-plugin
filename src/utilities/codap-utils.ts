@@ -205,6 +205,14 @@ export async function getData(contextName: string = dataContextName) {
   }
 }
 
+// True while we're applying a CODAP-originated selection to the plugin. The
+// plugin->CODAP reaction checks this so it doesn't echo that selection straight
+// back to CODAP (which caused a feedback fight while selecting on a CODAP graph).
+let applyingCodapSelection = false;
+// Monotonic id for in-flight updateSelection requests. getSelectionList is async,
+// so rapid CODAP notifications can resolve out of order; only the latest wins.
+let selectionRequestSeq = 0;
+
 /**
  * Set up selection synchronization between CODAP and the plugin
  * @param contextName The name of the dataset context to synchronize with
@@ -223,6 +231,9 @@ export function setupSelectionSynchronization(contextName: string) {
   reaction(
     () => Array.from(codapData.dataSet.selection),
     selection => {
+      // Don't echo a CODAP-originated selection back to CODAP — that creates a
+      // feedback loop while the user selects on a CODAP graph/table.
+      if (applyingCodapSelection) return;
       // A very large selection — e.g. clicking a legend quintile that covers ~20%
       // of a big dataset — can exceed CODAP's request timeout. The selection is
       // already applied locally, so degrade gracefully rather than letting the
@@ -243,10 +254,20 @@ export async function updateSelection(contextName: string = dataContextName) {
   // If the user is selecting using a marquee, ignore updates from codap.
   if (ui.activeMarquee) return;
 
+  const requestSeq = ++selectionRequestSeq;
   try {
     const selectionListResult = await getSelectionList(contextName);
+    // Discard a stale response: a newer CODAP notification superseded this one.
+    if (requestSeq !== selectionRequestSeq) return;
     if (selectionListResult.success) {
-      codapData.dataSet.setSelectedCases(selectionListResult.values.map((aCase: any) => toV3CaseId(aCase.caseID)));
+      const ids = selectionListResult.values.map((aCase: any) => toV3CaseId(aCase.caseID));
+      // Apply without echoing back to CODAP (see the reaction above).
+      applyingCodapSelection = true;
+      try {
+        codapData.dataSet.setSelectedCases(ids);
+      } finally {
+        applyingCodapSelection = false;
+      }
     }
   } catch (error) {
     // This will happen if not embedded in CODAP
