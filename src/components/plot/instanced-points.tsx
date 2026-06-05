@@ -107,7 +107,12 @@ export const InstancedPoints = observer(function InstancedPoints() {
     // Selection state as a typed array (1 = selected), rebuilt only when the
     // selection changes — keeps the per-frame scrub loop free of string hashing.
     const selectedFlags = new Uint8Array(count);
+    // caseId -> instance index, used for the marquee set (which stores case ids).
     const idToIndex = new Map<string, number>();
+    // itemId -> instance index. dataSet.selection stores *item* ids (setSelectedCases
+    // expands each case to its childItemIds), so CODAP-driven selection must be
+    // mapped through this, not idToIndex. Mirrors dataSet.isCaseSelected.
+    const itemIdToIndex = new Map<string, number>();
 
     // Ensure the custom instanceAlpha attribute exists on both geometries.
     const ensureAlpha = (geometry: THREE.BufferGeometry) => {
@@ -138,17 +143,24 @@ export const InstancedPoints = observer(function InstancedPoints() {
     // caches and the current graph/selection/ui state. Pure arithmetic; no
     // model method calls in the hot loop. Run untracked so it never registers
     // per-case MobX dependencies.
-    // Refills selectedFlags from the active selection set (marquee overrides the
-    // CODAP selection, matching codapData.isSelected). O(selected), run only when
-    // the selection changes — never during a scrub or animation frame.
+    // Refills selectedFlags from the active selection (marquee overrides the CODAP
+    // selection, matching codapData.isSelected). O(selected), run only when the
+    // selection changes — never during a scrub or animation frame. The marquee set
+    // holds case ids; dataSet.selection holds item ids — different key spaces.
     const rebuildSelection = () => untracked(() => {
       selectedFlags.fill(0);
       const marquee = codapData.marqueeSelection;
-      const active = marquee.size > 0 ? marquee : codapData.dataSet.selection;
-      active.forEach(id => {
-        const idx = idToIndex.get(id);
-        if (idx !== undefined) selectedFlags[idx] = 1;
-      });
+      if (marquee.size > 0) {
+        marquee.forEach(caseId => {
+          const idx = idToIndex.get(caseId);
+          if (idx !== undefined) selectedFlags[idx] = 1;
+        });
+      } else {
+        codapData.dataSet.selection.forEach(itemId => {
+          const idx = itemIdToIndex.get(itemId);
+          if (idx !== undefined) selectedFlags[idx] = 1;
+        });
+      }
     });
 
     const rebuildMatrices = () => untracked(() => {
@@ -229,10 +241,25 @@ export const InstancedPoints = observer(function InstancedPoints() {
 
       untracked(() => {
         idToIndex.clear();
+        itemIdToIndex.clear();
         const thresholds = computeNumericThresholds(colorConfig);
         for (let i = 0; i < count; i++) {
           const id = caseIds[i];
           idToIndex.set(id, i);
+          // Map this case's item id(s) -> index so CODAP-driven selection (which
+          // stores item ids) highlights correctly. Fall back to the case id, which
+          // matches dataSet.isCaseSelected's `selection.has(caseId)` branch. Guarded
+          // so an unexpected caseInfoMap shape can never abort buffer population.
+          try {
+            const childItemIds = ds.caseInfoMap?.get(id)?.childItemIds;
+            if (childItemIds && childItemIds.length > 0) {
+              for (const itemId of childItemIds) itemIdToIndex.set(itemId, i);
+            } else {
+              itemIdToIndex.set(id, i);
+            }
+          } catch {
+            itemIdToIndex.set(id, i);
+          }
           const lat = codapData.getLatitude(id);
           const lon = codapData.getLongitude(id);
           const dateMs = graph.convertCaseDate(id);
@@ -267,13 +294,15 @@ export const InstancedPoints = observer(function InstancedPoints() {
       rebuildMatrices();
     });
 
-    // Selection autorun: re-derive the flags, then repaint. Reading the size atom
-    // of both selection sources establishes a coarse dependency — replace()/add()/
-    // delete() all report it, so any membership change (even one preserving the
-    // count) re-runs this, while a scrub frame never does.
+    // Selection autorun: re-derive the flags, then repaint. dataSet.selectionChanges
+    // is bumped on every selection mutation (the canonical signal, robust to
+    // same-count replacements); the marquee size covers the in-progress marquee.
+    // This fires on selection from any source — CODAP table/graph, cube click, or
+    // marquee — so highlighting stays in sync bidirectionally.
     const disposeSelection = autorun(() => {
-      void codapData.marqueeSelection.size;
+      void codapData.dataSet.selectionChanges;
       void codapData.dataSet.selection.size;
+      void codapData.marqueeSelection.size;
       rebuildSelection();
       rebuildMatrices();
     });
