@@ -10,35 +10,39 @@
 
 .multi-legend {
   width: 100%;
-  height: 100%; /* Fill the entire available height */
+  height: 100%;
   display: flex;
-  flex-direction: column;
-  position: relative; /* Ensure proper stacking context */
-  overflow: visible; /* Prevent scrollbars and allow expansion */
-  gap: 30px; /* Further reduced from 5px */
-  justify-content: flex-start; /* Changed from space-between to stack legends closer */
-  
-  .legend {
-    padding: 3px; /* Further reduced from 5px */
-    border-bottom: 1px solid #eee;
-    height: 110px; /* Changed from min-height to exact height */
-    min-height: unset; /* Remove min-height */
-    flex: 0 0 100px; /* Fixed height, don't grow or shrink */
-    width: 100%;
+  flex-direction: column;     /* Selectors row on top, bodies stacked below */
+  position: relative;
+  overflow: visible;
+
+  .legend-selectors {
+    padding: 2px 4px 4px;
+    flex: 0 0 auto;
+  }
+
+  .legend-selector select {
+    max-width: 180px;
+    margin-left: 5px;
+    font-size: 13px;
+  }
+
+  .legend-bodies {
     display: flex;
-    flex-direction: column;
-    overflow: visible; /* Allow content to be visible */
-    position: relative; /* Create a new stacking context */
-    margin: 0; /* Remove any default margins */
-    
-    &:last-child {
-      border-bottom: none;
-    }
-    
-    select {
-      max-width: 200px;
-      margin-left: 5px;
-      font-size: 13px;
+    flex-direction: column;   /* Color body above Size body, full width each */
+    gap: 4px;
+    flex: 1 1 auto;
+    overflow: visible;
+  }
+
+  .legend-body {
+    width: 100%;
+    overflow: visible;
+    position: relative;
+
+    &:not(:last-child) {
+      border-bottom: 1px dotted #eee;
+      padding-bottom: 2px;
     }
   }
 }
@@ -51,11 +55,11 @@
 
 /* Style the legend display area */
 .legend-display {
-  margin-top: 2px; /* Reduced from 3px */
-  padding: 2px 0; /* Reduced from 3px */
+  margin-top: 2px;
+  padding: 2px 0;
   border-top: 1px dotted #eee;
-  min-height: 40px; /* Reduced from 40px */
+  min-height: 32px;
   width: 100%;
-  position: relative; /* Create stacking context */
-  overflow: visible; /* Allow content to expand as needed */
+  position: relative;
+  overflow: visible;
 }

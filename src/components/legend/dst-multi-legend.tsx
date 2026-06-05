@@ -135,39 +135,32 @@ export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAtt
     loadAttributes();
   }, [dataset, datasetConfig.dataContextName, datasetConfig.colorAttribute, datasetConfig.sizeAttribute, dataDisplayModel]);
 
-  // Update layout when component mounts to ensure proper initial spacing
+  // Pulldowns now share one horizontal row at top; legend bodies stack
+  // vertically below it. Pane height = selector row + sum(body heights).
+  const kSelectorRowHeight = 28;
+  const kLegendMinHeight = 80;
+
   useEffect(() => {
-    // Initial layout setup
-    const totalHeight = extentsRef.current.reduce((a, b) => a + b, 0);
-    if (totalHeight > 0) {
-      layout.setDesiredExtent("legend", totalHeight);
-    } else {
-      // Set a default initial height if no extents are calculated yet
-      layout.setDesiredExtent("legend", 180);
-    }
-    
-    // When unmounting, reset the layout
+    const sumExtents = extentsRef.current.reduce((a, b) => a + (b || 0), 0);
+    layout.setDesiredExtent("legend", Math.max(sumExtents + kSelectorRowHeight, kLegendMinHeight));
+
     return () => {
       layout.setDesiredExtent("legend", 0);
     };
   }, [layout]);
 
   const setDesiredExtent = useCallback((layerIndex: number, extent: number) => {
-    // Store the extent for this layer with a minimum height
-    extentsRef.current[layerIndex] = Math.max(extent, 75); // Use 75px as minimum height
+    extentsRef.current[layerIndex] = Math.max(extent, 40);
 
-    // Calculate total height needed and update layout
-    const totalHeight = extentsRef.current.reduce((a, b) => a + b, 0) + 10; // Add 10px for spacing
-    layout.setDesiredExtent("legend", Math.max(totalHeight, 180)); // Ensure we use at least the minimum height
+    const sumExtents = extentsRef.current.reduce((a, b) => a + (b || 0), 0);
+    layout.setDesiredExtent("legend", Math.max(sumExtents + kSelectorRowHeight, kLegendMinHeight));
 
-    // Update the height of the div if needed
     const theDivElt = divRefs.current[layerIndex]?.current;
     if (theDivElt) {
-      // Let CSS handle flexible heights
-      if (extent > 75) {
+      if (extent > 40) {
         theDivElt.style.height = `${extentsRef.current[layerIndex]}px`;
       } else {
-        theDivElt.style.height = ""; // Let CSS flex handle it
+        theDivElt.style.height = "";
       }
     }
   }, [layout]);
@@ -231,73 +224,76 @@ export const DstMultiLegend = observer(function MultiLegend({divElt, onChangeAtt
     }
   };
 
-  const renderLegend = (label: string, index: number, dataConfiguration?: IDstDataConfigurationModel) => {
-    const selectedAttribute = label === "Color" 
-      ? selectedColorAttribute 
+  const renderSelector = (label: string, dataConfiguration?: IDstDataConfigurationModel) => {
+    const legendAttributeId = dataConfiguration?.attributeID("legend") || "";
+    return (
+      <Flex align="center" className="legend-selector">
+        <Text fontWeight="bold" fontSize="sm" mr={2}>{label}:</Text>
+        {isLoading ? (
+          <Spinner size="sm" />
+        ) : (
+          <Select
+            size="xs"
+            width="auto"
+            value={legendAttributeId || ""}
+            onChange={(e) => handleAttributeChange(label, e.target.value)}
+            placeholder={`Select attribute`}
+          >
+            <option value="">None</option>
+            {availableAttributes.map(attr => (
+              <option key={attr.id} value={attr.id}>{attr.name}</option>
+            ))}
+          </Select>
+        )}
+      </Flex>
+    );
+  };
+
+  const renderLegendBody = (label: string, index: number, dataConfiguration?: IDstDataConfigurationModel) => {
+    const selectedAttribute = label === "Color"
+      ? selectedColorAttribute
       : (label === "Size" ? selectedSizeAttribute : null);
-    
+    if (!selectedAttribute) return null;
+
     const divRef = divRefs.current[index] || createRef<HTMLDivElement>();
     divRefs.current[index] = divRef;
-    
-    // Get current attribute ID safely from configuration
-    const legendAttributeId = dataConfiguration?.attributeID("legend") || "";
-    
+
     return (
-      <div className="legend" key={index} ref={divRef}>
-        <div className="legend-section">
-          <Flex align="center" mb={1}>
-            <Text fontWeight="bold" fontSize="sm" mr={2}>{label}:</Text>
-            {isLoading ? (
-              <Spinner size="sm" />
-            ) : (
-              <Select 
-                size="xs"
-                width="auto"
-                value={legendAttributeId || ""}
-                onChange={(e) => handleAttributeChange(label, e.target.value)}
-                placeholder={`Select attribute`}
-              >
-                <option value="">None</option>
-                {availableAttributes.map(attr => (
-                  <option key={attr.id} value={attr.id}>{attr.name}</option>
-                ))}
-              </Select>
-            )}
-          </Flex>
-          
-          {/* For regular attributes, we can safely show the full legend */}
-          {selectedAttribute && !selectedAttribute.isTemporary && (
-            <div className="legend-display">
-              <DataConfigurationContext.Provider value={dataConfiguration}>
-                <Legend layerIndex={index}
-                       setDesiredExtent={setDesiredExtent}
-                       onDropAttribute={(place, dataSet, attributeID) => onChangeAttribute(dataSet, attributeID, dataDisplayModel.layers[index])}
-                />
-              </DataConfigurationContext.Provider>
-            </div>
-          )}
-          
-          {/* For temporary attributes, just show a message */}
-          {selectedAttribute && selectedAttribute.isTemporary && (
-            <div className="legend-display">
-              <Text fontSize="xs" mt={1}>
-                Using attribute: {selectedAttribute.name}
-                <br />
-                <Text as="em" fontSize="10px" color="gray.500">
-                  (Legend preview not available for this attribute)
-                </Text>
+      <div className="legend-body" key={`body-${index}`} ref={divRef}>
+        {!selectedAttribute.isTemporary && (
+          <div className="legend-display">
+            <DataConfigurationContext.Provider value={dataConfiguration}>
+              <Legend layerIndex={index}
+                     setDesiredExtent={setDesiredExtent}
+                     onDropAttribute={(place, dataSet, attributeID) => onChangeAttribute(dataSet, attributeID, dataDisplayModel.layers[index])}
+              />
+            </DataConfigurationContext.Provider>
+          </div>
+        )}
+        {selectedAttribute.isTemporary && (
+          <div className="legend-display">
+            <Text fontSize="xs" mt={1}>
+              {label} attribute: {selectedAttribute.name}
+              <Text as="em" fontSize="10px" color="gray.500" ml={2}>
+                (preview unavailable)
               </Text>
-            </div>
-          )}
-        </div>
+            </Text>
+          </div>
+        )}
       </div>
     );
   };
 
   return (
-    <div ref={legendRef} className="multi-legend">      
-      {renderLegend("Color", 0, dataDisplayModel.colorDataConfiguration)}
-      {renderLegend("Size", 1, dataDisplayModel.sizeDataConfiguration)}
+    <div ref={legendRef} className="multi-legend">
+      <Flex className="legend-selectors" gap={4} align="center">
+        {renderSelector("Color", dataDisplayModel.colorDataConfiguration)}
+        {renderSelector("Size", dataDisplayModel.sizeDataConfiguration)}
+      </Flex>
+      <div className="legend-bodies">
+        {renderLegendBody("Color", 0, dataDisplayModel.colorDataConfiguration)}
+        {renderLegendBody("Size", 1, dataDisplayModel.sizeDataConfiguration)}
+      </div>
     </div>
   );
 });
