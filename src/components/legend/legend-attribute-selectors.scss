@@ -1,0 +1,17 @@
+.legend-attribute-selectors {
+  position: absolute;
+  left: 10px;
+  top: 388px;
+  width: 200px;
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 4px;
+  padding: 6px 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  pointer-events: auto;
+  z-index: 10;
+
+  .legend-selector-row select {
+    font-size: 11px;
+    max-width: 150px;
+  }
+}

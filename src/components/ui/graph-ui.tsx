@@ -17,6 +17,7 @@ import { datasetConfig } from "../../models/dataset-config";
 import { getAvailableDatasets } from "../../utilities/codap-interface-helpers";
 import { loadConfiguredData, getDatasetAttributes } from "../../utilities/codap-dataset-utils";
 import { resyncHiddenCasesFromCodap } from "../../utilities/codap-utils";
+import { LegendAttributeSelectors } from "../legend/legend-attribute-selectors";
 import { MapPanControls } from "./map-pan-controls";
 import { NavigationControls } from "./navigation-controls/navigation-controls";
 import { TimeSlider } from "./time-slider/time-slider";
@@ -403,6 +404,7 @@ export const GraphUI = observer(function GraphUI() {
           tooltip={ui.displayLegend ? "Hide Legend" : "Show Legend"}
         />
       </UIButtonContainer>
+      <LegendAttributeSelectors />
       <Box className="visibility-controls">
         <VStack align="start" spacing={0.5}>
           <Text fontSize="xs" fontWeight="bold" mb={0.5}>Show Points:</Text>
