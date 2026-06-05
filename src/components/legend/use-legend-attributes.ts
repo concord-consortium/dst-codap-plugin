@@ -128,6 +128,10 @@ export function useLegendAttributes() {
       if (label === "Color") setSelectedColorAttribute(selected);
       else setSelectedSizeAttribute(selected);
       config.setAttribute("legend", { attributeID: resolvedId });
+      // setAttribute doesn't invalidate the role-keyed value/category caches, so a
+      // categorical legend chosen first can render with stale (empty) categories.
+      // Clearing the cache forces them to recompute for the new attribute.
+      config.clearCasesCache?.();
       if (label === "Color") datasetConfig.setColorAttribute(selected.name);
       else datasetConfig.setSizeAttribute(selected.name);
       if (!selected.isTemporary && metadata) {
@@ -135,6 +139,7 @@ export function useLegendAttributes() {
       }
     } else {
       config.setAttribute("legend", undefined);
+      config.clearCasesCache?.();
       if (label === "Color") {
         setSelectedColorAttribute(null);
         datasetConfig.setColorAttribute(undefined);
