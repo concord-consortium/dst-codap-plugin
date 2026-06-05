@@ -10,7 +10,7 @@ import { CubeOutline } from "./cube-outline";
 import { DSTCamera } from "./dst-camera";
 import { MapPlane } from "./map-plane";
 import { MarqueeOverlay } from "./marquee-overlay";
-import { Points } from "./points";
+import { InstancedPoints } from "./instanced-points";
 import "./scatter-plot.scss";
 import { codapData } from "../../models/codap-data";
 
@@ -95,7 +95,7 @@ export const ScatterPlot = observer(function ScatterPlot() {
             name={controlName}
           />
           <ambientLight intensity={2.75} />
-          <Points />
+          <InstancedPoints />
           <MapPlane />
           <EffectComposer>
             <HueSaturation saturation={0.05} />
