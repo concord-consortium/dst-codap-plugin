@@ -1,3 +1,4 @@
+import { runInAction } from "mobx";
 import { graph } from "../models/graph";
 import { codapInterface } from "./codap-interface";
 import { codapData } from "../models/codap-data";
@@ -80,25 +81,27 @@ export class MapBoundsManager {
    * Uses slightly inset visible bounds to avoid projection distortion at poles
    */
   private setWorldMapBounds(): void {
-    // Set absolute boundaries (maximum possible extent)
-    graph.absoluteMinLatitude = this.ABSOLUTE_MIN_LAT;
-    graph.absoluteMaxLatitude = this.ABSOLUTE_MAX_LAT;
-    graph.absoluteMinLongitude = this.ABSOLUTE_MIN_LONG;
-    graph.absoluteMaxLongitude = this.ABSOLUTE_MAX_LONG;
+    runInAction(() => {
+      // Set absolute boundaries (maximum possible extent)
+      graph.absoluteMinLatitude = this.ABSOLUTE_MIN_LAT;
+      graph.absoluteMaxLatitude = this.ABSOLUTE_MAX_LAT;
+      graph.absoluteMinLongitude = this.ABSOLUTE_MIN_LONG;
+      graph.absoluteMaxLongitude = this.ABSOLUTE_MAX_LONG;
 
-    // Keep current view bounds if they exist, otherwise use visible bounds
-    if (graph.minLatitude === 0 && graph.maxLatitude === 0) {
-      graph.minLatitude = this.VISIBLE_MIN_LAT;
-      graph.maxLatitude = this.VISIBLE_MAX_LAT;
-      graph.minLongitude = this.VISIBLE_MIN_LONG;
-      graph.maxLongitude = this.VISIBLE_MAX_LONG;
+      // Keep current view bounds if they exist, otherwise use visible bounds
+      if (graph.minLatitude === 0 && graph.maxLatitude === 0) {
+        graph.minLatitude = this.VISIBLE_MIN_LAT;
+        graph.maxLatitude = this.VISIBLE_MAX_LAT;
+        graph.minLongitude = this.VISIBLE_MIN_LONG;
+        graph.maxLongitude = this.VISIBLE_MAX_LONG;
 
-      // Set home boundaries to match
-      graph.homeMinLatitude = this.VISIBLE_MIN_LAT;
-      graph.homeMaxLatitude = this.VISIBLE_MAX_LAT;
-      graph.homeMinLongitude = this.VISIBLE_MIN_LONG;
-      graph.homeMaxLongitude = this.VISIBLE_MAX_LONG;
-    }
+        // Set home boundaries to match
+        graph.homeMinLatitude = this.VISIBLE_MIN_LAT;
+        graph.homeMaxLatitude = this.VISIBLE_MAX_LAT;
+        graph.homeMinLongitude = this.VISIBLE_MIN_LONG;
+        graph.homeMaxLongitude = this.VISIBLE_MAX_LONG;
+      }
+    });
   }
 
   /**

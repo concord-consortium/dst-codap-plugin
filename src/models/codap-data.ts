@@ -19,7 +19,15 @@ class CodapData {
   }
 
   get caseIds() {
-    return this.dataSet.getCollectionByName(kCollectionName)?.caseIds ?? [];
+    // Prefer the leaf (last) collection, which is where the per-row cases live.
+    // The legacy "Cases" name only matches the bundled tornado sample and the
+    // seed dataset — imported CODAP datasets carry whatever name CODAP assigns.
+    const collections = this.dataSet.collections;
+    const leafCaseIds = collections && collections.length > 0
+      ? collections[collections.length - 1]?.caseIds ?? []
+      : this.dataSet.getCollectionByName(kCollectionName)?.caseIds ?? [];
+
+    return leafCaseIds;
   }
 
   get dataSet() {

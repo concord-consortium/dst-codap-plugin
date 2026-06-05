@@ -80,27 +80,63 @@ function extractAttributesFromContext(dataContextResult: any): string[] {
  */
 export async function getDatasetAttributes(dataContextName: string): Promise<string[]> {
   try {
-    const result = await codapInterface.sendRequest({
+    // Strategy 1: pull collections + attrs from the data context payload itself.
+    // This works regardless of collection naming and covers hierarchical datasets.
+    const contextResult = await codapInterface.sendRequest({
       action: "get",
-      resource: `dataContext[${dataContextName}].collection[Cases]`
+      resource: `dataContext[${dataContextName}]`
     }) as CodapApiResult;
 
-    if (!result.success || !result.values || !isCollectionResponse(result.values)) {
-      console.warn("Failed to get attributes from data context");
-      return [];
-    }
+    const fromContext = extractAttributesFromContext(contextResult);
+    if (fromContext.length > 0) return dedupe(fromContext);
 
-    const attrs = result.values.attrs;
-    if (!attrs || !Array.isArray(attrs)) {
-      console.warn("Attributes are not in expected format");
-      return [];
-    }
+    // Strategy 2: enumerate collections, then ask CODAP for each collection's
+    // attributes by the collection's actual name.
+    const collectionsResult = await codapInterface.sendRequest({
+      action: "get",
+      resource: `dataContext[${dataContextName}].collection`
+    }) as CodapApiResult;
 
-    return attrs.map((attr: CodapAttribute) => attr.name);
+    const collections = collectionsResult.success && Array.isArray(collectionsResult.values)
+      ? collectionsResult.values
+      : [];
+
+    const collected: string[] = [];
+    for (const collection of collections) {
+      const name = collection?.name;
+      if (!name) continue;
+      const result = await codapInterface.sendRequest({
+        action: "get",
+        resource: `dataContext[${dataContextName}].collection[${name}]`
+      }) as CodapApiResult;
+      if (result.success && result.values && isCollectionResponse(result.values)) {
+        const attrs = result.values.attrs;
+        if (Array.isArray(attrs)) {
+          collected.push(...attrs.map((attr: CodapAttribute) => attr.name));
+        }
+      }
+    }
+    if (collected.length > 0) return dedupe(collected);
+
+    // Strategy 3: derive attribute names from a sample case as a last resort.
+    const fromCase = await exploreDataset(dataContextName);
+    return dedupe(fromCase);
   } catch (error) {
     console.error("Error getting dataset attributes:", error);
     return [];
   }
+}
+
+function dedupe(names: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const n of names) {
+    if (n && !seen.has(n)) {
+      seen.add(n);
+      out.push(n);
+    }
+  }
+  return out;
 }
 
 /**

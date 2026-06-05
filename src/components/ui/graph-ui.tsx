@@ -5,6 +5,7 @@ import { SettingsIcon } from "@chakra-ui/icons";
 import LegendIcon from "../../assets/icons/display-hide-legend-icon.svg";
 import HomeIcon from "../../assets/icons/home-icon.svg";
 import MapResetIcon from "../../assets/icons/map-reset-icon.svg";
+import MapUSIcon from "../../assets/icons/map-us-icon.svg";
 import MapZoomInIcon from "../../assets/icons/map-zoom-in-icon.svg";
 import MapZoomOutIcon from "../../assets/icons/map-zoom-out-icon.svg";
 import MarqueeIcon from "../../assets/icons/marquee-select-icon.svg";
@@ -15,6 +16,7 @@ import { ui } from "../../models/ui";
 import { datasetConfig } from "../../models/dataset-config";
 import { getAvailableDatasets } from "../../utilities/codap-interface-helpers";
 import { loadConfiguredData, getDatasetAttributes } from "../../utilities/codap-dataset-utils";
+import { resyncHiddenCasesFromCodap } from "../../utilities/codap-utils";
 import { MapPanControls } from "./map-pan-controls";
 import { NavigationControls } from "./navigation-controls/navigation-controls";
 import { TimeSlider } from "./time-slider/time-slider";
@@ -24,6 +26,17 @@ import "./graph-ui.scss";
 
 export const GraphUI = observer(function GraphUI() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isReloadingTable, setIsReloadingTable] = useState(false);
+
+  const handleReloadTable = async () => {
+    if (!datasetConfig.dataContextName) return;
+    setIsReloadingTable(true);
+    try {
+      await resyncHiddenCasesFromCodap(datasetConfig.dataContextName);
+    } finally {
+      setIsReloadingTable(false);
+    }
+  };
   
   // Log dataset config status on component mount for debugging
   useEffect(() => {
@@ -290,6 +303,19 @@ export const GraphUI = observer(function GraphUI() {
         zIndex={10}
         spacing={2}
       >
+        {datasetConfig.isConfigured && datasetConfig.dataContextName && (
+          <Button
+            size="xs"
+            colorScheme="blue"
+            variant="outline"
+            onClick={handleReloadTable}
+            data-testid="button-reload-table"
+            isDisabled={isLoading || isReloadingTable}
+            leftIcon={isReloadingTable ? <Spinner size="xs" /> : undefined}
+          >
+            {isReloadingTable ? "Reloading..." : "Reload Table"}
+          </Button>
+        )}
         <Button
           size="xs"
           colorScheme={datasetConfig.isConfigured ? "blue" : "teal"}
@@ -300,10 +326,10 @@ export const GraphUI = observer(function GraphUI() {
           isDisabled={isLoading}
           leftIcon={isLoading ? <Spinner size="xs" /> : undefined}
         >
-          {isLoading 
-            ? "Loading..." 
-            : datasetConfig.isConfigured 
-              ? "Reload Data" 
+          {isLoading
+            ? "Loading..."
+            : datasetConfig.isConfigured
+              ? "Reload Data"
               : "Load Data"
           }
         </Button>
@@ -345,6 +371,15 @@ export const GraphUI = observer(function GraphUI() {
           onClick={() => graph.zoomOut()}
           testId="button-map-zoom-out"
           tooltip="Zoom Out"
+        />
+      </UIButtonContainer>
+      <UIButtonContainer className="map-us-container">
+        <UIButton
+          className="top bottom"
+          Icon={MapUSIcon}
+          onClick={() => graph.viewContinentalUS()}
+          testId="button-map-us"
+          tooltip="Continental US"
         />
       </UIButtonContainer>
       <MapPanControls />

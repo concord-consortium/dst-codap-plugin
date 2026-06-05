@@ -321,6 +321,19 @@ class Graph {
     });
   }
 
+  // Center the view on the contiguous (lower-48) United States.
+  // Bounds are slightly padded from CONUS extents (~24-50N, -125 to -66W)
+  // and held to a ~2:1 longitude:latitude aspect ratio so the cube fills
+  // without significant extra whitespace.
+  viewContinentalUS() {
+    this.animateTo({
+      minLatitude: 22,
+      maxLatitude: 52,
+      minLongitude: -127,
+      maxLongitude: -65
+    });
+  }
+
   restrictDates() {
     this.setCurrentDatePercent(this.currentDatePercent);
     this.setMapDatePercent(this.mapDatePercent);

@@ -1,6 +1,6 @@
 import {
-  addDataContextChangeListener, createDataContextFromURL, getCaseByFormulaSearch, getDataContext,
-  getSelectionList, initializePlugin, selectCases
+  addDataContextChangeListener, createDataContextFromURL, getCaseByFormulaSearch, getCollectionList,
+  getDataContext, getSelectionList, initializePlugin, selectCases
 } from "@concord-consortium/codap-plugin-api";
 import { comparer, reaction } from "mobx";
 import { applySnapshot, getSnapshot } from "mobx-state-tree";
@@ -87,6 +87,67 @@ export async function initializeDST() {
 }
 
 /**
+ * Ask CODAP for the case IDs currently visible in the table and update
+ * codapData.hiddenCaseIds so anything in our local caseIds but not in CODAP's
+ * visible set is treated as hidden. Useful when a notification arrives without
+ * per-case IDs in its payload.
+ */
+/**
+ * Re-fetch the currently visible cases from CODAP and rebuild the plugin's
+ * in-memory dataset to match. Set-aside cases are excluded automatically
+ * because CODAP's getCaseByFormulaSearch respects table visibility.
+ *
+ * Preserves the current view (camera, bounds, date range) — only the case
+ * set changes.
+ */
+export async function resyncHiddenCasesFromCodap(contextName: string) {
+  try {
+    const dataContextResult = await getDataContext(contextName);
+    if (!dataContextResult?.success) {
+      console.warn("Reload Table: data context not available");
+      return;
+    }
+    const collectionName = await resolveLeafCollectionName(contextName, dataContextResult.values);
+    const casesResult = await getCaseByFormulaSearch(contextName, collectionName, "true");
+    if (!casesResult.success || !Array.isArray(casesResult.values)) {
+      console.warn("Reload Table: case fetch failed", casesResult);
+      return;
+    }
+    const casesValues = casesResult.values as DIGetCaseResult["case"][];
+    const cases: ICaseCreation[] = casesValues.map(aCase => ({
+      __id__: toV3CaseId(aCase.id!),
+      ...aCase.values
+    }));
+    setDSTCases(cases);
+  } catch (e) {
+    console.warn("resyncHiddenCasesFromCodap failed:", e);
+  }
+}
+
+/**
+ * Resolve the leaf collection name for a CODAP data context. Prefers the
+ * deepest (last) collection from the context payload; falls back to
+ * getCollectionList; falls back to kCollectionName as a last resort.
+ */
+async function resolveLeafCollectionName(contextName: string, context: any): Promise<string> {
+  const fromContext = Array.isArray(context?.collections) ? context.collections : [];
+  if (fromContext.length > 0) {
+    const last = fromContext[fromContext.length - 1];
+    if (last?.name) return last.name;
+  }
+  try {
+    const list = await getCollectionList(contextName);
+    if (list?.success && Array.isArray(list.values) && list.values.length > 0) {
+      const last = list.values[list.values.length - 1];
+      if (last?.name) return last.name;
+    }
+  } catch (e) {
+    console.warn("getCollectionList failed:", e);
+  }
+  return kCollectionName;
+}
+
+/**
  * Load data from CODAP and set up visualization
  * @param contextName Optional context name to load, defaults to hardcoded dataContextName
  */
@@ -111,10 +172,14 @@ export async function getData(contextName: string = dataContextName) {
 
     updateDataSetAttributes(dataContextResult.values);
 
-    const casesResult = await getCaseByFormulaSearch(contextName, kCollectionName, "true");
+    // Determine the actual leaf collection name for this dataset — the legacy
+    // hardcoded "Cases" only matches the bundled tornado sample.
+    const collectionName = await resolveLeafCollectionName(contextName, dataContextResult.values);
+
+    const casesResult = await getCaseByFormulaSearch(contextName, collectionName, "true");
 
     if (!casesResult.success) {
-      console.error("Couldn't load cases from dataset");
+      console.error(`Couldn't load cases from dataset (collection "${collectionName}")`);
       return;
     }
 
@@ -146,11 +211,12 @@ export async function getData(contextName: string = dataContextName) {
  */
 export function setupSelectionSynchronization(contextName: string) {
   addDataContextChangeListener(contextName, notification => {
-    const { operation } = notification.values;
-
+    const { operation } = notification.values ?? {};
     if (operation === "selectCases") {
       updateSelection(contextName);
     }
+    // Set-aside / restore are intentionally NOT auto-synced; the user
+    // triggers a sync by clicking the "Reload Table" button.
   });
 
   // When the selection changes in the plugin, pass those changes to Codap.
