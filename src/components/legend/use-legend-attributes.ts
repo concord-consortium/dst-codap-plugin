@@ -24,6 +24,10 @@ export function useLegendAttributes() {
   const dataDisplayModel = dstContainer.dataDisplayModel;
   const dataset = dataDisplayModel.layers[0].dataConfiguration.dataset;
   const metadata = dataDisplayModel.layers[0].dataConfiguration.metadata;
+  // Reading the attribute count makes the (observer) caller reactive to the
+  // dataset's attributes loading, so the list below refreshes once data arrives
+  // instead of leaving every attribute as an unusable "temporary" entry.
+  const attrCount = dataset?.attributes.length ?? 0;
 
   const [availableAttributes, setAvailableAttributes] = useState<SafeAttribute[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -100,7 +104,9 @@ export function useLegendAttributes() {
       }
     };
     loadAttributes();
-  }, [dataset, datasetConfig.dataContextName, datasetConfig.colorAttribute, datasetConfig.sizeAttribute, dataDisplayModel]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataset, attrCount, datasetConfig.dataContextName, datasetConfig.colorAttribute,
+      datasetConfig.sizeAttribute, dataDisplayModel]);
 
   const handleAttributeChange = useCallback((label: LegendLabel, attributeId: string) => {
     if (!dataset || !availableAttributes.length) return;
@@ -110,15 +116,22 @@ export function useLegendAttributes() {
     if (!config) return;
 
     if (attributeId) {
-      const selected = availableAttributes.find(a => a.id === attributeId);
+      let selected = availableAttributes.find(a => a.id === attributeId);
       if (!selected) return;
+      // If a "temporary" attribute is actually loaded in the dataset now, resolve
+      // it to the real attribute so the legend has real data to color/size by.
+      if (selected.isTemporary) {
+        const real = dataset.attributes.find(a => a.name === selected!.name);
+        if (real) selected = { id: real.id, name: real.name, isTemporary: false, type: real.type };
+      }
+      const resolvedId = selected.id;
       if (label === "Color") setSelectedColorAttribute(selected);
       else setSelectedSizeAttribute(selected);
-      config.setAttribute("legend", { attributeID: attributeId });
+      config.setAttribute("legend", { attributeID: resolvedId });
       if (label === "Color") datasetConfig.setColorAttribute(selected.name);
       else datasetConfig.setSizeAttribute(selected.name);
       if (!selected.isTemporary && metadata) {
-        metadata.setAttributeBinningType(attributeId, "quantile");
+        metadata.setAttributeBinningType(resolvedId, "quantile");
       }
     } else {
       config.setAttribute("legend", undefined);
