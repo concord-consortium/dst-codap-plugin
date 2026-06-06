@@ -35,6 +35,8 @@
 
     const COUNT = Number(new URLSearchParams(location.search).get("count") || 200000);
     const SEGMENTS = Number(new URLSearchParams(location.search).get("seg") || 8);
+    // mode=spheres (default, current renderer) | quads (billboarded SDF discs).
+    const MODE = new URLSearchParams(location.search).get("mode") || "spheres";
 
     const resultEl = document.getElementById("result");
     const renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -56,26 +58,82 @@
       };
     }
 
-    const fillGeo = new THREE.SphereGeometry(1, SEGMENTS, SEGMENTS);
-    const outlineGeo = new THREE.SphereGeometry(1, SEGMENTS, SEGMENTS);
-    const fillMat = new THREE.MeshBasicMaterial({ transparent: true });
-    const outlineMat = new THREE.MeshBasicMaterial({ transparent: true, side: THREE.BackSide });
-    patchInstanceAlpha(fillMat);
-    patchInstanceAlpha(outlineMat);
+    // Quad SDF shader — mirrors src/components/plot/point-quad-material.ts.
+    const quadVert = `
+attribute vec3 aFillColor; attribute vec3 aOutlineColor;
+attribute float aAlpha; attribute float aFillRatio;
+varying vec2 vUv; varying vec3 vFillColor; varying vec3 vOutlineColor;
+varying float vAlpha; varying float vFillRatio;
+void main() {
+  vUv = position.xy * 2.0;
+  vFillColor = aFillColor; vOutlineColor = aOutlineColor;
+  vAlpha = aAlpha; vFillRatio = aFillRatio;
+  vec4 centerView = modelViewMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+  float scale = length(instanceMatrix[0].xyz);
+  gl_Position = projectionMatrix * (centerView + vec4(vUv * scale, 0.0, 0.0));
+}`;
+    const quadFrag = `
+precision mediump float;
+varying vec2 vUv; varying vec3 vFillColor; varying vec3 vOutlineColor;
+varying float vAlpha; varying float vFillRatio;
+void main() {
+  float d = length(vUv); float aa = fwidth(d);
+  float coverage = 1.0 - smoothstep(1.0 - aa, 1.0, d);
+  if (coverage <= 0.0) discard;
+  float ring = smoothstep(vFillRatio - aa, vFillRatio + aa, d);
+  vec3 color = mix(vFillColor, vOutlineColor, ring);
+  gl_FragColor = vec4(color, vAlpha * coverage);
+}`;
 
-    const fillAlpha = new THREE.InstancedBufferAttribute(new Float32Array(COUNT), 1);
-    const outlineAlpha = new THREE.InstancedBufferAttribute(new Float32Array(COUNT), 1);
-    fillAlpha.setUsage(THREE.DynamicDrawUsage);
-    outlineAlpha.setUsage(THREE.DynamicDrawUsage);
-    fillGeo.setAttribute("instanceAlpha", fillAlpha);
-    outlineGeo.setAttribute("instanceAlpha", outlineAlpha);
+    const quads = MODE === "quads";
 
-    const fill = new THREE.InstancedMesh(fillGeo, fillMat, COUNT);
-    const outline = new THREE.InstancedMesh(outlineGeo, outlineMat, COUNT);
-    fill.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    outline.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    fill.renderOrder = 1; outline.renderOrder = 0;
-    scene.add(outline); scene.add(fill);
+    // Sphere path (current renderer): two instanced meshes (fill + backside outline).
+    let fill, outline, fillM, outM, fillA, outA, fillAlpha, outlineAlpha;
+    // Quad path: one instanced mesh + per-instance SDF attributes.
+    let quad, quadM, quadAlpha, quadRatio, quadFillCol, quadOutCol;
+
+    if (quads) {
+      const geo = new THREE.PlaneGeometry(1, 1);
+      quadFillCol = new THREE.InstancedBufferAttribute(new Float32Array(COUNT * 3), 3);
+      quadOutCol = new THREE.InstancedBufferAttribute(new Float32Array(COUNT * 3), 3);
+      quadAlpha = new THREE.InstancedBufferAttribute(new Float32Array(COUNT), 1);
+      quadRatio = new THREE.InstancedBufferAttribute(new Float32Array(COUNT), 1);
+      quadAlpha.setUsage(THREE.DynamicDrawUsage);
+      quadRatio.setUsage(THREE.DynamicDrawUsage);
+      geo.setAttribute("aFillColor", quadFillCol);
+      geo.setAttribute("aOutlineColor", quadOutCol);
+      geo.setAttribute("aAlpha", quadAlpha);
+      geo.setAttribute("aFillRatio", quadRatio);
+      const mat = new THREE.ShaderMaterial({
+        vertexShader: quadVert, fragmentShader: quadFrag,
+        transparent: true, depthTest: true, depthWrite: true,
+      });
+      quad = new THREE.InstancedMesh(geo, mat, COUNT);
+      quad.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      quadM = quad.instanceMatrix.array;
+      scene.add(quad);
+    } else {
+      const fillGeo = new THREE.SphereGeometry(1, SEGMENTS, SEGMENTS);
+      const outlineGeo = new THREE.SphereGeometry(1, SEGMENTS, SEGMENTS);
+      const fillMat = new THREE.MeshBasicMaterial({ transparent: true });
+      const outlineMat = new THREE.MeshBasicMaterial({ transparent: true, side: THREE.BackSide });
+      patchInstanceAlpha(fillMat);
+      patchInstanceAlpha(outlineMat);
+      fillAlpha = new THREE.InstancedBufferAttribute(new Float32Array(COUNT), 1);
+      outlineAlpha = new THREE.InstancedBufferAttribute(new Float32Array(COUNT), 1);
+      fillAlpha.setUsage(THREE.DynamicDrawUsage);
+      outlineAlpha.setUsage(THREE.DynamicDrawUsage);
+      fillGeo.setAttribute("instanceAlpha", fillAlpha);
+      outlineGeo.setAttribute("instanceAlpha", outlineAlpha);
+      fill = new THREE.InstancedMesh(fillGeo, fillMat, COUNT);
+      outline = new THREE.InstancedMesh(outlineGeo, outlineMat, COUNT);
+      fill.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      outline.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      fill.renderOrder = 1; outline.renderOrder = 0;
+      scene.add(outline); scene.add(fill);
+      fillM = fill.instanceMatrix.array; outM = outline.instanceMatrix.array;
+      fillA = fillAlpha.array; outA = outlineAlpha.array;
+    }
 
     // Synthetic source data, spread through the [-5,5]^3 cube like real points.
     const lat = new Float64Array(COUNT), lon = new Float64Array(COUNT), dat = new Float64Array(COUNT);
@@ -99,37 +157,61 @@
       arr[base + 12] = x; arr[base + 13] = y; arr[base + 14] = z; arr[base + 15] = 1;
     }
 
-    const fillM = fill.instanceMatrix.array;
-    const outM = outline.instanceMatrix.array;
-    const fillA = fillAlpha.array;
-    const outA = outlineAlpha.array;
+    const fillRadius = 0.117;
+    const outlineRadius = fillRadius + 0.012;
+    const fillRatio = fillRadius / outlineRadius;
 
     function writeFrame(phase) {
-      const fillRadius = 0.117;
-      const outlineRadius = fillRadius + 0.012;
       const dy = phase * 0.0001; // tiny per-frame motion so the upload isn't elided
-      for (let i = 0; i < COUNT; i++) {
-        const b = i * 16;
-        const x = lat[i] * 10 - 5;
-        const y = dat[i] * 10 - 5 + dy;
-        const z = lon[i] * 10 - 5;
-        writeMatrix(fillM, b, x, y, z, fillRadius);
-        writeMatrix(outM, b, x, y, z, outlineRadius);
-        fillA[i] = 1; outA[i] = 1;
+      if (quads) {
+        for (let i = 0; i < COUNT; i++) {
+          const b = i * 16;
+          const x = lat[i] * 10 - 5;
+          const y = dat[i] * 10 - 5 + dy;
+          const z = lon[i] * 10 - 5;
+          // Quad transform = center + outline radius (matches the outline matrix
+          // the shipped writeInstanceFrame produces).
+          writeMatrix(quadM, b, x, y, z, outlineRadius);
+          quadAlpha.array[i] = 1;
+          quadRatio.array[i] = fillRatio;
+        }
+        quad.instanceMatrix.needsUpdate = true;
+        quadAlpha.needsUpdate = true; quadRatio.needsUpdate = true;
+      } else {
+        for (let i = 0; i < COUNT; i++) {
+          const b = i * 16;
+          const x = lat[i] * 10 - 5;
+          const y = dat[i] * 10 - 5 + dy;
+          const z = lon[i] * 10 - 5;
+          writeMatrix(fillM, b, x, y, z, fillRadius);
+          writeMatrix(outM, b, x, y, z, outlineRadius);
+          fillA[i] = 1; outA[i] = 1;
+        }
+        fill.instanceMatrix.needsUpdate = true;
+        outline.instanceMatrix.needsUpdate = true;
+        fillAlpha.needsUpdate = true; outlineAlpha.needsUpdate = true;
       }
-      fill.instanceMatrix.needsUpdate = true;
-      outline.instanceMatrix.needsUpdate = true;
-      fillAlpha.needsUpdate = true; outlineAlpha.needsUpdate = true;
     }
 
-    // Set colors once up front (allocates instanceColor); never touched per frame.
+    // Set colors once up front; never touched per frame. Outline is white (the
+    // unselected ring), matching the shipped renderer.
+    const out = new THREE.Color("#ffffff");
     for (let i = 0; i < COUNT; i++) {
       col.set(palette[i % palette.length]);
-      fill.setColorAt(i, col);
-      outline.setColorAt(i, col);
+      if (quads) {
+        quadFillCol.array[i * 3] = col.r; quadFillCol.array[i * 3 + 1] = col.g; quadFillCol.array[i * 3 + 2] = col.b;
+        quadOutCol.array[i * 3] = out.r; quadOutCol.array[i * 3 + 1] = out.g; quadOutCol.array[i * 3 + 2] = out.b;
+      } else {
+        fill.setColorAt(i, col);
+        outline.setColorAt(i, col);
+      }
     }
-    if (fill.instanceColor) fill.instanceColor.needsUpdate = true;
-    if (outline.instanceColor) outline.instanceColor.needsUpdate = true;
+    if (quads) {
+      quadFillCol.needsUpdate = true; quadOutCol.needsUpdate = true;
+    } else {
+      if (fill.instanceColor) fill.instanceColor.needsUpdate = true;
+      if (outline.instanceColor) outline.instanceColor.needsUpdate = true;
+    }
     writeFrame(0);
 
     let angle = 0;
@@ -167,6 +249,7 @@
       const result = {
         count: COUNT,
         segments: SEGMENTS,
+        mode: MODE,
         orbitFps: Math.round(orbitFps),
         scrubFps: Math.round(scrubFps),
         gl: renderer.getContext().getParameter(renderer.getContext().RENDERER) || "unknown",
