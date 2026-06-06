@@ -11,6 +11,7 @@ import { DSTCamera } from "./dst-camera";
 import { MapPlane } from "./map-plane";
 import { MarqueeOverlay } from "./marquee-overlay";
 import { InstancedPoints } from "./instanced-points";
+import { QuadInstancedPoints, QUAD_LOD_THRESHOLD } from "./quad-instanced-points";
 import "./scatter-plot.scss";
 import { codapData } from "../../models/codap-data";
 
@@ -95,7 +96,9 @@ export const ScatterPlot = observer(function ScatterPlot() {
             name={controlName}
           />
           <ambientLight intensity={2.75} />
-          <InstancedPoints />
+          {/* LOD: spheres for small datasets, billboarded quads for large ones
+              so weak GPUs stay interactive. Switch is purely point-count based. */}
+          {codapData.caseIds.length >= QUAD_LOD_THRESHOLD ? <QuadInstancedPoints /> : <InstancedPoints />}
           <MapPlane />
           <EffectComposer>
             <HueSaturation saturation={0.05} />
