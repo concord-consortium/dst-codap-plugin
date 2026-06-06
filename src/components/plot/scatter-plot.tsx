@@ -15,6 +15,16 @@ import { QuadInstancedPoints, QUAD_LOD_THRESHOLD } from "./quad-instanced-points
 import "./scatter-plot.scss";
 import { codapData } from "../../models/codap-data";
 
+// Chooses the point renderer: count-based LOD by default, with a ?points= URL
+// override (quads | spheres) so the same dataset can be rendered both ways for
+// visual/selection parity checks.
+function usePointQuads(count: number): boolean {
+  const override = new URLSearchParams(window.location.search).get("points");
+  if (override === "quads") return true;
+  if (override === "spheres") return false;
+  return count >= QUAD_LOD_THRESHOLD;
+}
+
 export const ScatterPlot = observer(function ScatterPlot() {
   const [cameraRef, setCameraRef] = useState<Maybe<any>>();
   const controlName = "scatter-plot-controls";
@@ -97,8 +107,9 @@ export const ScatterPlot = observer(function ScatterPlot() {
           />
           <ambientLight intensity={2.75} />
           {/* LOD: spheres for small datasets, billboarded quads for large ones
-              so weak GPUs stay interactive. Switch is purely point-count based. */}
-          {codapData.caseIds.length >= QUAD_LOD_THRESHOLD ? <QuadInstancedPoints /> : <InstancedPoints />}
+              so weak GPUs stay interactive. Count-based by default; ?points=quads
+              or ?points=spheres forces a mode for same-data A/B verification. */}
+          {usePointQuads(codapData.caseIds.length) ? <QuadInstancedPoints /> : <InstancedPoints />}
           <MapPlane />
           <EffectComposer>
             <HueSaturation saturation={0.05} />
