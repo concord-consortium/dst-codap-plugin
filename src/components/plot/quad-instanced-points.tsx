@@ -11,7 +11,8 @@ import { dstContainer } from "../../models/dst-container";
 import { datasetConfig } from "../../models/dataset-config";
 import { computeNumericThresholds, getCaseColor, DEFAULT_POINT_COLOR } from "../../utilities/point-color-utils";
 import { writeInstanceFrame } from "../../utilities/instance-frame";
-import { pickPointAt, ScreenPoints } from "../../utilities/point-picking";
+import { pickPointAt } from "../../utilities/point-picking";
+import { projectInstancesToScreen } from "../../utilities/point-projection";
 import { createPointQuadMaterial } from "./point-quad-material";
 
 const graphRange = graphMax - graphMin;
@@ -281,37 +282,9 @@ export const QuadInstancedPoints = observer(function QuadInstancedPoints() {
     const px = event.clientX - rect.left;
     const py = event.clientY - rect.top;
 
-    const sp: ScreenPoints = {
-      count: n,
-      screenX: new Float32Array(n),
-      screenY: new Float32Array(n),
-      screenR: new Float32Array(n),
-      depth: new Float32Array(n),
-      hidden: new Uint8Array(n),
-    };
-    const m = mesh.instanceMatrix.array as Float32Array;
-    const world = mesh.matrixWorld;
-    const center = new THREE.Vector3();
-    const edge = new THREE.Vector3();
-    const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0).normalize();
-    for (let i = 0; i < n; i++) {
-      const b = i * 16;
-      const scale = m[b]; // uniform scale = outline radius; 0 when culled
-      if (scale <= 0) { sp.hidden[i] = 1; continue; }
-      center.set(m[b + 12], m[b + 13], m[b + 14]).applyMatrix4(world);
-      edge.copy(center).addScaledVector(right, scale);
-      center.project(camera);
-      edge.project(camera);
-      const cx = (center.x * 0.5 + 0.5) * size.width;
-      const cy = (-center.y * 0.5 + 0.5) * size.height;
-      const ex = (edge.x * 0.5 + 0.5) * size.width;
-      const ey = (-edge.y * 0.5 + 0.5) * size.height;
-      sp.screenX[i] = cx;
-      sp.screenY[i] = cy;
-      sp.screenR[i] = Math.hypot(ex - cx, ey - cy);
-      sp.depth[i] = center.z;
-    }
-
+    const sp = projectInstancesToScreen(
+      mesh.instanceMatrix.array as Float32Array, n, mesh.matrixWorld, camera, size.width, size.height
+    );
     const hit = pickPointAt(px, py, sp);
     if (hit < 0) return;
     const id = caseIds[hit];
