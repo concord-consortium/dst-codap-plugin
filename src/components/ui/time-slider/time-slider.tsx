@@ -52,8 +52,10 @@ export const TimeSlider = observer(function TimeSlider() {
       })}
       <SliderThumb
         className="map-slider-thumb-container left-rounded"
-        maxPercent={graph.maxDatePercent}
-        minPercent={graph.minDatePercent}
+        // Locked: the map plane is freed to slide the full axis; unlocked it's
+        // confined to the slice.
+        maxPercent={graph.sliceLocked ? 1 : graph.maxDatePercent}
+        minPercent={graph.sliceLocked ? 0 : graph.minDatePercent}
         percent={graph.mapDatePercent}
         setPercent={percent => graph.setMapDatePercent(percent)}
         topOffset={mapSliderThumbOffset}

@@ -411,11 +411,17 @@ class Graph {
     // Reveal the whole slice — while locked the scrub dot is replaced by the
     // slice drag handle, so the full band between the triangles is shown.
     this.currentDatePercent = this.maxDatePercent;
+    // Detach the map plane: drop it to the bottom of the axis, where it's then
+    // free to roam the full timeframe independent of the slice.
+    this.mapDatePercent = 0;
   }
 
   unlockSlice() {
     this.sliceLocked = false;
     this.animatingDate = false;
+    // Re-clamp the map plane back inside the slice it's constrained to when
+    // unlocked.
+    this.setMapDatePercent(this.mapDatePercent);
   }
 
   toggleSliceLock() {
@@ -438,7 +444,11 @@ class Graph {
   }
 
   setMapDatePercent(date: number) {
-    this.mapDatePercent = datePercentInRange(date, this.minDatePercent, this.maxDatePercent);
+    // Unlocked, the map plane is confined to the slice; locked, it roams the
+    // full axis independent of the slice.
+    this.mapDatePercent = this.sliceLocked
+      ? datePercentInRange(date)
+      : datePercentInRange(date, this.minDatePercent, this.maxDatePercent);
   }
 
   setMaxDatePercent(date: number) {

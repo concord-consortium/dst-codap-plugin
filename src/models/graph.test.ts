@@ -145,6 +145,22 @@ describe("graph", () => {
       }, 600);
     });
 
+    it("frees the map plane to the full axis when locked, re-confines on unlock", () => {
+      graph.setMinDatePercent(0.4);
+      graph.setMaxDatePercent(0.8);
+      graph.setMapDatePercent(0.5); // confined to the slice while unlocked
+      expect(graph.mapDatePercent).toBeCloseTo(0.5);
+
+      graph.lockSlice();
+      expect(graph.mapDatePercent).toBeCloseTo(0); // dropped to the bottom
+      graph.setMapDatePercent(0.95);               // roams the full axis now
+      expect(graph.mapDatePercent).toBeCloseTo(0.95);
+
+      graph.unlockSlice();
+      // Re-confined to the slice [0.4, 0.8] → clamped down to the top.
+      expect(graph.mapDatePercent).toBeCloseTo(0.8);
+    });
+
     it("unlocking re-zooms the cube to the slice", () => {
       graph.setMinDatePercent(0.4);
       graph.setMaxDatePercent(0.8);
