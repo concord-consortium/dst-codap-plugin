@@ -58,3 +58,24 @@ npx cypress run --browser chrome --spec cypress/benchmarks/quad-vs-sphere.cy.js 
 ```
 
 Screenshots land in `cypress/screenshots/quad-vs-sphere.cy.js/`.
+
+### Quantified parity (no new deps)
+
+`scripts/png-diff.mjs` (built-in `zlib` only) measures the spheres-vs-quads
+difference. Across all three states, ~97% of pixels match within tolerance and
+real color changes (>96/255) are <1% — the residual is disc-edge antialiasing
+and ring rendering, expected between two render methods. This is the
+"pixel-close" measurement:
+
+| state       | pixels differing >32 | real color change >96 |
+|-------------|----------------------|-----------------------|
+| default     | 2.94%                | 0.67%                 |
+| selected    | 3.50%                | 0.98%                 |
+| see-through | 3.78%                | 0.40%                 |
+
+```bash
+node scripts/png-diff.mjs \
+  cypress/screenshots/quad-vs-sphere.cy.js/points-spheres.png \
+  cypress/screenshots/quad-vs-sphere.cy.js/points-quads.png
+```
+
