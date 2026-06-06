@@ -1,0 +1,75 @@
+.slice-lock {
+  // Color tiers: light gray at rest, darker on hover, darker still when locked.
+  --slice-lock-color: #b4b8bc;
+  --slice-lock-color-hover: #76797d;
+  --slice-lock-color-locked: #54585c;
+  --slice-lock-color-locked-hover: #303336;
+
+  position: absolute;
+  inset: 0;
+  pointer-events: none; // only the line + lock are interactive
+
+  .slice-lock-line {
+    position: absolute;
+    width: 0;
+    border-left: 1.5px dashed var(--slice-lock-color);
+    transform: translateX(-50%);
+    pointer-events: auto;
+    transition: border-color 0.12s ease;
+  }
+
+  .slice-lock-button {
+    align-items: center;
+    background: white;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    color: var(--slice-lock-color);
+    cursor: pointer;
+    display: flex;
+    height: 20px;
+    justify-content: center;
+    padding: 0;
+    pointer-events: auto;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    transition: color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
+    width: 20px;
+
+    .slice-lock-icon {
+      height: 11px;
+      width: 11px;
+    }
+
+    &.grow {
+      transform: translate(-50%, -50%) scale(1.22);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.28);
+    }
+
+    &:focus { outline: none; }
+
+    // Keyboard focus gets an intentional teal ring (matches the slider accent)
+    // rather than the browser's default amber box.
+    &:focus-visible {
+      outline: 2px solid #177991;
+      outline-offset: 2px;
+    }
+  }
+
+  // Hovering the line or the lock darkens both together.
+  &.hovering {
+    .slice-lock-line { border-left-color: var(--slice-lock-color-hover); }
+    .slice-lock-button { color: var(--slice-lock-color-hover); }
+  }
+
+  // Locked: line + lock sit a notch darker, and hover deepens further.
+  &.locked {
+    .slice-lock-line { border-left-color: var(--slice-lock-color-locked); }
+    .slice-lock-button { color: var(--slice-lock-color-locked); }
+
+    &.hovering {
+      .slice-lock-line { border-left-color: var(--slice-lock-color-locked-hover); }
+      .slice-lock-button { color: var(--slice-lock-color-locked-hover); }
+    }
+  }
+}

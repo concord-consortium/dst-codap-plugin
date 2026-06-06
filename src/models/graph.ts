@@ -26,6 +26,10 @@ class Graph {
   mapDatePercent = 0;
   currentDatePercent = 1;
   animatingDate = false;
+  // When a slice is locked, the two range triangles hold a fixed separation and
+  // move together as a unit; the cube z-axis zooms out to the full dataset so the
+  // slice reads as a band sliding through the whole timeframe. See lockSlice().
+  sliceLocked = false;
 
   absoluteMinLatitude = kBackgroundLatMin; // The absolute min latitude
   absoluteMaxLatitude = kBackgroundLatMax; // The absolute max latitude
@@ -91,9 +95,18 @@ class Graph {
     }
 
     if (this.animatingDate) {
-      this.setCurrentDatePercent(this.currentDatePercent + dt / 1000 * dateAnimationRate);
-      if (this.currentDatePercent >= this.maxDatePercent) {
-        this.setAnimatingDate(false);
+      const step = dt / 1000 * dateAnimationRate;
+      if (this.sliceLocked) {
+        // Translate the whole slice upward until its top triangle reaches the top.
+        this.translateSlice(step);
+        if (this.maxDatePercent >= 1) {
+          this.setAnimatingDate(false);
+        }
+      } else {
+        this.setCurrentDatePercent(this.currentDatePercent + step);
+        if (this.currentDatePercent >= this.maxDatePercent) {
+          this.setAnimatingDate(false);
+        }
       }
     }
   }
@@ -170,11 +183,46 @@ class Graph {
   }
 
   convertPercentToGraph(percent: number) {
-    return (percent - this.minDatePercent) / (this.maxDatePercent - this.minDatePercent) * graphRange + graphMin;
+    return (percent - this.projMinDatePercent) / this.projDatePercentSpan * graphRange + graphMin;
+  }
+
+  // Basis the cube z-axis projects against. Unlocked: the slice fills the cube
+  // (zoom to slice). Locked: the full dataset [0,1] fills the cube, so the slice
+  // shows as a band that slides through the whole timeframe.
+  get projMinDatePercent() {
+    return this.sliceLocked ? 0 : this.minDatePercent;
+  }
+
+  get projDatePercentSpan() {
+    return (this.sliceLocked ? 1 : this.maxDatePercent - this.minDatePercent) || 1;
+  }
+
+  // Dates labelling the cube z-axis, matching the projection basis above.
+  get axisMinDate() {
+    return this.convertPercentToDate(this.projMinDatePercent);
+  }
+
+  get axisMaxDate() {
+    return this.convertPercentToDate(this.projMinDatePercent + this.projDatePercentSpan);
+  }
+
+  // A slice exists once either triangle is pulled off its extreme; this is when
+  // the lock affordance appears and locking becomes possible.
+  get sliceExists() {
+    return this.minDatePercent > 0 || this.maxDatePercent < 1;
+  }
+
+  get sliceSeparation() {
+    return this.maxDatePercent - this.minDatePercent;
+  }
+
+  // Midpoint of the slice (0..1) — the locked drag handle rides here.
+  get sliceCenter() {
+    return (this.minDatePercent + this.maxDatePercent) / 2;
   }
 
   get canAnimateDate() {
-    return this.currentDatePercent < this.maxDatePercent;
+    return this.sliceLocked ? this.maxDatePercent < 1 : this.currentDatePercent < this.maxDatePercent;
   }
 
   get canPanDown() {
@@ -350,10 +398,39 @@ class Graph {
     this.mapDatePercent = 0;
     this.currentDatePercent = 1;
     this.animatingDate = false;
+    this.sliceLocked = false;
   }
 
   setAnimatingDate(animating: boolean) {
     this.animatingDate = animating;
+  }
+
+  lockSlice() {
+    if (!this.sliceExists) return;
+    this.sliceLocked = true;
+    // Reveal the whole slice — while locked the scrub dot is replaced by the
+    // slice drag handle, so the full band between the triangles is shown.
+    this.currentDatePercent = this.maxDatePercent;
+  }
+
+  unlockSlice() {
+    this.sliceLocked = false;
+    this.animatingDate = false;
+  }
+
+  toggleSliceLock() {
+    if (this.sliceLocked) this.unlockSlice();
+    else this.lockSlice();
+  }
+
+  // Slide a locked slice along the axis by delta (in 0..1 percent), preserving
+  // the triangle separation and keeping both triangles within [0, 1].
+  translateSlice(delta: number) {
+    if (!this.sliceLocked) return;
+    const clamped = Math.max(-this.minDatePercent, Math.min(1 - this.maxDatePercent, delta));
+    this.minDatePercent += clamped;
+    this.maxDatePercent += clamped;
+    this.currentDatePercent = this.maxDatePercent;
   }
 
   setCurrentDatePercent(date: number) {

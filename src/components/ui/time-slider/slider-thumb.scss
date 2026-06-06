@@ -73,10 +73,20 @@
     }
   }
 
+  &.slice-handle {
+    .slider-thumb {
+      left: 3px; // center the 34px ridged handle where the 40px dot sat
+    }
+  }
+
   .slider-thumb {
     cursor: pointer;
     position: absolute;
-  
+
+    &.disabled {
+      cursor: default;
+    }
+
     .slider-thumb-center {
       fill: white;
       fill-opacity: .8;

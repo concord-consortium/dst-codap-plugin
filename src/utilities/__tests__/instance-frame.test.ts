@@ -25,7 +25,8 @@ function baseParams(overrides: Partial<InstanceFrameParams> = {}): InstanceFrame
     absDateRange: realCodapData.absoluteDateRange || 1,
     minDatePercent: graph.minDatePercent,
     currentDatePercent: graph.currentDatePercent,
-    datePercentSpan: (graph.maxDatePercent - graph.minDatePercent) || 1,
+    projMinDatePercent: graph.projMinDatePercent,
+    projDatePercentSpan: graph.projDatePercentSpan,
     graphMin,
     graphRange,
     showSelected: true,
@@ -110,6 +111,34 @@ describe("writeInstanceFrame projection parity", () => {
     // Selected outline is red, unselected is white.
     expect([p.outlineColor[0], p.outlineColor[1], p.outlineColor[2]]).toEqual([1, 0, 0]);
     expect([p.outlineColor[3], p.outlineColor[4], p.outlineColor[5]]).toEqual([1, 1, 1]);
+  });
+
+  it("projects a locked slice against the full range while still filtering to it", () => {
+    // Locked slice [0.4, 0.6] projected against the full dataset [0, 1]: a point
+    // at the slice's top maps near the cube center, not the cube top, and a point
+    // just outside the slice is hidden even though it's inside the full range.
+    const midSlice = realCodapData.absoluteMinDate + realCodapData.absoluteDateRange * 0.6;
+    const inside = baseParams({
+      dateArr: new Float64Array([midSlice]),
+      minDatePercent: 0.4,
+      currentDatePercent: 0.6,
+      projMinDatePercent: 0,    // locked → project against full range
+      projDatePercentSpan: 1,
+    });
+    writeInstanceFrame(inside);
+    // 0.6 of the full range → 0.6 * graphRange + graphMin = 0.1 (near center), not graphMax.
+    expect(inside.fillAlpha[0]).toBe(1);
+    expect(inside.fillMatrix[13]).toBeCloseTo(0.6 * graphRange + graphMin, 5);
+
+    const outside = baseParams({
+      dateArr: new Float64Array([realCodapData.absoluteMinDate + realCodapData.absoluteDateRange * 0.7]),
+      minDatePercent: 0.4,
+      currentDatePercent: 0.6,
+      projMinDatePercent: 0,
+      projDatePercentSpan: 1,
+    });
+    writeInstanceFrame(outside);
+    expect(outside.fillAlpha[0]).toBe(0); // outside slice → hidden despite being in full range
   });
 
   it("grows selected points and their outline", () => {

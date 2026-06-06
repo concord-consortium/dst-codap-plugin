@@ -10,6 +10,8 @@ import { graph } from "../../../models/graph";
 import { UIButton } from "../ui-button";
 import { UIButtonContainer } from "../ui-button-container";
 import { MaxDateRangeSliderThumb, MinDateRangeSliderThumb } from "./date-range-slider-thumb";
+import RidgedHandle from "./ridged-handle";
+import { SliceLock } from "./slice-lock";
 import { SliderThumb } from "./slider-thumb";
 import { TimeLine } from "./time-line";
 import {
@@ -60,16 +62,32 @@ export const TimeSlider = observer(function TimeSlider() {
       {!minMaxSlider && <MaxDateRangeSliderThumb />}
       <MinDateRangeSliderThumb />
       {minMaxSlider && <MaxDateRangeSliderThumb />}
-      <SliderThumb
-        className="time-slider-thumb-container right-rounded"
-        LabelBackground={TimeSliderDateContainer}
-        maxPercent={graph.maxDatePercent}
-        minPercent={graph.minDatePercent}
-        percent={graph.currentDatePercent}
-        setPercent={percent => graph.setCurrentDatePercent(percent)}
-        topOffset={timeSliderThumbOffset}
-        ThumbIcon={TimeSliderThumb}
-      />
+      <SliceLock />
+      {graph.sliceLocked ? (
+        // Locked: the scrub dot becomes the ridged drag handle that slides the
+        // whole slice. It rides at the slice center, clamped so neither triangle
+        // leaves [0, 1].
+        <SliderThumb
+          className="time-slider-thumb-container right-rounded slice-handle"
+          maxPercent={1 - graph.sliceSeparation / 2}
+          minPercent={graph.sliceSeparation / 2}
+          percent={graph.sliceCenter}
+          setPercent={target => graph.translateSlice(target - graph.sliceCenter)}
+          topOffset={timeSliderThumbOffset}
+          ThumbIcon={RidgedHandle}
+        />
+      ) : (
+        <SliderThumb
+          className="time-slider-thumb-container right-rounded"
+          LabelBackground={TimeSliderDateContainer}
+          maxPercent={graph.maxDatePercent}
+          minPercent={graph.minDatePercent}
+          percent={graph.currentDatePercent}
+          setPercent={percent => graph.setCurrentDatePercent(percent)}
+          topOffset={timeSliderThumbOffset}
+          ThumbIcon={TimeSliderThumb}
+        />
+      )}
       <UIButtonContainer className="play-container">
         <UIButton
           className="play-button top bottom"

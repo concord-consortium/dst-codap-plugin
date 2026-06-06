@@ -127,9 +127,9 @@ export const CubeOutline = observer(function CubeOutline({ cameraRef }: ICubeOut
       {displayTimeAxis && (
         <TimeAxis
           endPoint={new Vector3(yAxisX, yMax, yAxisZ)}
-          minValue={graph.minDate}
+          minValue={graph.axisMinDate}
           startPoint={new Vector3(yAxisX, yMin, yAxisZ)}
-          maxValue={graph.maxDate}
+          maxValue={graph.axisMaxDate}
         />
       )}
       {displayZAxis && (
