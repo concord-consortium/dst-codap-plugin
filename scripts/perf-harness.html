@@ -37,6 +37,10 @@
     const SEGMENTS = Number(new URLSearchParams(location.search).get("seg") || 8);
     // mode=spheres (default, current renderer) | quads (billboarded SDF discs).
     const MODE = new URLSearchParams(location.search).get("mode") || "spheres";
+    // select=0..1 fraction of points drawn selected (red ring + grown); seethrough=1
+    // dims unselected points. Used for state-by-state spheres-vs-quads parity.
+    const SELECT = Number(new URLSearchParams(location.search).get("select") || 0);
+    const SEETHROUGH = new URLSearchParams(location.search).get("seethrough") === "1";
 
     const resultEl = document.getElementById("result");
     const renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -157,35 +161,43 @@ void main() {
       arr[base + 12] = x; arr[base + 13] = y; arr[base + 14] = z; arr[base + 15] = 1;
     }
 
-    const fillRadius = 0.117;
-    const outlineRadius = fillRadius + 0.012;
-    const fillRatio = fillRadius / outlineRadius;
+    // Per-instance state, derived exactly like the shipped writeInstanceFrame:
+    // selected points grow (selectedExtra) and ring red with a thicker outline;
+    // unselected ring white and dim under see-through. Static here (selection
+    // doesn't change per frame), so precompute once.
+    const BASE_FILL = 0.117, SEL_EXTRA = 0.02, UNSEL_THICK = 0.012, SEL_THICK = 0.03;
+    const selStride = SELECT > 0 ? Math.max(2, Math.round(1 / SELECT)) : 0;
+    const fillR = new Float32Array(COUNT), outR = new Float32Array(COUNT), alpha = new Float32Array(COUNT);
+    const sel = new Uint8Array(COUNT);
+    for (let i = 0; i < COUNT; i++) {
+      const selected = selStride > 0 && (i % selStride === 0);
+      sel[i] = selected ? 1 : 0;
+      const fr = BASE_FILL + (selected ? SEL_EXTRA : 0);
+      fillR[i] = fr;
+      outR[i] = fr + (selected ? SEL_THICK : UNSEL_THICK);
+      alpha[i] = selected ? 1 : (SEETHROUGH ? 0.2 : 1);
+    }
 
     function writeFrame(phase) {
       const dy = phase * 0.0001; // tiny per-frame motion so the upload isn't elided
       if (quads) {
         for (let i = 0; i < COUNT; i++) {
           const b = i * 16;
-          const x = lat[i] * 10 - 5;
-          const y = dat[i] * 10 - 5 + dy;
-          const z = lon[i] * 10 - 5;
-          // Quad transform = center + outline radius (matches the outline matrix
-          // the shipped writeInstanceFrame produces).
-          writeMatrix(quadM, b, x, y, z, outlineRadius);
-          quadAlpha.array[i] = 1;
-          quadRatio.array[i] = fillRatio;
+          const x = lat[i] * 10 - 5, y = dat[i] * 10 - 5 + dy, z = lon[i] * 10 - 5;
+          // Quad transform = center + outline radius (the outline matrix).
+          writeMatrix(quadM, b, x, y, z, outR[i]);
+          quadAlpha.array[i] = alpha[i];
+          quadRatio.array[i] = fillR[i] / outR[i];
         }
         quad.instanceMatrix.needsUpdate = true;
         quadAlpha.needsUpdate = true; quadRatio.needsUpdate = true;
       } else {
         for (let i = 0; i < COUNT; i++) {
           const b = i * 16;
-          const x = lat[i] * 10 - 5;
-          const y = dat[i] * 10 - 5 + dy;
-          const z = lon[i] * 10 - 5;
-          writeMatrix(fillM, b, x, y, z, fillRadius);
-          writeMatrix(outM, b, x, y, z, outlineRadius);
-          fillA[i] = 1; outA[i] = 1;
+          const x = lat[i] * 10 - 5, y = dat[i] * 10 - 5 + dy, z = lon[i] * 10 - 5;
+          writeMatrix(fillM, b, x, y, z, fillR[i]);
+          writeMatrix(outM, b, x, y, z, outR[i]);
+          fillA[i] = alpha[i]; outA[i] = alpha[i];
         }
         fill.instanceMatrix.needsUpdate = true;
         outline.instanceMatrix.needsUpdate = true;
@@ -193,17 +205,18 @@ void main() {
       }
     }
 
-    // Set colors once up front; never touched per frame. Outline is white (the
-    // unselected ring), matching the shipped renderer.
-    const out = new THREE.Color("#ffffff");
+    // Colors set once. Ring is red for selected / white otherwise — matching the
+    // shipped renderer's outline color (both modes, so the A/B is faithful).
+    const white = new THREE.Color("#ffffff"), red = new THREE.Color("#ff0000");
     for (let i = 0; i < COUNT; i++) {
       col.set(palette[i % palette.length]);
+      const ring = sel[i] ? red : white;
       if (quads) {
         quadFillCol.array[i * 3] = col.r; quadFillCol.array[i * 3 + 1] = col.g; quadFillCol.array[i * 3 + 2] = col.b;
-        quadOutCol.array[i * 3] = out.r; quadOutCol.array[i * 3 + 1] = out.g; quadOutCol.array[i * 3 + 2] = out.b;
+        quadOutCol.array[i * 3] = ring.r; quadOutCol.array[i * 3 + 1] = ring.g; quadOutCol.array[i * 3 + 2] = ring.b;
       } else {
         fill.setColorAt(i, col);
-        outline.setColorAt(i, col);
+        outline.setColorAt(i, ring);
       }
     }
     if (quads) {

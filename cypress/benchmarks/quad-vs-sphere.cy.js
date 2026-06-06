@@ -17,6 +17,18 @@ describe("quad vs sphere point renderer", () => {
       cy.screenshot(`points-${mode}`, { capture: "viewport" });
     });
 
+    it(`renders ${mode} selected (visual)`, () => {
+      cy.visit(`/scripts/perf-harness.html?count=150&mode=${mode}&select=0.25`);
+      cy.window({ timeout: 30000 }).its("__perf").should("exist");
+      cy.screenshot(`points-${mode}-selected`, { capture: "viewport" });
+    });
+
+    it(`renders ${mode} see-through (visual)`, () => {
+      cy.visit(`/scripts/perf-harness.html?count=150&mode=${mode}&select=0.25&seethrough=1`);
+      cy.window({ timeout: 30000 }).its("__perf").should("exist");
+      cy.screenshot(`points-${mode}-seethrough`, { capture: "viewport" });
+    });
+
     it(`benchmarks ${mode} @200K (fps)`, () => {
       cy.visit(`/scripts/perf-harness.html?count=200000&mode=${mode}`);
       cy.window({ timeout: 30000 }).its("__perf").should("exist");
