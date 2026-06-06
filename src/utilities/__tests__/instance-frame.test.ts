@@ -88,6 +88,24 @@ describe("writeInstanceFrame projection parity", () => {
     expect(p.fillAlpha[0]).toBe(0);
   });
 
+  it("emits quadFillRatio = fillRadius/outlineRadius for the quad path", () => {
+    const quadFillRatio = new Float32Array(1);
+    const p = baseParams({ quadFillRatio });
+    writeInstanceFrame(p);
+    // Unselected: fillRadius = 6 * 0.0195 = 0.117; outlineRadius adds 0.012.
+    const fillRadius = 6 * 0.0195;
+    const outlineRadius = fillRadius + 0.012;
+    expect(quadFillRatio[0]).toBeCloseTo(fillRadius / outlineRadius, 5);
+    expect(quadFillRatio[0]).toBeGreaterThan(0);
+    expect(quadFillRatio[0]).toBeLessThan(1);
+
+    // Hidden instances get 0 (no ring boundary).
+    const hidden = new Float32Array(1);
+    const ph = baseParams({ quadFillRatio: hidden, latArr: new Float64Array([graph.maxLatitude + 100]) });
+    writeInstanceFrame(ph);
+    expect(hidden[0]).toBe(0);
+  });
+
   it("applies see-through opacity to unselected and full opacity to selected", () => {
     const p = baseParams({
       count: 2,

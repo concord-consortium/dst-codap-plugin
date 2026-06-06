@@ -59,6 +59,11 @@ export interface InstanceFrameParams {
   fillAlpha: Float32Array;     // count
   outlineAlpha: Float32Array;  // count
   outlineColor: Float32Array;  // 3 * count
+  // Optional output for the billboarded-quad renderer: fillRadius / outlineRadius
+  // per instance, i.e. where the SDF ring begins. The quad path uses the outline
+  // matrix as its transform (center + outline radius) and this ratio to place the
+  // fill/ring boundary, so it needs no separate fill geometry.
+  quadFillRatio?: Float32Array; // count
 }
 
 // Writes an identity-rotation translation+uniform-scale matrix into a 16-float
@@ -78,7 +83,7 @@ export function writeInstanceFrame(p: InstanceFrameParams): void {
     graphMin, graphRange,
     showSelected, showUnselected, seeThrough, unselectedOpacity,
     pxToWorld, selectedExtra, outlineThicknessUnselected, outlineThicknessSelected,
-    fillMatrix, outlineMatrix, fillAlpha, outlineAlpha, outlineColor,
+    fillMatrix, outlineMatrix, fillAlpha, outlineAlpha, outlineColor, quadFillRatio,
   } = p;
 
   for (let i = 0; i < count; i++) {
@@ -108,6 +113,7 @@ export function writeInstanceFrame(p: InstanceFrameParams): void {
       writeMatrix(outlineMatrix, mBase, 0, 0, 0, 0);
       fillAlpha[i] = 0;
       outlineAlpha[i] = 0;
+      if (quadFillRatio) quadFillRatio[i] = 0;
       continue;
     }
 
@@ -123,6 +129,7 @@ export function writeInstanceFrame(p: InstanceFrameParams): void {
     writeMatrix(outlineMatrix, mBase, x, y, z, outlineRadius);
     fillAlpha[i] = opacity;
     outlineAlpha[i] = opacity;
+    if (quadFillRatio) quadFillRatio[i] = outlineRadius > 0 ? fillRadius / outlineRadius : 0;
 
     // Pure red / white are identical in sRGB and linear space, so writing the
     // raw components matches THREE.Color("#FF0000")/("#FFFFFF") + setColorAt.
