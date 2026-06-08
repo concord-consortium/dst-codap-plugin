@@ -12,6 +12,7 @@ import { MapPlane } from "./map-plane";
 import { MarqueeOverlay } from "./marquee-overlay";
 import { InstancedPoints } from "./instanced-points";
 import { QuadInstancedPoints, QUAD_LOD_THRESHOLD } from "./quad-instanced-points";
+import { DebugHud } from "./debug-hud";
 import "./scatter-plot.scss";
 import { codapData } from "../../models/codap-data";
 
@@ -116,6 +117,7 @@ export const ScatterPlot = observer(function ScatterPlot() {
           </EffectComposer>
         </Canvas>
         {ui.mode === "marquee" && <MarqueeOverlay cameraRef={cameraRef} />}
+        <DebugHud />
       </div>
     </div>
   );
