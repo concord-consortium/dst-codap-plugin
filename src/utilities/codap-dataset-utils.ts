@@ -165,20 +165,27 @@ export async function loadConfiguredData(): Promise<void> {
   }
   
   try {
+    // [timing] phase breakdown to locate the multi-minute load cost.
+    const t0 = performance.now();
     // Load the dataset using the configured context name
     await getData(datasetConfig.dataContextName);
-    
+    console.log(`[timing] getData: ${Math.round(performance.now() - t0)}ms`);
+
     // Set up selection synchronization with the configured context
     setupSelectionSynchronization(datasetConfig.dataContextName);
-    
+
     // Add a small delay to ensure data is fully loaded before calculating date range
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     // Calculate and set the absolute date range from the actual data
+    const t1 = performance.now();
     await updateDateRangeFromData(datasetConfig.dataContextName);
-    
+    console.log(`[timing] updateDateRangeFromData: ${Math.round(performance.now() - t1)}ms`);
+
     // Calculate and set the map bounds based on the geographic range of the data
+    const t2 = performance.now();
     await updateMapBoundsFromData(datasetConfig.dataContextName);
+    console.log(`[timing] updateMapBoundsFromData: ${Math.round(performance.now() - t2)}ms`);
   } catch (error) {
     console.error("Error loading configured data:", error);
   }

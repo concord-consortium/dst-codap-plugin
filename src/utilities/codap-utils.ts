@@ -197,6 +197,7 @@ export async function getData(contextName: string = dataContextName) {
     // hardcoded "Cases" only matches the bundled tornado sample.
     const collectionName = await resolveLeafCollectionName(contextName, dataContextResult.values);
 
+    const tFetch = performance.now();
     const casesResult = await fetchAllVisibleCases(contextName, collectionName);
 
     if (!casesResult.success) {
@@ -206,12 +207,16 @@ export async function getData(contextName: string = dataContextName) {
     }
 
     const casesValues = casesResult.values as DIGetCaseResult["case"][];
+    console.log(`[timing] fetchAllVisibleCases: ${Math.round(performance.now() - tFetch)}ms, cases: ${casesValues.length}`);
     // The id should never be undefined but it is typed that way
     const cases: ICaseCreation[] = casesValues.map(aCase => ({ __id__: toV3CaseId(aCase.id!), ...aCase.values }));
 
+    const tSet = performance.now();
     setDSTCases(cases);
+    console.log(`[timing] setDSTCases(${cases.length}): ${Math.round(performance.now() - tSet)}ms`);
 
     // Update date range
+    const tDate = performance.now();
     const dates = codapData.caseIds
       .map(caseId => codapData.getCaseDate(caseId))
       .filter((date): date is number => date !== undefined && isFinite(date));
@@ -225,6 +230,7 @@ export async function getData(contextName: string = dataContextName) {
     } else {
       console.warn("No valid dates found in the dataset");
     }
+    console.log(`[timing] getData date range (${dates.length} dates): ${Math.round(performance.now() - tDate)}ms`);
   } catch (error) {
     // This will happen if not embedded in CODAP
     console.warn("Not embedded in CODAP", error);
