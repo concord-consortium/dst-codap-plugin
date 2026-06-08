@@ -103,17 +103,7 @@ async function fetchDatasetAttributes(dataContextName: string): Promise<string[]
       resource: `dataContext[${dataContextName}]`
     }) as CodapApiResult;
 
-    // DIAGNOSTIC: summarize what CODAP returned for the context so we can see the
-    // actual structure (hierarchical? attrs inline?) when attributes come back empty.
-    try {
-      const v: any = (contextResult as any)?.values;
-      const cols = Array.isArray(v?.collections) ? v.collections : [];
-      console.log("[attrs] dataContext ok:", contextResult?.success,
-        "collections:", cols.map((c: any) => ({ name: c?.name, attrs: Array.isArray(c?.attrs) ? c.attrs.length : "none" })));
-    } catch { /* ignore logging errors */ }
-
     const fromContext = extractAttributesFromContext(contextResult);
-    console.log("[attrs] strategy 1 (context payload) →", fromContext);
     if (fromContext.length > 0) return dedupe(fromContext);
 
     // Strategy 2: enumerate collections, then ask CODAP for each collection's
@@ -126,7 +116,6 @@ async function fetchDatasetAttributes(dataContextName: string): Promise<string[]
     const collections = collectionsResult.success && Array.isArray(collectionsResult.values)
       ? collectionsResult.values
       : [];
-    console.log("[attrs] strategy 2 collections:", collections.map((c: any) => c?.name));
 
     const collected: string[] = [];
     for (const collection of collections) {
@@ -136,21 +125,17 @@ async function fetchDatasetAttributes(dataContextName: string): Promise<string[]
         action: "get",
         resource: `dataContext[${dataContextName}].collection[${name}]`
       }) as CodapApiResult;
-      let attrNames: string[] | string = "none";
       if (result.success && result.values && isCollectionResponse(result.values)) {
         const attrs = result.values.attrs;
         if (Array.isArray(attrs)) {
-          attrNames = attrs.map((a: CodapAttribute) => a.name);
           collected.push(...attrs.map((attr: CodapAttribute) => attr.name));
         }
       }
-      console.log(`[attrs] strategy 2 collection[${name}] →`, attrNames);
     }
     if (collected.length > 0) return dedupe(collected);
 
     // Strategy 3: derive attribute names from a sample case as a last resort.
     const fromCase = await exploreDataset(dataContextName);
-    console.log("[attrs] strategy 3 (sample case) →", fromCase);
     return dedupe(fromCase);
   } catch (error) {
     console.error("Error getting dataset attributes:", error);

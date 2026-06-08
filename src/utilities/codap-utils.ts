@@ -1,5 +1,5 @@
 import {
-  addDataContextChangeListener, codapInterface, createDataContextFromURL, getCaseByFormulaSearch, getCollectionList,
+  addDataContextChangeListener, createDataContextFromURL, getCaseByFormulaSearch, getCollectionList,
   getDataContext, getSelectionList, initializePlugin, selectCases
 } from "@concord-consortium/codap-plugin-api";
 import { comparer, reaction } from "mobx";
@@ -121,47 +121,6 @@ async function fetchAllVisibleCases(contextName: string, collectionName: string,
   return { success: false, values: [] as DIGetCaseResult["case"][] };
 }
 
-// Experimental fast path (opt-in via ?fetch=items): fetch the dataset in ranged
-// item chunks instead of one all-cases request. Each chunk is small and returns
-// well under the request timeout, avoiding the ~30s timeout+retry the single
-// 100K caseFormulaSearch[true] request hits. Returns the same { id, values }
-// shape as getCaseByFormulaSearch so getData maps it identically.
-//
-// CAVEATS being evaluated: items do NOT respect table set-aside/hidden state the
-// way caseFormulaSearch does, and item ids differ from case ids — so selection
-// sync and set-aside-on-reload must be verified before this becomes the default.
-async function fetchAllItemsChunked(contextName: string, chunkSize = 5000) {
-  const all: DIGetCaseResult["case"][] = [];
-  // Bound the loop defensively (chunkSize * maxChunks) so a malformed response
-  // can never spin forever.
-  const maxChunks = 1000;
-  for (let chunk = 0; chunk < maxChunks; chunk++) {
-    const start = chunk * chunkSize;
-    const end = start + chunkSize - 1;
-    let result: { success?: boolean; values?: unknown } | undefined;
-    for (let attempt = 1; attempt <= 4; attempt++) {
-      try {
-        result = await codapInterface.sendRequest({
-          action: "get",
-          resource: `dataContext[${contextName}].item[${start}-${end}]`
-        }) as { success?: boolean; values?: unknown };
-        if (result?.success && Array.isArray(result.values)) break;
-      } catch (e) {
-        console.warn(`item chunk [${start}-${end}] attempt ${attempt}/4 failed:`, e);
-      }
-      if (attempt < 4) await new Promise(resolve => setTimeout(resolve, 600 * attempt));
-    }
-    if (!result?.success || !Array.isArray(result.values)) {
-      return { success: false, values: all };
-    }
-    const values = result.values as DIGetCaseResult["case"][];
-    all.push(...values);
-    if (values.length < chunkSize) break; // last (short) chunk
-  }
-  console.log(`[timing] fetchAllItemsChunked total items: ${all.length}`);
-  return { success: true, values: all };
-}
-
 // getDataContext, with retry + backoff on *timeouts*. The bare call rejects with
 // "CODAP request timed out" while CODAP is busy holding/importing a large (100K+)
 // dataset, which aborted the whole load and left the plot blank. Retrying rides
@@ -259,14 +218,7 @@ export async function getData(contextName: string = dataContextName) {
     // hardcoded "Cases" only matches the bundled tornado sample.
     const collectionName = await resolveLeafCollectionName(contextName, dataContextResult.values);
 
-    // Opt-in fast path for evaluation: ?fetch=items chunks the load; the default
-    // remains the visibility-correct caseFormulaSearch.
-    const useItemChunks = typeof window !== "undefined" &&
-      new URLSearchParams(window.location.search).get("fetch") === "items";
-    const tFetch = performance.now();
-    const casesResult = useItemChunks
-      ? await fetchAllItemsChunked(contextName)
-      : await fetchAllVisibleCases(contextName, collectionName);
+    const casesResult = await fetchAllVisibleCases(contextName, collectionName);
 
     if (!casesResult.success) {
       console.error(`Couldn't load cases from dataset (collection "${collectionName}") after retries — ` +
@@ -275,16 +227,12 @@ export async function getData(contextName: string = dataContextName) {
     }
 
     const casesValues = casesResult.values as DIGetCaseResult["case"][];
-    console.log(`[timing] fetchAllVisibleCases: ${Math.round(performance.now() - tFetch)}ms, cases: ${casesValues.length}`);
     // The id should never be undefined but it is typed that way
     const cases: ICaseCreation[] = casesValues.map(aCase => ({ __id__: toV3CaseId(aCase.id!), ...aCase.values }));
 
-    const tSet = performance.now();
     setDSTCases(cases);
-    console.log(`[timing] setDSTCases(${cases.length}): ${Math.round(performance.now() - tSet)}ms`);
 
     // Update date range
-    const tDate = performance.now();
     const dates = codapData.caseIds
       .map(caseId => codapData.getCaseDate(caseId))
       .filter((date): date is number => date !== undefined && isFinite(date));
@@ -298,7 +246,6 @@ export async function getData(contextName: string = dataContextName) {
     } else {
       console.warn("No valid dates found in the dataset");
     }
-    console.log(`[timing] getData date range (${dates.length} dates): ${Math.round(performance.now() - tDate)}ms`);
   } catch (error) {
     // This will happen if not embedded in CODAP
     console.warn("Not embedded in CODAP", error);
