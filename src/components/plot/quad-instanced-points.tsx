@@ -115,8 +115,6 @@ export const QuadInstancedPoints = observer(function QuadInstancedPoints() {
     });
 
     const rebuildMatrices = () => untracked(() => {
-      const maxDatePercent = graph.maxDatePercent;
-      const minDatePercent = graph.minDatePercent;
       writeInstanceFrame({
         count, selectedFlags, latArr, lonArr, dateArr, sizeArr,
         minLat: graph.minLatitude,
@@ -129,9 +127,12 @@ export const QuadInstancedPoints = observer(function QuadInstancedPoints() {
         centerZ: graph.centerZ,
         absMinDate: codapData.absoluteMinDate,
         absDateRange: codapData.absoluteDateRange || 1,
-        minDatePercent,
+        minDatePercent: graph.minDatePercent,
         currentDatePercent: graph.currentDatePercent,
-        datePercentSpan: (maxDatePercent - minDatePercent) || 1,
+        // Slice-aware projection (locked slice -> full-range axis), matching the
+        // sphere path so locking works identically in the quad renderer.
+        projMinDatePercent: graph.projMinDatePercent,
+        projDatePercentSpan: graph.projDatePercentSpan,
         graphMin, graphRange,
         showSelected: ui.showSelectedPoints,
         showUnselected: ui.showUnselectedPoints,
@@ -245,6 +246,7 @@ export const QuadInstancedPoints = observer(function QuadInstancedPoints() {
       void graph.minLatitude; void graph.maxLatitude; void graph.minLongitude; void graph.maxLongitude;
       void graph.centerX; void graph.centerZ;
       void graph.minDatePercent; void graph.maxDatePercent; void graph.currentDatePercent;
+      void graph.sliceLocked; void graph.projMinDatePercent; void graph.projDatePercentSpan;
       void codapData.absoluteMinDate; void codapData.absoluteDateRange;
       void ui.showSelectedPoints; void ui.showUnselectedPoints;
       void ui.seeThroughMode; void ui.unselectedPointsOpacity;
