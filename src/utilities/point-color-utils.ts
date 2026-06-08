@@ -1,4 +1,5 @@
 import type { IDstDataConfigurationModel } from "../models/dst-data-configuration-model";
+import { minMax } from "./array-utils";
 
 // Colors from the choropleth scale (mirrors point.tsx).
 export const choroplethColors = ["#eff3ff", "#b5cbe6", "#7ca2ce", "#427ab5", "#08519c"];
@@ -71,8 +72,8 @@ export function getCaseColor(id: string, colorDataConfig: ColorConfig, threshold
           // Linear fallback over the attribute's min/max.
           const allValues = Array.from(colorDataConfig.numericValuesForAttrRole("legend") || []);
           if (allValues.length > 0) {
-            const min = Math.min(...allValues);
-            const max = Math.max(...allValues);
+            // minMax, not Math.min(...allValues): spreading 100K+ values throws.
+            const { min, max } = minMax(allValues);
             const range = max - min;
             if (range > 0) {
               const normalizedValue = Math.max(0, Math.min(1, (numericValue - min) / range));

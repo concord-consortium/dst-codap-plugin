@@ -11,6 +11,7 @@ import { CodapV2DataSetImporter } from "../codap/v2/codap-v2-data-set-importer";
 import { toV3CaseId } from "../codap/utilities/codap-utils";
 import { ICaseCreation } from "../codap/models/data/data-set-types";
 
+import { minMax } from "./array-utils";
 import { codapData } from "../models/codap-data";
 import { DstContainer, dstContainer } from "../models/dst-container";
 import { IDstDataConfigurationModel } from "../models/dst-data-configuration-model";
@@ -216,7 +217,11 @@ export async function getData(contextName: string = dataContextName) {
       .filter((date): date is number => date !== undefined && isFinite(date));
     
     if (dates.length > 0) {
-      codapData.setAbsoluteDateRange(Math.min(...dates), Math.max(...dates));
+      // minMax, not Math.min(...dates): spreading 100K+ dates throws
+      // "Maximum call stack size exceeded", which silently aborted load and left
+      // the plot blank at scale.
+      const { min, max } = minMax(dates);
+      codapData.setAbsoluteDateRange(min, max);
     } else {
       console.warn("No valid dates found in the dataset");
     }
