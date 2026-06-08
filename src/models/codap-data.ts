@@ -65,6 +65,10 @@ class CodapData {
    * @param caseId The case ID
    * @returns Timestamp (milliseconds since epoch)
    */
+  // Hot path: called per-case on every render rebuild and during date-range
+  // computation. It must NOT log per case — at 100K rows the previous per-case
+  // console.warn calls produced hundreds of thousands of writes and noticeably
+  // slowed loading. Callers handle the undefined return for unparseable dates.
   getCaseDate(caseId: string) {
     // If we have a configured date attribute, use it
     if (datasetConfig.dateAttribute) {
@@ -73,28 +77,19 @@ class CodapData {
         const timestamp = parseDate(dateStr, datasetConfig.dateFormat);
         if (timestamp) {
           return timestamp;
-        } else {
-          console.warn(`Failed to parse date from "${dateStr}"`);
         }
       }
     }
-    
+
     // Fallback to Year, Month, Day attributes if date parsing fails
     const year = this.getAttributeNumericValue("Year", caseId);
     const month = this.getAttributeNumericValue("Month", caseId);
     const day = this.getAttributeNumericValue("Day", caseId);
-    
+
     if (year !== undefined || month !== undefined || day !== undefined) {
-      const timestamp = createDateFromComponents(year, month, day);
-      if (timestamp) {
-        return timestamp;
-      } else {
-        console.warn(`Failed to create date from components ${year}/${month}/${day}`);
-      }
-      return timestamp;
+      return createDateFromComponents(year, month, day);
     }
-    
-    console.warn(`No valid date found for case ${caseId}`);
+
     return undefined;
   }
 

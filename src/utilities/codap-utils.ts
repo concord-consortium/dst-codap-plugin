@@ -121,6 +121,27 @@ async function fetchAllVisibleCases(contextName: string, collectionName: string,
   return { success: false, values: [] as DIGetCaseResult["case"][] };
 }
 
+// getDataContext, with retry + backoff on *timeouts*. The bare call rejects with
+// "CODAP request timed out" while CODAP is busy holding/importing a large (100K+)
+// dataset, which aborted the whole load and left the plot blank. Retrying rides
+// out the transient busy window. A resolved { success: false } is a definitive
+// answer (the context doesn't exist) — return it immediately, no retry. If every
+// attempt throws (e.g. not embedded in CODAP), re-throw so getData's caller bails
+// the same way it did before.
+async function getDataContextWithRetry(contextName: string, attempts = 4) {
+  let lastError: unknown;
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      return await getDataContext(contextName);
+    } catch (e) {
+      lastError = e;
+      console.warn(`getDataContext attempt ${i}/${attempts} failed (likely timeout):`, e);
+      if (i < attempts) await new Promise(resolve => setTimeout(resolve, 600 * i));
+    }
+  }
+  throw lastError;
+}
+
 export async function resyncHiddenCasesFromCodap(contextName: string) {
   try {
     const dataContextResult = await getDataContext(contextName);
@@ -174,7 +195,7 @@ async function resolveLeafCollectionName(contextName: string, context: any): Pro
  */
 export async function getData(contextName: string = dataContextName) {
   try {
-    let dataContextResult = await getDataContext(contextName);
+    let dataContextResult = await getDataContextWithRetry(contextName);
 
     if (!dataContextResult.success) {
       // If specified dataset doesn't exist and it's the default dataset, try to create it
@@ -184,7 +205,7 @@ export async function getData(contextName: string = dataContextName) {
           console.error("Couldn't load dataset");
           return;
         }
-        dataContextResult = await getDataContext(contextName);
+        dataContextResult = await getDataContextWithRetry(contextName);
       } else {
         console.error(`Dataset ${contextName} not found`);
         return;

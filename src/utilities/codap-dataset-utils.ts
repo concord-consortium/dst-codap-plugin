@@ -73,12 +73,28 @@ function extractAttributesFromContext(dataContextResult: any): string[] {
   }
 }
 
+// In-flight de-duplication: the Load Data handler and the legend hook both call
+// getDatasetAttributes for the same context at roughly the same time, doubling
+// the get-dataContext requests and worsening the timeouts under a large load.
+// Share one in-flight promise per context; clear it once settled so later loads
+// still re-fetch.
+const inFlightAttributes = new Map<string, Promise<string[]>>();
+
 /**
  * Get all attributes for a specific dataset in CODAP
  * @param dataContextName The name of the dataset
  * @returns An array of attribute names
  */
-export async function getDatasetAttributes(dataContextName: string): Promise<string[]> {
+export function getDatasetAttributes(dataContextName: string): Promise<string[]> {
+  const existing = inFlightAttributes.get(dataContextName);
+  if (existing) return existing;
+  const promise = fetchDatasetAttributes(dataContextName)
+    .finally(() => inFlightAttributes.delete(dataContextName));
+  inFlightAttributes.set(dataContextName, promise);
+  return promise;
+}
+
+async function fetchDatasetAttributes(dataContextName: string): Promise<string[]> {
   try {
     // Strategy 1: pull collections + attrs from the data context payload itself.
     // This works regardless of collection naming and covers hierarchical datasets.
@@ -165,27 +181,19 @@ export async function loadConfiguredData(): Promise<void> {
   }
   
   try {
-    // [timing] phase breakdown to locate the multi-minute load cost.
-    const t0 = performance.now();
-    // Load the dataset using the configured context name
+    // getData loads the cases and sets the absolute date range from them
+    // (single-pass minMax). The old updateDateRangeFromData call here was
+    // redundant — it re-derived the same range via ~7 separate CODAP API
+    // strategies that all fail on large datasets, adding hundreds of ms to
+    // (formerly minutes of) load time for nothing. Removed, along with the
+    // 500ms guard delay (getData already awaits the data).
     await getData(datasetConfig.dataContextName);
-    console.log(`[timing] getData: ${Math.round(performance.now() - t0)}ms`);
 
     // Set up selection synchronization with the configured context
     setupSelectionSynchronization(datasetConfig.dataContextName);
 
-    // Add a small delay to ensure data is fully loaded before calculating date range
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Calculate and set the absolute date range from the actual data
-    const t1 = performance.now();
-    await updateDateRangeFromData(datasetConfig.dataContextName);
-    console.log(`[timing] updateDateRangeFromData: ${Math.round(performance.now() - t1)}ms`);
-
     // Calculate and set the map bounds based on the geographic range of the data
-    const t2 = performance.now();
     await updateMapBoundsFromData(datasetConfig.dataContextName);
-    console.log(`[timing] updateMapBoundsFromData: ${Math.round(performance.now() - t2)}ms`);
   } catch (error) {
     console.error("Error loading configured data:", error);
   }
