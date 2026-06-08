@@ -6,6 +6,7 @@ import "./slider-thumb.scss";
 
 interface ISliderThumbProps {
   className?: string;
+  disabled?: boolean;
   LabelBackground?: React.FC<React.SVGProps<SVGSVGElement>>;
   minPercent: number;
   maxPercent: number;
@@ -15,7 +16,7 @@ interface ISliderThumbProps {
   ThumbIcon: React.FC<React.SVGProps<SVGSVGElement>>;
 }
 export function SliderThumb({
-  className, LabelBackground, minPercent, maxPercent, percent, setPercent, topOffset, ThumbIcon
+  className, disabled, LabelBackground, minPercent, maxPercent, percent, setPercent, topOffset, ThumbIcon
 }: ISliderThumbProps) {
   const [hovering, setHovering] = useState(false);
   const [pointerDown, setPointerDown] = useState(false);
@@ -24,6 +25,7 @@ export function SliderThumb({
   const style = { top: `${timeLineTop + (topOffset ?? 0) + timeLineHeight * (1 - percent)}px` };
 
   const handlePointerDown: React.PointerEventHandler<HTMLDivElement> = event => {
+    if (disabled) return;
     setPointerDown(true);
     startingPercent.current = percent;
     startingY.current = event.clientY;
@@ -52,9 +54,9 @@ export function SliderThumb({
   const handlePointerLeave = () => setHovering(false);
   const handlePointerOver = () => setHovering(true);
 
-  const extraClass = pointerDown ? "active" : hovering ? "hover" : "";
+  const extraClass = pointerDown ? "active" : hovering && !disabled ? "hover" : "";
   const labelClass = clsx("slider-thumb-label", extraClass);
-  const thumbClass = clsx("slider-thumb", extraClass);
+  const thumbClass = clsx("slider-thumb", extraClass, { disabled });
 
   return (
     <div className={clsx("slider-thumb-container", className)} style={style}>

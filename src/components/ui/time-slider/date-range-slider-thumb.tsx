@@ -16,6 +16,9 @@ export function DateRangeSliderThumb({
   return (
     <SliderThumb
       className="date-range-slider-thumb-container left-rounded"
+      // While the slice is locked the triangles hold a fixed separation and move
+      // together via the slice handle, so they can't be dragged individually.
+      disabled={graph.sliceLocked}
       maxPercent={maxPercent}
       minPercent={minPercent}
       percent={percent}

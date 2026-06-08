@@ -34,6 +34,7 @@ describe("graph", () => {
   });
 
   beforeEach(() => {
+    graph.unlockSlice();
     graph.setMaxDatePercent(1);
     graph.setMinDatePercent(0);
     graph.setCurrentDatePercent(1);
@@ -77,6 +78,97 @@ describe("graph", () => {
         expect(graph.canAnimateDate).toBe(false);
         done();
       }, 300);
+    });
+  });
+
+  describe("slice lock", () => {
+    it("only allows locking once a slice exists", () => {
+      expect(graph.sliceExists).toBe(false);
+      graph.lockSlice();
+      expect(graph.sliceLocked).toBe(false); // no slice yet → no-op
+
+      graph.setMinDatePercent(0.4);
+      graph.setMaxDatePercent(0.8);
+      expect(graph.sliceExists).toBe(true);
+      graph.lockSlice();
+      expect(graph.sliceLocked).toBe(true);
+      // Locking reveals the whole slice (scrub pinned to the top triangle).
+      expect(graph.currentDatePercent).toBeCloseTo(0.8);
+    });
+
+    it("projects against the full range when locked, the slice when not", () => {
+      graph.setMinDatePercent(0.4);
+      graph.setMaxDatePercent(0.8);
+      // Unlocked: slice fills the cube.
+      expect(graph.convertPercentToGraph(0.4)).toBeCloseTo(graphMin);
+      expect(graph.convertPercentToGraph(0.8)).toBeCloseTo(graphMax);
+
+      graph.lockSlice();
+      // Locked: full dataset fills the cube; the slice is an interior band.
+      expect(graph.convertPercentToGraph(0)).toBeCloseTo(graphMin);
+      expect(graph.convertPercentToGraph(1)).toBeCloseTo(graphMax);
+      expect(graph.axisMinDate).toBeCloseTo(graph.convertPercentToDate(0));
+      expect(graph.axisMaxDate).toBeCloseTo(graph.convertPercentToDate(1));
+    });
+
+    it("slides a locked slice as a unit, clamped to [0, 1]", () => {
+      graph.setMinDatePercent(0.4);
+      graph.setMaxDatePercent(0.6);
+      graph.lockSlice();
+
+      graph.translateSlice(0.1);
+      expect(graph.minDatePercent).toBeCloseTo(0.5);
+      expect(graph.maxDatePercent).toBeCloseTo(0.7);
+      expect(graph.sliceSeparation).toBeCloseTo(0.2); // separation preserved
+
+      // Over-translate up: clamps so the top triangle stops at 1.
+      graph.translateSlice(0.9);
+      expect(graph.maxDatePercent).toBeCloseTo(1);
+      expect(graph.minDatePercent).toBeCloseTo(0.8);
+    });
+
+    it("can animate while locked until the top triangle reaches the top", (done) => {
+      // Start near the top so the climb finishes within the test window
+      // (animation rate is 0.1/sec).
+      graph.setMinDatePercent(0.67);
+      graph.setMaxDatePercent(0.97);
+      graph.lockSlice();
+      expect(graph.canAnimateDate).toBe(true);
+      graph.setAnimatingDate(true);
+
+      setTimeout(() => {
+        expect(graph.maxDatePercent).toBeGreaterThan(0.97); // slid up
+        expect(graph.sliceSeparation).toBeCloseTo(0.3);     // separation held
+        expect(graph.animatingDate).toBe(false);            // stopped at the top
+        expect(graph.maxDatePercent).toBeCloseTo(1);
+        done();
+      }, 600);
+    });
+
+    it("frees the map plane to the full axis when locked, re-confines on unlock", () => {
+      graph.setMinDatePercent(0.4);
+      graph.setMaxDatePercent(0.8);
+      graph.setMapDatePercent(0.5); // confined to the slice while unlocked
+      expect(graph.mapDatePercent).toBeCloseTo(0.5);
+
+      graph.lockSlice();
+      expect(graph.mapDatePercent).toBeCloseTo(0); // dropped to the bottom
+      graph.setMapDatePercent(0.95);               // roams the full axis now
+      expect(graph.mapDatePercent).toBeCloseTo(0.95);
+
+      graph.unlockSlice();
+      // Re-confined to the slice [0.4, 0.8] → clamped down to the top.
+      expect(graph.mapDatePercent).toBeCloseTo(0.8);
+    });
+
+    it("unlocking re-zooms the cube to the slice", () => {
+      graph.setMinDatePercent(0.4);
+      graph.setMaxDatePercent(0.8);
+      graph.lockSlice();
+      graph.unlockSlice();
+      expect(graph.sliceLocked).toBe(false);
+      expect(graph.convertPercentToGraph(0.4)).toBeCloseTo(graphMin);
+      expect(graph.convertPercentToGraph(0.8)).toBeCloseTo(graphMax);
     });
   });
 

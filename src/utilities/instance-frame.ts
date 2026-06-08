@@ -35,9 +35,15 @@ export interface InstanceFrameParams {
   centerZ: number;
   absMinDate: number;
   absDateRange: number;
+  // Visibility bounds: a point shows when its date percent is in
+  // [minDatePercent, currentDatePercent] (the slice, up to the scrub/handle).
   minDatePercent: number;
   currentDatePercent: number;
-  datePercentSpan: number;
+  // Projection basis for the cube z-axis, decoupled from the visibility bounds so
+  // a locked slice can be shown small within the full-dataset axis while still
+  // filtering to the slice. Unlocked these equal minDatePercent / slice span.
+  projMinDatePercent: number;
+  projDatePercentSpan: number;
   graphMin: number;
   graphRange: number;
 
@@ -79,7 +85,8 @@ export function writeInstanceFrame(p: InstanceFrameParams): void {
   const {
     count, selectedFlags, latArr, lonArr, dateArr, sizeArr,
     minLat, latRange, maxLat, minLon, lonRange, maxLon, centerX, centerZ,
-    absMinDate, absDateRange, minDatePercent, currentDatePercent, datePercentSpan,
+    absMinDate, absDateRange, minDatePercent, currentDatePercent,
+    projMinDatePercent, projDatePercentSpan,
     graphMin, graphRange,
     showSelected, showUnselected, seeThrough, unselectedOpacity,
     pxToWorld, selectedExtra, outlineThicknessUnselected, outlineThicknessSelected,
@@ -119,7 +126,7 @@ export function writeInstanceFrame(p: InstanceFrameParams): void {
 
     const x = ((lat - minLat) / latRange) * graphRange + graphMin - centerX;
     const z = ((lon - minLon) / lonRange) * graphRange + graphMin - centerZ;
-    const y = ((datePercent - minDatePercent) / datePercentSpan) * graphRange + graphMin;
+    const y = ((datePercent - projMinDatePercent) / projDatePercentSpan) * graphRange + graphMin;
 
     const fillRadius = sizeArr[i] * pxToWorld + (isSelected ? selectedExtra : 0);
     const opacity = isSelected ? 1 : (seeThrough ? unselectedOpacity : (showUnselected ? 1 : 0));
