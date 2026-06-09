@@ -64,8 +64,7 @@ function extractAttributesFromContext(dataContextResult: any): string[] {
         }
       });
     }
-    
-    console.log("Extracted attributes from context:", attributes);
+
     return attributes;
   } catch (error) {
     console.error("Error extracting attributes from context:", error);
